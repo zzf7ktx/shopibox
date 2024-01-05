@@ -1,3 +1,3 @@
-export enum CloudProvider {
+export enum CloudProviders {
   Cloudinary = "cloudinary",
 }
