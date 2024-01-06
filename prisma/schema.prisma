@@ -1,0 +1,52 @@
+// schema.prisma
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("POSTGRES_PRISMA_URL") // uses connection pooling
+}
+
+enum ImageSource {
+  Manual
+  Auto
+}
+
+enum ImageSyncStatus {
+  Synced
+  NotSync
+}
+
+model Image {
+  id          String          @id @default(cuid())
+  name        String
+  source      ImageSource
+  sourceLink  String?
+  cloudLink   String
+  backupLink  String?
+  provider    String?
+  providerRef String?
+  syncStatus  ImageSyncStatus @default(NotSync)
+  product     Product?        @relation(fields: [productId], references: [id])
+  productId   String?
+  createdAt   DateTime        @default(now()) @map(name: "created_at")
+  updatedAt   DateTime        @updatedAt @map(name: "updated_at")
+
+  @@map(name: "images")
+}
+
+model Product {
+  id              String   @id @default(cuid())
+  name            String?
+  price           Decimal?
+  description     String?
+  descriptionHtml String?
+
+  createdAt DateTime @default(now()) @map(name: "created_at")
+  updatedAt DateTime @updatedAt @map(name: "updated_at")
+  images    Image[]
+
+  @@map(name: "products")
+}
