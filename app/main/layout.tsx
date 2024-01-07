@@ -11,11 +11,12 @@ import {
   ShoppingCartOutlined,
   ShoppingOutlined,
 } from "@ant-design/icons";
-import { useState } from "react";
+import { Suspense, useState } from "react";
 import "./main.css";
 import Link from "next/link";
 import MenuItem from "antd/es/menu/MenuItem";
 import { usePathname, useRouter } from "next/navigation";
+import Loading from "./loading";
 
 const { Header, Sider, Content } = Layout;
 
@@ -36,21 +37,17 @@ export default function MainLayout({
     token: { colorBgContainer, borderRadiusLG },
   } = theme.useToken();
   const pathName = usePathname();
-  
+
   return (
-    <Layout className="h-screen">
+    <Layout className="h-screen" hasSider>
       <Sider trigger={null} collapsible collapsed={collapsed}>
         <div className="logo">Shopify Tools</div>
         <Menu theme="dark" mode="inline" defaultSelectedKeys={[pathName]}>
           <MenuItem key="/main/products" icon={<ShoppingOutlined />}>
-            <Link href="products">
-              Products
-            </Link>
+            <Link href="products">Products</Link>
           </MenuItem>
           <MenuItem key="/main/images" icon={<VideoCameraOutlined />}>
-            <Link href="images">
-              Images
-            </Link>
+            <Link href="images">Images</Link>
           </MenuItem>
           <MenuItem key="3" icon={<UploadOutlined />}>
             Comming soon
@@ -71,15 +68,13 @@ export default function MainLayout({
           />
         </Header>
         <Content
+          className="overflow-auto mx-6 my-4 p-6 min-h-72"
           style={{
-            margin: "24px 16px",
-            padding: 24,
-            minHeight: 280,
             background: colorBgContainer,
             borderRadius: borderRadiusLG,
           }}
         >
-          {children}
+          <Suspense fallback={<Loading />}>{children}</Suspense>
         </Content>
       </Layout>
     </Layout>

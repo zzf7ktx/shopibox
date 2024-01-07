@@ -1,10 +1,46 @@
 "use client";
+import { syncImageWithMainProvider } from "@/actions/syncImageWithMainProvider";
+import { CloudSyncOutlined } from "@ant-design/icons";
 import { Image as ImageInfo, ImageSyncStatus } from "@prisma/client";
-import { Badge, Image, Space, Table, TableColumnsType } from "antd";
+import {
+  Badge,
+  Button,
+  Image,
+  Space,
+  Table,
+  TableColumnsType,
+  Tooltip,
+} from "antd";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
 
 export interface ImageTableProps {
-  data: Array<ImageInfo>;
+  data?: Array<ImageInfo>;
+  loading?: boolean;
 }
+
+const SyncButton = ({ id }: { id: string }) => {
+  const [loading, setLoading] = useState<boolean>(false);
+  const router = useRouter();
+
+  const handleSync = async () => {
+    setLoading(true);
+    await syncImageWithMainProvider(id, "default");
+    router.refresh();
+    setLoading(false);
+  };
+
+  return (
+    <Tooltip title="Sync">
+      <Button
+        shape="circle"
+        icon={<CloudSyncOutlined />}
+        onClick={handleSync}
+        loading={loading}
+      />
+    </Tooltip>
+  );
+};
 
 const columns: TableColumnsType<ImageInfo> = [
   {
@@ -15,8 +51,8 @@ const columns: TableColumnsType<ImageInfo> = [
       <Image
         width={150}
         height={90}
-        src={record.cloudLink}
-        alt="record.name"
+        src={record.cloudLink ?? record.backupLink ?? record.sourceLink}
+        alt={record.name}
       ></Image>
     ),
   },
@@ -35,12 +71,17 @@ const columns: TableColumnsType<ImageInfo> = [
     dataIndex: "syncStatus",
     key: "syncStatus",
     render: (_, record) => (
-      <Badge
-        status={
-          record.syncStatus === ImageSyncStatus.Synced ? "success" : "warning"
-        }
-        text={record.syncStatus}
-      />
+      <Space>
+        <Badge
+          status={
+            record.syncStatus === ImageSyncStatus.Synced ? "success" : "warning"
+          }
+          text={record.syncStatus}
+        />
+        {record.syncStatus === ImageSyncStatus.NotSync && (
+          <SyncButton id={record.id} />
+        )}
+      </Space>
     ),
   },
   {
@@ -54,6 +95,38 @@ const columns: TableColumnsType<ImageInfo> = [
   },
 ];
 
-export default function Images({ data }: ImageTableProps) {
-  return <Table virtual dataSource={data} columns={columns} />;
+const rowSelection = {
+  onChange: (selectedRowKeys: React.Key[], selectedRows: ImageInfo[]) => {
+    console.log(
+      `selectedRowKeys: ${selectedRowKeys}`,
+      "selectedRows: ",
+      selectedRows
+    );
+  },
+  getCheckboxProps: (record: ImageInfo) => ({
+    disabled: record.name === "Disabled", // Column configuration not to be checked
+    name: record.id,
+  }),
+};
+
+export default function Images({ data, loading }: ImageTableProps) {
+  return (
+    <>
+      <Table
+        rowSelection={{
+          type: "checkbox",
+          ...rowSelection,
+        }}
+        pagination={{
+          defaultPageSize: 5,
+          showSizeChanger: true,
+          pageSizeOptions: ["5", "10", "20"],
+        }}
+        dataSource={data}
+        columns={columns}
+        loading={loading}
+        rowKey={(p) => p.id}
+      />
+    </>
+  );
 }
