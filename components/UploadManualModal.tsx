@@ -88,6 +88,7 @@ export default function UploadManualModal({
   const router = useRouter();
 
   const handleCancel = () => {
+    form.resetFields();
     onClose();
   };
 
@@ -105,6 +106,8 @@ export default function UploadManualModal({
     await uploadImages(values.product, data);
     router.refresh();
     setLoading(false);
+    form.resetFields();
+    onClose();
   };
 
   useEffect(() => {
@@ -115,7 +118,11 @@ export default function UploadManualModal({
       setLoadingProducts(false);
     };
     getProductOptions();
-  }, []);
+
+    if (!!productKey) {
+      form.setFieldValue("product", productKey);
+    }
+  }, [productKey]);
 
   return (
     <Modal

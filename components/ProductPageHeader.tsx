@@ -3,6 +3,7 @@ import { SyncOutlined } from "@ant-design/icons";
 import { Flex, Space, Button, Typography } from "antd";
 import { useRouter } from "next/navigation";
 import { startTransition } from "react";
+import AddManualProductButton from "./AddManualProductButton";
 const { Title } = Typography;
 
 export interface ProductPageHeaderProps {}
@@ -22,6 +23,7 @@ export default function ProductPageHeader({}: ProductPageHeaderProps) {
           onClick={handleRefresh}
         />
       </Space>
+      <AddManualProductButton />
     </Flex>
   );
 }
