@@ -1,6 +1,6 @@
 "use client";
 import { Inter } from "next/font/google";
-import { Button, Layout, Menu, theme } from "antd";
+import { Button, Layout, Menu, Space, theme } from "antd";
 import {
   VideoCameraOutlined,
   UploadOutlined,
@@ -13,11 +13,9 @@ import "./main.css";
 import { usePathname, useRouter } from "next/navigation";
 import Loading from "./loading";
 import { ItemType, MenuItemType } from "antd/es/menu/hooks/useItems";
+import Image from "next/image";
 
 const { Header, Sider, Content } = Layout;
-
-const inter = Inter({ subsets: ["latin"] });
-
 
 export default function MainLayout({
   children,
@@ -54,7 +52,10 @@ export default function MainLayout({
   return (
     <Layout className="h-screen" hasSider>
       <Sider trigger={null} collapsible collapsed={collapsed}>
-        <div className="logo">Shopibox</div>
+        <Space className="logo">
+          <Image width={50} height={50} src="/logo.png" alt="logo" priority/>
+          {!collapsed && <span className="logo__text">Shopibox</span>}
+        </Space>
         <Menu
           items={items}
           theme="dark"
