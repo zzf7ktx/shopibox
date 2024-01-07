@@ -1,9 +1,13 @@
-import { Table } from "antd";
+import ProductTable from "@/components/ProductTable";
+import prisma from "@/lib/prisma";
 
-export default function Products() {
-  return (
-    <main>
-      <Table virtual scroll={{ x: 2000, y: 500 }} />
-    </main>
-  );
+export default async function Products() {
+  let data = await prisma.product.findMany({
+    orderBy: [
+      {
+        createdAt: "desc",
+      },
+    ],
+  });
+  return <ProductTable data={data} />;
 }
