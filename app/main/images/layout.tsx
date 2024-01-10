@@ -1,4 +1,3 @@
-import { Layout } from "antd";
 import "./images.css";
 import { Metadata } from "next";
 import ImagePageHeader from "@/components/ImagePageHeader";
@@ -10,7 +9,7 @@ export const metadata: Metadata = {
   description: "Image management",
 };
 
-export default function MainLayout({
+export default function ImagesLayout({
   children,
 }: {
   children: React.ReactNode;
