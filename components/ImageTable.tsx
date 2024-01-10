@@ -13,6 +13,7 @@ import {
 } from "antd";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import ViewMetadataButtonButton from "./ViewMetadataButton";
 
 export interface ImageTableProps {
   data?: Array<ImageInfo>;
@@ -89,7 +90,7 @@ const columns: TableColumnsType<ImageInfo> = [
     key: "",
     render: (_, record) => (
       <Space size="middle">
-        <a>View</a>
+        <ViewMetadataButtonButton imageSrc={record.cloudLink} />
       </Space>
     ),
   },
@@ -109,7 +110,7 @@ const rowSelection = {
   }),
 };
 
-export default function Images({ data, loading }: ImageTableProps) {
+export default function ImageTable({ data, loading }: ImageTableProps) {
   return (
     <>
       <Table
