@@ -53,7 +53,7 @@ export const uploadImages = async (productId: string, data: FormData) => {
 
     await prisma.image.update({
       data: {
-        cloudLink: uploadResult.url,
+        cloudLink: uploadResult.secure_url,
         provider: CloudProviders.Cloudinary,
         providerRef: uploadResult.public_id,
         syncStatus: "Synced",
