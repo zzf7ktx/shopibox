@@ -5,10 +5,12 @@ import { useState } from "react";
 
 export interface ViewMetadataButtonProps {
   imageSrc: string;
+  imageId: string;
 }
 
 export default function ViewMetadataButtonButton({
   imageSrc,
+  imageId,
 }: ViewMetadataButtonProps) {
   const [open, setOpen] = useState<boolean>(false);
 
@@ -19,6 +21,7 @@ export default function ViewMetadataButtonButton({
         open={open}
         onClose={() => setOpen(false)}
         imageSrc={imageSrc}
+        imageId={imageId}
       />
     </>
   );
