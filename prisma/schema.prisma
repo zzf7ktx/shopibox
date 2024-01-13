@@ -41,7 +41,7 @@ model Image {
 model Product {
   id              String   @id @default(cuid())
   name            String?
-  price           Decimal?
+  price           Float?
   description     String?
   descriptionHtml String?
 
