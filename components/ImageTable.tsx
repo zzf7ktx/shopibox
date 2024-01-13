@@ -90,7 +90,10 @@ const columns: TableColumnsType<ImageInfo> = [
     key: "",
     render: (_, record) => (
       <Space size="middle">
-        <ViewMetadataButtonButton imageSrc={record.cloudLink} />
+        <ViewMetadataButtonButton
+          imageSrc={record.cloudLink}
+          imageId={record.id}
+        />
       </Space>
     ),
   },
@@ -105,7 +108,6 @@ const rowSelection = {
     );
   },
   getCheckboxProps: (record: ImageInfo) => ({
-    disabled: record.name === "Disabled", // Column configuration not to be checked
     name: record.id,
   }),
 };

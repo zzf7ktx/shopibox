@@ -18,7 +18,10 @@ const debugExif = (exif: RawMetadata) => {
   }
 };
 
-const decimalArrayToString = (array: Array<number>, zeroChar: string = "") => {
+const decimalArrayToString = (
+  array: Array<number>,
+  zeroChar: string = ""
+): string => {
   var result = "";
   for (let i = 0; i < array.length; i++) {
     result += array[i] === 0 ? zeroChar : String.fromCharCode(+array[i], 10);
@@ -26,8 +29,52 @@ const decimalArrayToString = (array: Array<number>, zeroChar: string = "") => {
   return result;
 };
 
+const stringToDecimalArray = (stringValue: string): Array<number> => {
+  var result = [];
+  for (let i = 0; i < stringValue.length; i++) {
+    result.push(stringValue.charCodeAt(i));
+    result.push(0);
+  }
+  result.push(0);
+  result.push(0);
+  return result;
+};
+
 const load = (base64String: string): RawMetadata => {
   return pi.load(base64String);
+};
+
+const dump = (rawMetadata: RawMetadata): any => {
+  return pi.dump(rawMetadata);
+};
+
+const insert = (newExifBinary: string, imageData: string): string => {
+  return pi.insert(newExifBinary, imageData);
+};
+
+const setMetaByTag = (
+  rawMetadata: RawMetadata,
+  tag: MetaTags,
+  value: string
+): RawMetadata => {
+  switch (tag) {
+    case MetaTags.XPTitle:
+      rawMetadata["0th"][40091] = stringToDecimalArray(value);
+      break;
+    case MetaTags.ImageDescription:
+      rawMetadata["0th"][270] = value;
+      break;
+    case MetaTags.XPKeywords:
+      rawMetadata["0th"][40094] = stringToDecimalArray(value);
+      break;
+    case MetaTags.XPSubject:
+      rawMetadata["0th"][40095] = stringToDecimalArray(value);
+      break;
+    case MetaTags.Artis:
+      rawMetadata["0th"][315] = value;
+      break;
+  }
+  return rawMetadata;
 };
 
 const getBase64Image = async (imageUrl: string): Promise<string> => {
@@ -47,6 +94,7 @@ export enum MetaTags {
   XPKeywords = "40094",
   XPSubject = "40095",
   ImageDescription = "270",
+  Artis = "315",
 }
 
 export interface RawMetadata extends Partial<{ [key: string]: any }> {
@@ -60,6 +108,8 @@ export interface RawMetadata extends Partial<{ [key: string]: any }> {
     "283": Array<number>;
     "296": number;
     "306": string;
+    // Artis
+    "315": string;
     // ExifTag
     "34665": number;
     "34853": number;
@@ -127,15 +177,21 @@ const getMetaByTag = (rawMetadata: RawMetadata, tag: MetaTags): any => {
       return rawMetadata["0th"][40094];
     case MetaTags.XPSubject:
       return rawMetadata["0th"][40095];
+    case MetaTags.Artis:
+      return rawMetadata["0th"][315];
   }
 };
 
 const metadata = {
   load,
+  dump,
+  insert,
   debugExif,
   getBase64Image,
   getMetaByTag,
+  setMetaByTag,
   decimalArrayToString,
+  stringToDecimalArray,
 };
 
 export default metadata;

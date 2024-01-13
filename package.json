@@ -14,6 +14,7 @@
     "@prisma/client": "^5.7.1",
     "@vercel/postgres": "^0.5.1",
     "antd": "^5.12.5",
+    "classnames": "^2.5.1",
     "cloudinary": "^1.41.1",
     "next": "14.0.4",
     "piexifjs": "^1.0.6",

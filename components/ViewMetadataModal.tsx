@@ -1,9 +1,10 @@
 "use client";
 
-import { Product } from "@prisma/client";
-import { Form, Input, Modal } from "antd";
+import { Form, Input, Modal, message } from "antd";
 import { useEffect, useState } from "react";
 import metadata, { MetaTags, RawMetadata } from "@/lib/metadata";
+import { updateMetadata } from "@/actions";
+import { useRouter } from "next/navigation";
 
 const layout = {
   labelCol: { span: 6 },
@@ -14,14 +15,19 @@ export interface ViewMetadataButtonModalProps {
   open: boolean;
   onClose: () => void;
   imageSrc: string;
+  imageId: string;
 }
 
 export default function ViewMetadataButtonModal({
   open,
   onClose,
   imageSrc,
+  imageId,
 }: ViewMetadataButtonModalProps) {
   const [loading, setLoading] = useState<boolean>(false);
+  const [imageData, setImageData] = useState<string>("");
+  const [meta, setMeta] = useState<RawMetadata>();
+  const router = useRouter();
 
   const handleCancel = () => {
     form.resetFields();
@@ -30,9 +36,32 @@ export default function ViewMetadataButtonModal({
 
   const [form] = Form.useForm();
 
-  const onFinish = async (values: {}) => {
-    form.resetFields();
-    onClose();
+  const onFinish = async (values: Record<MetaTags, string>) => {
+    try {
+      setLoading(true);
+
+      let newMeta: RawMetadata = meta!;
+      for (let code of Object.values(MetaTags)) {
+        newMeta = metadata.setMetaByTag(newMeta, code, values[code]);
+      }
+
+      const newExifBinary = metadata.dump(newMeta!);
+      const newPhotoData = metadata.insert(newExifBinary, imageData);
+      let fileBuffer = Buffer.from(newPhotoData, "binary");
+      const blob = new Blob([fileBuffer]);
+
+      let data = new FormData();
+      data.append("file", blob);
+
+      await updateMetadata(imageId, data);
+      setLoading(false);
+      message.success("Update image metadata successfully");
+      onClose();
+      router.refresh();
+    } catch (error) {
+      console.log(error);
+      message.error("Something wrong");
+    }
   };
 
   useEffect(() => {
@@ -42,30 +71,27 @@ export default function ViewMetadataButtonModal({
       }
 
       let base64: string = await metadata.getBase64Image(imageSrc);
-      let meta: RawMetadata = metadata.load(base64);
+      setImageData(base64);
+      let originalMeta: RawMetadata = metadata.load(base64);
+      setMeta(originalMeta);
 
-      form.setFieldValue(
-        MetaTags.XPSubject,
-        metadata.decimalArrayToString(
-          metadata.getMetaByTag(meta, MetaTags.XPSubject) ?? []
-        )
-      );
-      form.setFieldValue(
-        MetaTags.XPTitle,
-        metadata.decimalArrayToString(
-          metadata.getMetaByTag(meta, MetaTags.XPTitle) ?? []
-        )
-      );
-      form.setFieldValue(
-        MetaTags.XPKeywords,
-        metadata.decimalArrayToString(
-          metadata.getMetaByTag(meta, MetaTags.XPKeywords) ?? []
-        )
-      );
-      form.setFieldValue(
-        MetaTags.ImageDescription,
-        metadata.getMetaByTag(meta, MetaTags.ImageDescription)
-      );
+      for (let code of Object.values(MetaTags)) {
+        let fieldValue = metadata.getMetaByTag(originalMeta, code);
+        if (!fieldValue) {
+          continue;
+        }
+
+        if (typeof fieldValue === "string") {
+          form.setFieldValue(code, metadata.getMetaByTag(originalMeta, code));
+        } else {
+          form.setFieldValue(
+            code,
+            metadata.decimalArrayToString(
+              metadata.getMetaByTag(originalMeta, code)
+            )
+          );
+        }
+      }
     };
     getMetadata();
   }, [imageSrc, open]);
@@ -81,18 +107,11 @@ export default function ViewMetadataButtonModal({
       okButtonProps={{ htmlType: "submit" }}
     >
       <Form {...layout} form={form} name="control-hooks" onFinish={onFinish}>
-        <Form.Item name={MetaTags.ImageDescription} label="ImageDescription">
-          <Input size="large" placeholder="ImageDescription" />
-        </Form.Item>
-        <Form.Item name={MetaTags.XPSubject} label="XPSubject">
-          <Input size="large" placeholder="XPSubject" />
-        </Form.Item>
-        <Form.Item name={MetaTags.XPTitle} label="XPTitle">
-          <Input size="large" placeholder="XPTitle" />
-        </Form.Item>
-        <Form.Item name={MetaTags.XPKeywords} label="XPKeywords">
-          <Input size="large" placeholder="XPKeywords" />
-        </Form.Item>
+        {Object.entries(MetaTags).map(([tag, code]) => (
+          <Form.Item key={code} name={code} label={tag}>
+            <Input size="large" placeholder={tag} />
+          </Form.Item>
+        ))}
       </Form>
     </Modal>
   );
