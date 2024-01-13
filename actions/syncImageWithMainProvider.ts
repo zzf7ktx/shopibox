@@ -41,7 +41,7 @@ export const syncImageWithMainProvider = async (
   await prisma.image.update({
     data: {
       syncStatus: "Synced",
-      cloudLink: uploadResult.url,
+      cloudLink: uploadResult.secure_url,
     },
     where: {
       id: image?.id,

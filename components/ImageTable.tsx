@@ -1,5 +1,4 @@
 "use client";
-import { syncImageWithMainProvider } from "@/actions/syncImageWithMainProvider";
 import { CloudSyncOutlined } from "@ant-design/icons";
 import { Image as ImageInfo, ImageSyncStatus } from "@prisma/client";
 import {
@@ -14,6 +13,7 @@ import {
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import ViewMetadataButtonButton from "./ViewMetadataButton";
+import { syncImageWithMainProvider } from "@/actions";
 
 export interface ImageTableProps {
   data?: Array<ImageInfo>;
