@@ -7,9 +7,10 @@ export const addProduct = async (data: AddProductFormFields) => {
   const product = await prisma.product.create({
     data: {
       name: data.name,
-      price: +data.price,
+      price: data.price,
       description: data.description,
       descriptionHtml: data.descriptionHtml,
+      category: data.category ? data.category.join(" > ") : "",
     },
   });
   return product;
