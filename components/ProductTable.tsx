@@ -1,6 +1,6 @@
 "use client";
 import { Product } from "@prisma/client";
-import { Button, Popover, Table, TableColumnsType } from "antd";
+import { Button, Popover, Space, Table, TableColumnsType, Tag } from "antd";
 
 export interface ProductTableProps {
   data?: Array<Product>;
@@ -37,6 +37,28 @@ const columns: TableColumnsType<Product> = [
         title="HTML preview"
       >
         <Button>Preview</Button>
+      </Popover>
+    ),
+  },
+  {
+    title: "Category",
+    dataIndex: "category",
+    key: "category",
+    render: (_, record) => (
+      <Popover
+        content={
+          <Space>
+            {record.category?.split(" > ").map((catg) => (
+              <Tag key={catg} color="geekblue">
+                {catg}
+              </Tag>
+            ))}
+          </Space>
+        }
+      >
+        {record.category && (
+          <Tag color="geekblue">{record.category.split(" > ").pop()}</Tag>
+        )}
       </Popover>
     ),
   },
