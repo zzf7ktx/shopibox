@@ -1,9 +1,17 @@
 "use client";
 
-import { Product } from "@prisma/client";
-import { Cascader, Form, Input, InputNumber, Modal, message } from "antd";
-import { useEffect, useState } from "react";
-import { addProduct } from "@/actions";
+import { Collection, Product } from "@prisma/client";
+import {
+  Cascader,
+  Form,
+  Input,
+  InputNumber,
+  Modal,
+  Select,
+  message,
+} from "antd";
+import { ReactNode, useEffect, useState } from "react";
+import { addProduct, getCollections } from "@/actions";
 import { useRouter } from "next/navigation";
 
 const layout = {
@@ -23,6 +31,7 @@ export interface AddProductFormFields {
   description: string;
   descriptionHtml: string;
   category: string[];
+  collections: string[];
 }
 
 interface Option {
@@ -31,12 +40,22 @@ interface Option {
   children: Option[];
 }
 
+interface CollectionOption {
+  value: string;
+  label: ReactNode;
+}
+
+const renderItem = (collection: Collection): CollectionOption => ({
+  value: collection.id,
+  label: collection.name,
+});
+
 async function convertTxtToJS(url: string): Promise<Array<Option>> {
   try {
     const res = await fetch(url);
     const dataStr = await res.text();
     const lines = dataStr.split("\n");
-    const catgoriesObject: any = {};
+    const categoriesObject: any = {};
 
     for (const line of lines) {
       const fields = line.split("-");
@@ -46,7 +65,7 @@ async function convertTxtToJS(url: string): Promise<Array<Option>> {
 
       let categories = fields[1].split(" > ");
 
-      let subCatg = catgoriesObject;
+      let subCatg = categoriesObject;
       for (let catg of categories) {
         subCatg[catg.trim()] = {} as any;
         subCatg = subCatg[catg.trim()];
@@ -54,17 +73,17 @@ async function convertTxtToJS(url: string): Promise<Array<Option>> {
     }
 
     const result: Option[] = [];
-    const stack = [{ catgoriesObject, parent: result }];
+    const stack = [{ categoriesObject, parent: result }];
     while (stack.length > 0) {
-      const { catgoriesObject, parent } = stack.pop()!;
-      for (const [key, value] of Object.entries(catgoriesObject)) {
+      const { categoriesObject, parent } = stack.pop()!;
+      for (const [key, value] of Object.entries(categoriesObject)) {
         const newObj: Option = {
           label: key,
           value: key,
           children: [],
         };
         parent.push(newObj);
-        stack.push({ catgoriesObject: value, parent: newObj.children });
+        stack.push({ categoriesObject: value, parent: newObj.children });
       }
     }
     return result;
@@ -79,17 +98,27 @@ export default function AddManualProductModal({
   onClose,
 }: AddManualProductModalProps) {
   const [loading, setLoading] = useState<boolean>(false);
-  const [categories, setCatgories] = useState<Option[]>([]);
+  const [categories, setCategories] = useState<Option[]>([]);
+  const [collections, setCollections] = useState<CollectionOption[]>([]);
+  const [loadingCollections, setLoadingCollection] = useState<boolean>(false);
   const router = useRouter();
 
   useEffect(() => {
-    const getCagtegories = async () => {
+    const getProductOptions = async () => {
+      setLoadingCollection(true);
+      const products = await getCollections();
+      setCollections(products.map((p) => renderItem(p)));
+      setLoadingCollection(false);
+    };
+    getProductOptions();
+
+    const getCategories = async () => {
       const result = await convertTxtToJS(
         "https://res.cloudinary.com/dtp8svzny/raw/upload/v1705205941/shopify/product_taxonomy_byh5fo.txt"
       );
-      setCatgories(result);
+      setCategories(result);
     };
-    getCagtegories();
+    getCategories();
   }, []);
 
   const handleCancel = () => {
@@ -102,7 +131,6 @@ export default function AddManualProductModal({
   const onFinish = async (values: AddProductFormFields) => {
     try {
       setLoading(true);
-
       const newProduct = await addProduct(values);
 
       message.success("Add product successfully", () =>
@@ -128,6 +156,7 @@ export default function AddManualProductModal({
       confirmLoading={loading}
       onCancel={handleCancel}
       okButtonProps={{ htmlType: "submit" }}
+      width={"70%"}
     >
       <Form
         {...layout}
@@ -155,15 +184,22 @@ export default function AddManualProductModal({
         >
           <Input.TextArea size="large" placeholder="Description HTML" />
         </Form.Item>
-        <Form.Item
-          label="Category"
-          name="category"
-          rules={[{ required: true }]}
-        >
+        <Form.Item label="Category" name="category">
           <Cascader
             size="large"
             options={categories}
             placeholder="Please select"
+          />
+        </Form.Item>
+        <Form.Item label="Collections" name="collections">
+          <Select
+            mode="tags"
+            size="large"
+            allowClear
+            placeholder="Please select"
+            options={collections}
+            loading={loadingCollections}
+            onChange={(e) => console.log(e)}
           />
         </Form.Item>
       </Form>
