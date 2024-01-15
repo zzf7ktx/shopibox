@@ -3,6 +3,7 @@ import { SyncOutlined } from "@ant-design/icons";
 import { Flex, Space, Button, Typography } from "antd";
 import { useRouter } from "next/navigation";
 import { startTransition } from "react";
+import AddManualCollectionButton from "./AddManualCollectionButton";
 const { Title } = Typography;
 
 export interface CollectionPageHeaderProps {}
@@ -22,6 +23,7 @@ export default function CollectionPageHeader({}: CollectionPageHeaderProps) {
           onClick={handleRefresh}
         />
       </Space>
+      <AddManualCollectionButton />
     </Flex>
   );
 }
