@@ -48,7 +48,30 @@ model Product {
 
   createdAt DateTime @default(now()) @map(name: "created_at")
   updatedAt DateTime @updatedAt @map(name: "updated_at")
-  images    Image[]
+
+  images      Image[]
+  collections ProductsOnCollections[]
 
   @@map(name: "products")
+}
+
+model Collection {
+  id   String @id @default(cuid())
+  name String
+
+  products ProductsOnCollections[]
+
+  @@map(name: "collections")
+}
+
+model ProductsOnCollections {
+  product      Product    @relation(fields: [productId], references: [id])
+  productId    String
+  collection   Collection @relation(fields: [collectionId], references: [id])
+  collectionId String
+  priority     Int?
+  assignedAt   DateTime   @default(now())
+
+  @@id([productId, collectionId])
+  @@map(name: "products_on_collections")
 }
