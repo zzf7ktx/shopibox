@@ -6,6 +6,7 @@ import {
   MenuUnfoldOutlined,
   MenuFoldOutlined,
   ShoppingOutlined,
+  FolderOutlined,
 } from "@ant-design/icons";
 import { Suspense, useState } from "react";
 import "./main.css";
@@ -43,6 +44,12 @@ export default function MainLayout({
       icon: <VideoCameraOutlined />,
       label: "Images",
       onClick: () => router.replace("/main/images"),
+    },
+    {
+      key: "/main/collections",
+      icon: <FolderOutlined />,
+      label: "Collections",
+      onClick: () => router.replace("/main/collections"),
     },
     {
       key: "soon",
