@@ -1,13 +1,23 @@
 "use client";
-import { Product } from "@prisma/client";
+import { Product, Prisma } from "@prisma/client";
 import { Button, Popover, Space, Table, TableColumnsType, Tag } from "antd";
 
+type ProductWithCollections = Prisma.ProductGetPayload<{
+  include: {
+    collections: {
+      include: {
+        collection: true;
+      };
+    };
+  };
+}>;
+
 export interface ProductTableProps {
-  data?: Array<Product>;
+  data?: Array<ProductWithCollections>;
   loading?: boolean;
 }
 
-const columns: TableColumnsType<Product> = [
+const columns: TableColumnsType<ProductWithCollections> = [
   {
     title: "Name",
     dataIndex: "name",
@@ -60,6 +70,20 @@ const columns: TableColumnsType<Product> = [
           <Tag color="geekblue">{record.category.split(" > ").pop()}</Tag>
         )}
       </Popover>
+    ),
+  },
+  {
+    title: "Collections",
+    dataIndex: "collections",
+    key: "collections",
+    render: (_, record) => (
+      <Space>
+        {record.collections?.map((pc) => (
+          <Tag key={pc.collection.id} color="geekblue">
+            {pc.collection.name}
+          </Tag>
+        ))}
+      </Space>
     ),
   },
 ];
