@@ -1,51 +1,90 @@
 "use client";
 
-import { Collection, Product } from "@prisma/client";
-import {
-  Cascader,
-  Form,
-  Input,
-  InputNumber,
-  Modal,
-  Select,
-  message,
-} from "antd";
-import { ReactNode, useEffect, useState } from "react";
+import { Collection } from "@prisma/client";
+import { ReactNode, useEffect, useRef, useState } from "react";
 import { addProduct, getCollections } from "@/actions";
 import { useRouter } from "next/navigation";
+import * as z from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm } from "react-hook-form";
+import { cn } from "@/lib/utils";
+import {
+  DialogHeader,
+  Dialog,
+  DialogContent,
+  DialogTitle,
+  DialogDescription,
+  DialogTrigger,
+} from "@/components/ui/Dialog";
+import { useToast } from "@/components/ui/useToast";
+import { Button } from "@/components/ui/Button";
+import {
+  Form,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormControl,
+  FormDescription,
+  FormMessage,
+} from "@/components/ui/Form";
+import { Input } from "@/components/ui/Input";
+import { Textarea } from "@/components/ui/Textarea";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/Popover";
+import {
+  Command,
+  CommandInput,
+  CommandEmpty,
+  CommandGroup,
+  CommandItem,
+} from "@/components/ui/Command";
+import { Badge } from "@/components/ui/Badge";
+import { ScrollArea } from "@/components/ui/ScrollArea";
+import { CaretSortIcon, CheckIcon, ReloadIcon } from "@radix-ui/react-icons";
+import UploadManualModal from "./UploadManualModal";
 
-const layout = {
-  labelCol: { span: 5 },
-  wrapperCol: { span: 21 },
-};
+const formSchema = z.object({
+  name: z
+    .string()
+    .min(2, {
+      message: "Name must be at least 2 characters.",
+    })
+    .max(50),
+  price: z.number().min(0, {
+    message: "Price must be a positive value",
+  }),
+  description: z
+    .string()
+    .min(2, {
+      message: "Description must be at least 2 characters.",
+    })
+    .max(250),
+  descriptionHtml: z
+    .string()
+    .min(2, {
+      message: "Description HTML must be at least 2 characters.",
+    })
+    .max(1000),
+  category: z.optional(z.array(z.string())),
+  collections: z.array(z.string()).min(1).max(100),
+});
 
 export interface AddManualProductModalProps {
-  open: boolean;
-  onClose: (value?: Product) => void;
-  productKey?: string;
+  dialogTrigger: ReactNode;
 }
 
-export interface AddProductFormFields {
-  name: string;
-  price: number;
-  description: string;
-  descriptionHtml: string;
-  category: string[];
-  collections: string[];
-}
+export type AddProductFormFields = z.infer<typeof formSchema>;
 
 interface Option {
   value: string;
   label: string;
-  children: Option[];
+  children?: Option[];
 }
 
-interface CollectionOption {
-  value: string;
-  label: ReactNode;
-}
-
-const renderItem = (collection: Collection): CollectionOption => ({
+const renderItem = (collection: Collection): Option => ({
   value: collection.id,
   label: collection.name,
 });
@@ -83,7 +122,7 @@ async function convertTxtToJS(url: string): Promise<Array<Option>> {
           children: [],
         };
         parent.push(newObj);
-        stack.push({ categoriesObject: value, parent: newObj.children });
+        stack.push({ categoriesObject: value, parent: newObj.children ?? [] });
       }
     }
     return result;
@@ -93,27 +132,69 @@ async function convertTxtToJS(url: string): Promise<Array<Option>> {
   }
 }
 
+async function convertTxtToJSFlat(url: string): Promise<Array<Option>> {
+  try {
+    const res = await fetch(url);
+    const dataStr = await res.text();
+    const lines = dataStr.split("\n");
+
+    const result: Option[] = [];
+
+    for (const line of lines) {
+      const fields = line.split("-");
+      if (fields.length < 2) {
+        continue;
+      }
+
+      result.push({
+        label: fields[1].trim(),
+        value: fields[1].trim(),
+      });
+    }
+    return result;
+  } catch (err) {
+    console.error(err);
+    return [];
+  }
+}
+
 export default function AddManualProductModal({
-  open,
-  onClose,
+  dialogTrigger,
 }: AddManualProductModalProps) {
   const [loading, setLoading] = useState<boolean>(false);
+  const [open, setOpen] = useState(false);
   const [categories, setCategories] = useState<Option[]>([]);
-  const [collections, setCollections] = useState<CollectionOption[]>([]);
+  const [searchCategory, setSearchCategory] = useState<string>("");
+  const [collections, setCollections] = useState<Option[]>([]);
+  const [tempCollections, setTempCollections] = useState<Option[]>([]);
   const [loadingCollections, setLoadingCollection] = useState<boolean>(false);
   const router = useRouter();
+  const { toast } = useToast();
+  const uploadImageModalRef = useRef<HTMLButtonElement | null>(null);
+  const [addedProductId, setAddedProductId] = useState<string>("");
+
+  const form = useForm<z.infer<typeof formSchema>>({
+    resolver: zodResolver(formSchema),
+    defaultValues: {
+      name: "",
+      description: "",
+      descriptionHtml: "",
+      price: 0,
+      collections: [],
+    },
+  });
 
   useEffect(() => {
-    const getProductOptions = async () => {
+    const getCollectionOptions = async () => {
       setLoadingCollection(true);
-      const products = await getCollections();
-      setCollections(products.map((p) => renderItem(p)));
+      const collections = await getCollections();
+      setCollections(collections.map((p) => renderItem(p)));
       setLoadingCollection(false);
     };
-    getProductOptions();
+    getCollectionOptions();
 
     const getCategories = async () => {
-      const result = await convertTxtToJS(
+      const result = await convertTxtToJSFlat(
         "https://res.cloudinary.com/dtp8svzny/raw/upload/v1705205941/shopify/product_taxonomy_byh5fo.txt"
       );
       setCategories(result);
@@ -121,88 +202,314 @@ export default function AddManualProductModal({
     getCategories();
   }, []);
 
-  const handleCancel = () => {
-    onClose();
-    form.resetFields();
-  };
-
-  const [form] = Form.useForm();
-
-  const onFinish = async (values: AddProductFormFields) => {
+  const onFinish = async (values: z.infer<typeof formSchema>) => {
     try {
       setLoading(true);
       const newProduct = await addProduct(values);
+      setAddedProductId(newProduct?.id ?? "");
+      if (uploadImageModalRef?.current) {
+        uploadImageModalRef.current.click();
+      }
 
-      message.success("Add product successfully", () =>
-        message.info("Upload some images for this product")
-      );
+      toast({
+        title: "Success",
+        description:
+          "Add product successfully. Upload some images for this product",
+      });
 
-      form.resetFields();
+      setOpen(false);
+      form.reset();
       router.refresh();
-      onClose(newProduct);
     } catch (error) {
-      message.error("Something wrong");
+      toast({
+        title: "Error",
+        description: "Something wrong",
+        variant: "destructive",
+      });
     } finally {
       setLoading(false);
     }
   };
 
+  const onOpenChange = (newValue: boolean) => {
+    setOpen(newValue);
+    form.reset();
+  };
+
   return (
-    <Modal
-      title="Add product manual"
-      open={open}
-      onOk={form.submit}
-      okText="Submit"
-      confirmLoading={loading}
-      onCancel={handleCancel}
-      okButtonProps={{ htmlType: "submit" }}
-      width={"70%"}
-    >
-      <Form
-        {...layout}
-        form={form}
-        name="add-manual-product-form"
-        onFinish={onFinish}
-      >
-        <Form.Item label="Name" name="name" rules={[{ required: true }]}>
-          <Input size="large" placeholder="Name" />
-        </Form.Item>
-        <Form.Item label="Price" name="price" rules={[{ required: true }]}>
-          <InputNumber size="large" placeholder="Price" className="w-full" />
-        </Form.Item>
-        <Form.Item
-          label="Description"
-          name="description"
-          rules={[{ required: true }]}
-        >
-          <Input.TextArea size="large" placeholder="Description" />
-        </Form.Item>
-        <Form.Item
-          label="HTML"
-          name="descriptionHtml"
-          rules={[{ required: true }]}
-        >
-          <Input.TextArea size="large" placeholder="Description HTML" />
-        </Form.Item>
-        <Form.Item label="Category" name="category">
-          <Cascader
-            size="large"
-            options={categories}
-            placeholder="Please select"
-          />
-        </Form.Item>
-        <Form.Item label="Collections" name="collections">
-          <Select
-            mode="tags"
-            size="large"
-            allowClear
-            placeholder="Please select"
-            options={collections}
-            loading={loadingCollections}
-            onChange={(e) => console.log(e)}
-          />
-        </Form.Item>
-      </Form>
-    </Modal>
+    <>
+      <Dialog open={open} onOpenChange={onOpenChange}>
+        {dialogTrigger}
+        <DialogContent className="max-h-[80%] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Add product manually</DialogTitle>
+            <DialogDescription asChild>
+              <Form {...form}>
+                <form
+                  onSubmit={form.handleSubmit(onFinish)}
+                  className="space-y-8"
+                >
+                  <FormField
+                    control={form.control}
+                    name="name"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Name</FormLabel>
+                        <FormControl>
+                          <Input placeholder="Product A" {...field} />
+                        </FormControl>
+                        <FormDescription>
+                          This is your public product name.
+                        </FormDescription>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="description"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Description</FormLabel>
+                        <FormControl>
+                          <Textarea
+                            placeholder="This is product A"
+                            {...field}
+                          />
+                        </FormControl>
+                        <FormDescription>
+                          This is the detail of product.
+                        </FormDescription>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="descriptionHtml"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Description HTML</FormLabel>
+                        <FormControl>
+                          <Textarea
+                            placeholder="<h4>This is product A</h4>"
+                            {...field}
+                          />
+                        </FormControl>
+                        <FormDescription>
+                          This is the detail of product in html.
+                        </FormDescription>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="category"
+                    render={({ field }) => (
+                      <FormItem className="flex flex-col">
+                        <FormLabel>Category</FormLabel>
+                        <Popover>
+                          <PopoverTrigger asChild>
+                            <FormControl>
+                              <Button
+                                variant="outline"
+                                role="combobox"
+                                className={cn(
+                                  "w-full h-auto justify-between",
+                                  !field.value && "text-muted-foreground"
+                                )}
+                              >
+                                {field.value ? (
+                                  <div className="flex gap-1 w-full flex-wrap">
+                                    {field.value.map((item) => (
+                                      <Badge key={item} variant="secondary">
+                                        {item}
+                                      </Badge>
+                                    ))}
+                                  </div>
+                                ) : (
+                                  "Select category"
+                                )}
+                                <CaretSortIcon className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                              </Button>
+                            </FormControl>
+                          </PopoverTrigger>
+                          <PopoverContent className="mw-[400px] p-0">
+                            <Command>
+                              <CommandInput
+                                onValueChange={(e) => setSearchCategory(e)}
+                                placeholder="Search category..."
+                                className="h-9"
+                              />
+                              <CommandEmpty>No category found.</CommandEmpty>
+                              <CommandGroup>
+                                <ScrollArea className="max-h-72">
+                                  {(searchCategory.length < 3
+                                    ? []
+                                    : categories.filter((c) =>
+                                        c.value.includes(
+                                          searchCategory.toLocaleLowerCase()
+                                        )
+                                      )
+                                  ).map((category, index) => (
+                                    <CommandItem
+                                      key={index}
+                                      value={category.label}
+                                      onSelect={() => {
+                                        form.setValue(
+                                          "category",
+                                          category.value.split(" > ")
+                                        );
+                                      }}
+                                    >
+                                      {category.label}
+                                    </CommandItem>
+                                  ))}
+                                </ScrollArea>
+                              </CommandGroup>
+                            </Command>
+                          </PopoverContent>
+                        </Popover>
+                        <FormDescription>
+                          This category is for SEO.
+                        </FormDescription>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="collections"
+                    render={({ field }) => (
+                      <FormItem className="flex flex-col">
+                        <FormLabel>Collections</FormLabel>
+                        <Popover>
+                          <PopoverTrigger asChild>
+                            <FormControl>
+                              <Button
+                                variant="outline"
+                                role="combobox"
+                                className={cn(
+                                  "w-full h-auto justify-between",
+                                  !field.value && "text-muted-foreground"
+                                )}
+                              >
+                                {field.value ? (
+                                  <div className="flex gap-1 w-full flex-wrap">
+                                    {field.value
+                                      .map((current) => {
+                                        return (
+                                          collections.find(
+                                            (opt) => opt.value === current
+                                          )?.label ?? current
+                                        );
+                                      })
+                                      .map((selected, index) => (
+                                        <Badge key={index} variant="secondary">
+                                          {selected}
+                                        </Badge>
+                                      ))}
+                                  </div>
+                                ) : (
+                                  "Select collections"
+                                )}
+                                <CaretSortIcon className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                              </Button>
+                            </FormControl>
+                          </PopoverTrigger>
+                          <PopoverContent className="mw-[400px] p-0">
+                            <Command>
+                              <CommandInput
+                                onValueChange={(e) =>
+                                  setTempCollections((prev) => {
+                                    let newData = [...prev];
+                                    newData[0] = {
+                                      label: e,
+                                      value: e,
+                                    };
+                                    return newData;
+                                  })
+                                }
+                                placeholder="Search collections..."
+                                className="h-9"
+                              />
+                              <CommandEmpty>No collection found.</CommandEmpty>
+                              <CommandGroup>
+                                <ScrollArea className="max-h-72">
+                                  {[...tempCollections, ...collections].map(
+                                    (collection) => (
+                                      <span key={collection?.value ?? ""}>
+                                        {typeof collection !== "undefined" && (
+                                          <CommandItem
+                                            value={collection.label}
+                                            onSelect={() => {
+                                              const newValue =
+                                                field.value.includes(
+                                                  collection.value
+                                                )
+                                                  ? field.value.filter(
+                                                      (cur) =>
+                                                        cur !== collection.value
+                                                    )
+                                                  : field.value.concat(
+                                                      collection.value
+                                                    );
+                                              form.setValue(
+                                                "collections",
+                                                newValue
+                                              );
+                                            }}
+                                          >
+                                            {collection.label}
+                                            <CheckIcon
+                                              className={cn(
+                                                "ml-auto h-4 w-4",
+                                                field.value.includes(
+                                                  collection.value
+                                                )
+                                                  ? "opacity-100"
+                                                  : "opacity-0"
+                                              )}
+                                            />
+                                          </CommandItem>
+                                        )}
+                                      </span>
+                                    )
+                                  )}
+                                </ScrollArea>
+                              </CommandGroup>
+                            </Command>
+                          </PopoverContent>
+                        </Popover>
+                        <FormDescription>
+                          Choose existing collections or add to new collections.
+                        </FormDescription>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <Button type="submit">
+                    {loading && (
+                      <ReloadIcon className="mr-2 h-4 w-4 animate-spin" />
+                    )}
+                    Submit
+                  </Button>
+                </form>
+              </Form>
+            </DialogDescription>
+          </DialogHeader>
+        </DialogContent>
+      </Dialog>
+      <UploadManualModal
+        productKey={addedProductId}
+        dialogTrigger={
+          <DialogTrigger
+            className="hidden"
+            ref={uploadImageModalRef}
+          ></DialogTrigger>
+        }
+      />
+    </>
   );
 }
