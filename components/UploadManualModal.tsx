@@ -243,7 +243,6 @@ export default function UploadManualModal({
                           {...rest}
                           onChange={(event) => {
                             const { files, displayUrls } = getImageData(event);
-                            console.log(files, displayUrls);
                             setImagePreview(displayUrls);
                             onChange(files);
                           }}
