@@ -3,7 +3,6 @@ import { Button } from "antd";
 import { useState } from "react";
 import AddManualProductModal from "./AddManualProductModal";
 import { Product } from "@prisma/client";
-import UploadManualModal from "./UploadManualModal";
 
 export interface AddManualProductButtonProps {}
 
@@ -23,11 +22,6 @@ export default function AddManualProductButton() {
     <>
       <Button onClick={() => setOpen((prev) => !prev)}>Upload Manual</Button>
       <AddManualProductModal open={open} onClose={handleClose} />
-      <UploadManualModal
-        open={openImageStep}
-        productKey={newProduct?.id}
-        onClose={() => setOpenImageStep(false)}
-      />
     </>
   );
 }
