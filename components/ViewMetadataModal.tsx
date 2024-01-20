@@ -1,40 +1,53 @@
 "use client";
 
-import { Form, Input, Modal, message } from "antd";
-import { useEffect, useState } from "react";
+import { ReactNode, useEffect, useState } from "react";
 import metadata, { MetaTags, RawMetadata } from "@/lib/metadata";
 import { updateMetadata } from "@/actions";
 import { useRouter } from "next/navigation";
+import * as z from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm } from "react-hook-form";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/Dialog";
+import { Button } from "@/components/ui/Button";
+import {
+  Form,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormControl,
+  FormDescription,
+  FormMessage,
+} from "@/components/ui/Form";
+import { Input } from "@/components/ui/Input";
+import { useToast } from "@/components/ui/useToast";
+import { ReloadIcon } from "@radix-ui/react-icons";
 
-const layout = {
-  labelCol: { span: 6 },
-  wrapperCol: { span: 21 },
-};
-
-export interface ViewMetadataButtonModalProps {
-  open: boolean;
-  onClose: () => void;
+export interface ViewMetadataModalProps {
+  dialogTrigger: ReactNode;
   imageSrc: string;
   imageId: string;
 }
 
-export default function ViewMetadataButtonModal({
-  open,
-  onClose,
+export default function ViewMetadataModal({
+  dialogTrigger,
   imageSrc,
   imageId,
-}: ViewMetadataButtonModalProps) {
+}: ViewMetadataModalProps) {
   const [loading, setLoading] = useState<boolean>(false);
   const [imageData, setImageData] = useState<string>("");
   const [meta, setMeta] = useState<RawMetadata>();
+  const [open, setOpen] = useState(false);
   const router = useRouter();
+  const { toast } = useToast();
 
-  const handleCancel = () => {
-    form.resetFields();
-    onClose();
-  };
-
-  const [form] = Form.useForm();
+  const form = useForm<Record<MetaTags, string>>();
 
   const onFinish = async (values: Record<MetaTags, string>) => {
     try {
@@ -55,12 +68,18 @@ export default function ViewMetadataButtonModal({
 
       await updateMetadata(imageId, data);
       setLoading(false);
-      message.success("Update image metadata successfully");
-      onClose();
+      toast({
+        title: "Success",
+        description: "Update image metadata successfully",
+      });
       router.refresh();
+      setOpen(false);
     } catch (error) {
       console.log(error);
-      message.error("Something wrong");
+      toast({
+        title: "Error",
+        description: "Something error",
+      });
     }
   };
 
@@ -82,9 +101,9 @@ export default function ViewMetadataButtonModal({
         }
 
         if (typeof fieldValue === "string") {
-          form.setFieldValue(code, metadata.getMetaByTag(originalMeta, code));
+          form.setValue(code, metadata.getMetaByTag(originalMeta, code));
         } else {
-          form.setFieldValue(
+          form.setValue(
             code,
             metadata.decimalArrayToString(
               metadata.getMetaByTag(originalMeta, code)
@@ -96,23 +115,51 @@ export default function ViewMetadataButtonModal({
     getMetadata();
   }, [imageSrc, open]);
 
+  const onOpenChange = (newValue: boolean) => {
+    setOpen(newValue);
+    form.reset();
+  };
+
   return (
-    <Modal
-      title="Image metadata"
-      open={open}
-      onOk={form.submit}
-      okText="Save"
-      confirmLoading={loading}
-      onCancel={handleCancel}
-      okButtonProps={{ htmlType: "submit" }}
-    >
-      <Form {...layout} form={form} name="control-hooks" onFinish={onFinish}>
-        {Object.entries(MetaTags).map(([tag, code]) => (
-          <Form.Item key={code} name={code} label={tag}>
-            <Input size="large" placeholder={tag} />
-          </Form.Item>
-        ))}
-      </Form>
-    </Modal>
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      {dialogTrigger}
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>Add collection manually</DialogTitle>
+          <DialogDescription>
+            <Form {...form}>
+              <form
+                onSubmit={form.handleSubmit(onFinish)}
+                className="space-y-8"
+              >
+                {Object.entries(MetaTags).map(([tag, code]) => (
+                  <FormField
+                    key={code}
+                    name={code}
+                    control={form.control}
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>{tag}</FormLabel>
+                        <FormControl>
+                          <Input placeholder={tag} {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                ))}
+
+                <Button type="submit">
+                  {loading && (
+                    <ReloadIcon className="mr-2 h-4 w-4 animate-spin" />
+                  )}
+                  Submit
+                </Button>
+              </form>
+            </Form>
+          </DialogDescription>
+        </DialogHeader>
+      </DialogContent>
+    </Dialog>
   );
 }

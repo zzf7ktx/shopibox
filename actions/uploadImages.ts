@@ -18,7 +18,7 @@ export const uploadImages = async (productId: string, data: FormData) => {
     const image = await prisma.image.create({
       data: {
         cloudLink: "",
-        name: "",
+        name: file?.name ?? "",
         source: "Manual",
         productId: productId,
       },
