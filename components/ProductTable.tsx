@@ -22,6 +22,7 @@ import { Separator } from "@/components/ui/Separator";
 import { Checkbox } from "@/components/ui/Checkbox";
 import { ProductTableToolbar } from "./ProductTableToolbar";
 import { DotsHorizontalIcon, ZoomInIcon } from "@radix-ui/react-icons";
+import { ScrollArea } from "./ui/ScrollArea";
 
 type ProductWithCollections = Prisma.ProductGetPayload<{
   include: {
@@ -72,16 +73,21 @@ const columns: ColumnDef<ProductWithCollections>[] = [
           <HoverCardTrigger className="flex gap-1 items-center">
             {name} <ZoomInIcon />
           </HoverCardTrigger>
-          <HoverCardContent>
-            <p>Plaintext</p>
-            <div>{description}</div>
-            <Separator className="my-2" />
-            <p>HTML</p>
-            <div
-              dangerouslySetInnerHTML={{
-                __html: descriptionHtml,
-              }}
-            ></div>
+          <HoverCardContent className="flex gap-1 w-auto max-w-96">
+            <div className="basis-1/2">
+              <p className="font-500">Plaintext</p>
+              <ScrollArea className="h-96">{description}</ScrollArea>
+            </div>
+            <div className="basis-1/2">
+              <p className="font-500">HTML</p>
+              <ScrollArea className="h-96">
+                <div
+                  dangerouslySetInnerHTML={{
+                    __html: descriptionHtml,
+                  }}
+                ></div>
+              </ScrollArea>
+            </div>
           </HoverCardContent>
         </HoverCard>
       );
@@ -127,12 +133,8 @@ const columns: ColumnDef<ProductWithCollections>[] = [
       const collections = row.original.collections;
       return (
         <div className="flex gap-1">
-          {collections.map((item) => (
-            <Badge
-              key={item.collectionId}
-              variant="secondary"
-              className="mb-1 last:mb-0"
-            >
+          {collections.map((item, index) => (
+            <Badge key={index} variant="secondary" className="mb-1 last:mb-0">
               {item.collection.name}
             </Badge>
           ))}
