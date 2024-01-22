@@ -6,3 +6,4 @@ export { syncImageWithMainProvider } from "./syncImageWithMainProvider";
 export { addCollection } from "./addCollection";
 export { getCollections } from "./getCollections";
 export { importProducts } from "./importProducts";
+export { addShop } from "./addShop";
