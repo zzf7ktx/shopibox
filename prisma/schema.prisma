@@ -57,7 +57,7 @@ model Product {
 
 model Collection {
   id   String @id @default(cuid())
-  name String
+  name String @unique
 
   createdAt DateTime @default(now()) @map(name: "created_at")
   updatedAt DateTime @updatedAt @map(name: "updated_at")
@@ -88,7 +88,7 @@ enum ShopSyncStatus {
 
 model Shop {
   id         String         @id @default(cuid())
-  name       String
+  name       String         @unique
   syncStatus ShopSyncStatus @default(NotPublished) @map(name: "sync_status")
   apiKey     String?        @map(name: "api_key")
 
