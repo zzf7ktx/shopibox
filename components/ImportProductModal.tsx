@@ -1,23 +1,24 @@
 "use client";
 
 import { ChangeEvent, ReactNode, useState } from "react";
-import { Button } from "./ui/Button";
-import { Input } from "./ui/Input";
+import { useForm } from "react-hook-form";
+import { useRouter } from "next/navigation";
+import * as z from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { Prisma } from "@prisma/client";
+import { Csv } from "@/lib/csv";
+import { Button } from "@/components/ui/Button";
+import { Input } from "@/components/ui/Input";
 import {
   Dialog,
   DialogContent,
   DialogDescription,
   DialogHeader,
   DialogTitle,
-} from "./ui/Dialog";
-import { Prisma } from "@prisma/client";
-import { Csv } from "@/lib/csv";
-import ProductTable from "./ProductTable";
+} from "@/components/ui/Dialog";
 import { importProducts } from "@/actions";
 import { parseCurrency } from "@/utils";
-import { useToast } from "./ui/useToast";
-import { ReloadIcon } from "@radix-ui/react-icons";
-import { useForm } from "react-hook-form";
+import { useToast } from "@/components/ui/useToast";
 import {
   Form,
   FormControl,
@@ -26,8 +27,15 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from "./ui/Form";
-import { useRouter } from "next/navigation";
+} from "@/components/ui/Form";
+import { Checkbox } from "@/components/ui/Checkbox";
+import { ReloadIcon } from "@radix-ui/react-icons";
+import ProductTable from "./ProductTable";
+
+const formSchema = z.object({
+  autoSyncImages: z.boolean().optional(),
+  file: z.any(),
+});
 
 type ProductWithCollections = Prisma.ProductGetPayload<{
   include: {
@@ -52,7 +60,12 @@ export default function ImportProductModal({
   const router = useRouter();
   const { toast } = useToast();
 
-  const form = useForm<{ file: FileList }>({});
+  const form = useForm<z.infer<typeof formSchema>>({
+    resolver: zodResolver(formSchema),
+    defaultValues: {
+      autoSyncImages: false,
+    },
+  });
 
   const onFileChange = async (e: ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files![0];
@@ -84,7 +97,10 @@ export default function ImportProductModal({
     });
   };
 
-  const onFinish = async ({ file }: { file: FileList }) => {
+  const onFinish = async ({
+    file,
+    autoSyncImages,
+  }: z.infer<typeof formSchema>) => {
     try {
       if (!file || file.length < 1) {
         return;
@@ -96,8 +112,8 @@ export default function ImportProductModal({
 
       const formData = new FormData();
       formData.append("file", importFile);
-
-      const result = await importProducts(formData);
+      console.log("tete", autoSyncImages);
+      const result = await importProducts(formData, autoSyncImages);
       toast({
         title: "Success",
         description: `${result?.length ?? 0} products added.`,
@@ -159,6 +175,27 @@ export default function ImportProductModal({
                       </FormDescription>
                       <FormMessage />
                       <ProductTable data={imported} />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="autoSyncImages"
+                  render={({ field }) => (
+                    <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4 shadow">
+                      <FormControl>
+                        <Checkbox
+                          checked={field.value}
+                          onCheckedChange={field.onChange}
+                        />
+                      </FormControl>
+                      <div className="space-y-1 leading-none">
+                        <FormLabel>Auto sync images</FormLabel>
+                        <FormDescription>
+                          The product images will be upload to cloud provider
+                          automatically
+                        </FormDescription>
+                      </div>
                     </FormItem>
                   )}
                 />
