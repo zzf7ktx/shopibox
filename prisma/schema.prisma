@@ -63,6 +63,7 @@ model Collection {
   updatedAt DateTime @updatedAt @map(name: "updated_at")
 
   products ProductsOnCollections[]
+  shops    CollectionsOnShops[]
 
   @@map(name: "collections")
 }
@@ -94,9 +95,22 @@ model Shop {
   createdAt DateTime @default(now()) @map(name: "created_at")
   updatedAt DateTime @updatedAt @map(name: "updated_at")
 
-  maskImages ShopMaskImage[]
+  maskImages  ShopMaskImage[]
+  collections CollectionsOnShops[]
 
   @@map(name: "shops")
+}
+
+model CollectionsOnShops {
+  shop         Shop       @relation(fields: [shopId], references: [id])
+  shopId       String     @map(name: "shop_id")
+  collection   Collection @relation(fields: [collectionId], references: [id])
+  collectionId String     @map(name: "collection_id")
+  priority     Int?
+  assignedAt   DateTime   @default(now()) @map(name: "assigned_at")
+
+  @@id([shopId, collectionId])
+  @@map(name: "collections_on_shops")
 }
 
 model ShopMaskImage {
