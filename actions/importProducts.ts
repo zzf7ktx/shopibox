@@ -5,8 +5,12 @@ import prisma from "@/lib/prisma";
 import { parseCurrency } from "@/utils";
 import { ImageSource } from "@prisma/client";
 import { Readable } from "stream";
+import { syncImageWithMainProvider } from ".";
 
-export const importProducts = async (data: FormData) => {
+export const importProducts = async (
+  data: FormData,
+  autoSyncImages: boolean = false
+) => {
   const file: File = data.get("file") as unknown as File;
   if (!file) {
     throw new Error("No file uploaded");
@@ -77,7 +81,16 @@ export const importProducts = async (data: FormData) => {
             }
           : {}),
       },
+      include: {
+        images: true,
+      },
     });
+
+    if (autoSyncImages) {
+      for (let image of product.images) {
+        syncImageWithMainProvider(image.id, "default");
+      }
+    }
 
     products.push(product);
   }
