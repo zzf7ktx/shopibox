@@ -19,12 +19,14 @@ import {
   StopwatchIcon,
 } from "@radix-ui/react-icons";
 import { ShopTableToolbar } from "./ShopTableToolbar";
+import Link from "next/link";
 
 type ShopDto = Prisma.ShopGetPayload<{
   select: {
     id: true;
     name: true;
     syncStatus: true;
+    provider: true;
     maskImages: true;
     createdAt: true;
     updatedAt: true;
@@ -90,7 +92,9 @@ const columns: ColumnDef<ShopDto>[] = [
             </DropdownMenuItem>
             <DropdownMenuSeparator />
             <DropdownMenuItem>View products</DropdownMenuItem>
-            <DropdownMenuItem>Edit</DropdownMenuItem>
+            <DropdownMenuItem asChild>
+              <Link href={`/main/shops/${shop.id}/overview`}>Go to page</Link>
+            </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
       );
