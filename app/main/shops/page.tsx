@@ -6,6 +6,8 @@ import { DialogTrigger } from "@/components/ui/Dialog";
 import prisma from "@/lib/prisma";
 import { PlusCircledIcon } from "@radix-ui/react-icons";
 
+export const revalidate = 0;
+
 export default async function Shops() {
   let data = await prisma.shop.findMany({
     orderBy: [

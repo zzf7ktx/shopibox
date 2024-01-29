@@ -1,6 +1,8 @@
 import ShopCollectionTable from "@/components/ShopCollectionTable";
 import prisma from "@/lib/prisma";
 
+export const revalidate = 0;
+
 export default async function ShopCollectionsPage({
   params,
 }: {
