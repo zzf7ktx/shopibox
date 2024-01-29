@@ -7,6 +7,8 @@ export const addShop = async (data: AddShopFormFields) => {
   const collection = await prisma.shop.create({
     data: {
       name: data.name,
+      apiKey: data.apiKey,
+      shopDomain: data.shopDomain,
       collections: {
         create: data.collections.map((collection) => ({
           collection: {
