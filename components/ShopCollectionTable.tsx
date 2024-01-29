@@ -20,6 +20,8 @@ import {
   MinusCircledIcon,
 } from "@radix-ui/react-icons";
 import { CollectionTableToolbar } from "./CollectionTableToolbar";
+import { pushCollectionToShopify } from "@/actions/pushCollectionToShopify";
+import { useRouter } from "next/navigation";
 
 type CollectionOnShop = Prisma.CollectionGetPayload<{
   include: {
@@ -75,31 +77,37 @@ const columns: ColumnDef<CollectionOnShop>[] = [
   {
     id: "actions",
     cell: ({ row }) => {
-      const collection = row.original;
-      return (
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="ghost" className="h-8 w-8 p-0">
-              <span className="sr-only">Open menu</span>
-              <DotsHorizontalIcon className="h-4 w-4" />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            <DropdownMenuLabel>Actions</DropdownMenuLabel>
-            <DropdownMenuItem
-              onClick={() => navigator.clipboard.writeText(collection.id)}
-            >
-              Copy ID
-            </DropdownMenuItem>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem>Push all</DropdownMenuItem>
-            <DropdownMenuItem>Fork and edit</DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
-      );
+      return <ActionCell row={row.original} />;
     },
   },
 ];
+
+function ActionCell({ row }: { row: CollectionOnShop }) {
+  const router = useRouter();
+  const pushAll = async () => {
+    await pushCollectionToShopify(row.shops[0].shopId, row.id);
+    router.refresh();
+  };
+  return (
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <Button variant="ghost" className="h-8 w-8 p-0">
+          <span className="sr-only">Open menu</span>
+          <DotsHorizontalIcon className="h-4 w-4" />
+        </Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="end">
+        <DropdownMenuLabel>Actions</DropdownMenuLabel>
+        <DropdownMenuItem onClick={() => navigator.clipboard.writeText(row.id)}>
+          Copy ID
+        </DropdownMenuItem>
+        <DropdownMenuSeparator />
+        <DropdownMenuItem onClick={pushAll}>Push all</DropdownMenuItem>
+        <DropdownMenuItem>Fork and edit</DropdownMenuItem>
+      </DropdownMenuContent>
+    </DropdownMenu>
+  );
+}
 
 export interface ShopCollectionTableProps {
   data?: Array<CollectionOnShop>;

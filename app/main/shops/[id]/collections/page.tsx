@@ -10,7 +10,7 @@ export default async function ShopCollectionsPage({
     ? await prisma.collection.findMany({
         where: {
           shops: {
-            every: {
+            some: {
               shopId: params.id,
             },
           },

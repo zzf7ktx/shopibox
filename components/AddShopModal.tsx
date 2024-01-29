@@ -50,6 +50,18 @@ const formSchema = z.object({
       message: "Name must be at least 2 characters.",
     })
     .max(50),
+  shopDomain: z
+    .string()
+    .min(2, {
+      message: "Shop domain must be at least 2 characters.",
+    })
+    .max(50),
+  apiKey: z
+    .string()
+    .min(2, {
+      message: "Api key must be at least 2 characters.",
+    })
+    .max(50),
   collections: z.array(z.string()).min(0).max(1000),
 });
 
@@ -151,6 +163,41 @@ export default function AddShopModal({ dialogTrigger }: AddShopModalProps) {
                       </FormControl>
                       <FormDescription>
                         This is your public shop name.
+                      </FormDescription>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="shopDomain"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Shop Domain</FormLabel>
+                      <FormControl>
+                        <Input
+                          placeholder="https://2baf97-4.myshopify.com"
+                          {...field}
+                        />
+                      </FormControl>
+                      <FormDescription>
+                        This is your public shop domain.
+                      </FormDescription>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="apiKey"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Api key</FormLabel>
+                      <FormControl>
+                        <Input placeholder="" {...field} type="password" />
+                      </FormControl>
+                      <FormDescription>
+                        The api key for this shop.
                       </FormDescription>
                       <FormMessage />
                     </FormItem>
