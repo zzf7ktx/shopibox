@@ -1,17 +1,9 @@
 import { cn } from "@/lib/utils";
 import { Button } from "./ui/Button";
-import {
-  CiFolderOn,
-  CiImageOn,
-  CiBag1,
-  CiWarning,
-  CiShop,
-} from "react-icons/ci";
-import Image from "next/image";
-import classNames from "classnames";
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname } from "next/navigation";
 import { ReactNode } from "react";
 import Link from "next/link";
+import { LuAlertTriangle, LuFolder, LuGlobe, LuImage, LuShoppingBag } from "react-icons/lu";
 
 interface SidebarProps extends React.HTMLAttributes<HTMLDivElement> {}
 
@@ -27,17 +19,17 @@ export function Sidebar({ className }: SidebarProps) {
   }[] = [
     {
       href: "/main/products",
-      icon: <CiBag1 />,
-      title: "Product",
+      icon: <LuShoppingBag />,
+      title: "Products",
     },
     {
       href: "/main/images",
-      icon: <CiImageOn />,
+      icon: <LuImage />,
       title: "Images",
     },
     {
       href: "/main/collections",
-      icon: <CiFolderOn />,
+      icon: <LuFolder />,
       title: "Collections",
     },
   ];
@@ -51,28 +43,17 @@ export function Sidebar({ className }: SidebarProps) {
   }[] = [
     {
       href: "/main/shops",
-      icon: <CiShop />,
+      icon: <LuGlobe />,
       title: "Shops",
     },
   ];
 
   return (
     <div className={cn("pb-12", className)}>
-      <div className="flex items-center px-3">
-        <Image
-          width={50}
-          height={50}
-          src="/logo.png"
-          alt="logo"
-          priority
-          style={{ minWidth: 50 }}
-        />
-        <span className={classNames("logo__text")}>Shopibox</span>
-      </div>
-      <div className="space-y-4 py-4">
-        <div className="px-3 py-2">
+      <div className="space-y-4 py-6">
+        <div className="px-3 pb-2">
           <h2 className="mb-2 px-4 text-lg font-semibold tracking-tight">
-            General
+            Manage
           </h2>
           <div className="space-y-1">
             {generalItems.map((item) => (
@@ -112,11 +93,11 @@ export function Sidebar({ className }: SidebarProps) {
         </div>
         <div className="px-3 py-2">
           <h2 className="mb-2 px-4 text-lg font-semibold tracking-tight">
-            Analysis
+            Analyze
           </h2>
           <div className="space-y-1">
             <Button variant="ghost" className="w-full justify-start gap-2">
-              <CiWarning />
+              <LuAlertTriangle />
               Soon
             </Button>
           </div>

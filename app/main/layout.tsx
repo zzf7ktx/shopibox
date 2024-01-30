@@ -7,6 +7,7 @@ import {
 } from "@/components/ui/Resizable";
 import { Sidebar } from "@/components/Sidebar";
 import { ScrollArea } from "@/components/ui/ScrollArea";
+import { Menu } from "@/components/Menu";
 
 export default function MainLayout({
   children,
@@ -14,13 +15,14 @@ export default function MainLayout({
   children: React.ReactNode;
 }) {
   return (
-    <>
+    <div className="overflow-hidden w-screen h-screen">
+      <Menu />
       <ResizablePanelGroup
         direction="horizontal"
         className="min-h-[200px] !h-screen !w-screen"
       >
         <ResizablePanel defaultSize={15}>
-          <div className="flex h-full p-6">
+          <div className="flex h-full">
             <span className="font-semibold">
               <Sidebar />
             </span>
@@ -33,6 +35,6 @@ export default function MainLayout({
           </ScrollArea>
         </ResizablePanel>
       </ResizablePanelGroup>
-    </>
+    </div>
   );
 }
