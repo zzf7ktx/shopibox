@@ -9,9 +9,11 @@ import {
 } from "react-icons/ci";
 import Image from "next/image";
 import classNames from "classnames";
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname } from "next/navigation";
 import { ReactNode } from "react";
 import Link from "next/link";
+import { ImageIcon } from "@radix-ui/react-icons";
+import { LuAlertTriangle, LuFolder, LuGlobe, LuImage, LuShoppingBag } from "react-icons/lu";
 
 interface SidebarProps extends React.HTMLAttributes<HTMLDivElement> {}
 
@@ -27,17 +29,17 @@ export function Sidebar({ className }: SidebarProps) {
   }[] = [
     {
       href: "/main/products",
-      icon: <CiBag1 />,
+      icon: <LuShoppingBag />,
       title: "Product",
     },
     {
       href: "/main/images",
-      icon: <CiImageOn />,
+      icon: <LuImage />,
       title: "Images",
     },
     {
       href: "/main/collections",
-      icon: <CiFolderOn />,
+      icon: <LuFolder />,
       title: "Collections",
     },
   ];
@@ -51,7 +53,7 @@ export function Sidebar({ className }: SidebarProps) {
   }[] = [
     {
       href: "/main/shops",
-      icon: <CiShop />,
+      icon: <LuGlobe />,
       title: "Shops",
     },
   ];
@@ -116,7 +118,7 @@ export function Sidebar({ className }: SidebarProps) {
           </h2>
           <div className="space-y-1">
             <Button variant="ghost" className="w-full justify-start gap-2">
-              <CiWarning />
+              <LuAlertTriangle />
               Soon
             </Button>
           </div>
