@@ -26,8 +26,9 @@ import {
 } from "@/components/ui/Form";
 import { Input } from "@/components/ui/Input";
 import { useToast } from "@/components/ui/useToast";
+import { ToastAction } from "@/components/ui/Toast";
 import { PlusCircledIcon, ReloadIcon } from "@radix-ui/react-icons";
-import { ToastAction } from "./ui/Toast";
+import Link from "next/link";
 
 const formSchema = z.object({
   name: z
@@ -36,13 +37,25 @@ const formSchema = z.object({
       message: "Name must be at least 2 characters.",
     })
     .max(50),
+  description: z.optional(
+    z
+      .string()
+      .min(2, {
+        message: "Description must be at least 2 characters.",
+      })
+      .max(250)
+  ),
+  publicName: z.optional(
+    z
+      .string()
+      .min(2, {
+        message: "Public name must be at least 2 characters.",
+      })
+      .max(50)
+  ),
 });
 
 export interface AddManualCollectionModalProps {}
-
-export interface AddCollectionFormFields {
-  name: string;
-}
 
 export default function AddManualCollectionModal({}: AddManualCollectionModalProps) {
   const [loading, setLoading] = useState<boolean>(false);
@@ -54,6 +67,8 @@ export default function AddManualCollectionModal({}: AddManualCollectionModalPro
     resolver: zodResolver(formSchema),
     defaultValues: {
       name: "",
+      publicName: "",
+      description: "",
     },
   });
 
@@ -67,7 +82,11 @@ export default function AddManualCollectionModal({}: AddManualCollectionModalPro
         title: "Success",
         description:
           "Add collection successfully. Add some product to this collection",
-        action: <ToastAction altText="AddProducts">Add products</ToastAction>,
+        action: (
+          <ToastAction altText="AddProducts" asChild>
+            <Link href="/main/products">Add products</Link>
+          </ToastAction>
+        ),
       });
 
       form.reset();
@@ -99,7 +118,7 @@ export default function AddManualCollectionModal({}: AddManualCollectionModalPro
       <DialogContent>
         <DialogHeader>
           <DialogTitle>Add collection manually</DialogTitle>
-          <DialogDescription>
+          <DialogDescription asChild>
             <Form {...form}>
               <form
                 onSubmit={form.handleSubmit(onFinish)}
@@ -112,10 +131,43 @@ export default function AddManualCollectionModal({}: AddManualCollectionModalPro
                     <FormItem>
                       <FormLabel>Name</FormLabel>
                       <FormControl>
-                        <Input placeholder="shadcn" {...field} />
+                        <Input placeholder="name" {...field} />
                       </FormControl>
                       <FormDescription>
-                        This is your public collection name.
+                        This is your collection name which unique.
+                      </FormDescription>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="name"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Public name</FormLabel>
+                      <FormControl>
+                        <Input placeholder="public name" {...field} />
+                      </FormControl>
+                      <FormDescription>
+                        This is your public collection name. Default will be set
+                        as the name value.
+                      </FormDescription>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="name"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Description</FormLabel>
+                      <FormControl>
+                        <Input placeholder="something..." {...field} />
+                      </FormControl>
+                      <FormDescription>
+                        This is your collection description.
                       </FormDescription>
                       <FormMessage />
                     </FormItem>
