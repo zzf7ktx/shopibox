@@ -58,7 +58,7 @@ const columns: ColumnDef<CollectionOnShop>[] = [
     cell: ({ row }) => {
       const collection = row.original;
       const noPushed = collection.products.filter(
-        (p) => p.product.shops[0].status === "Published"
+        (p) => p.product.shops[0]?.status === "Published"
       ).length;
       const productCount = collection.products.length;
       return (
