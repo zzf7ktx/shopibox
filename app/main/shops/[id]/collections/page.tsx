@@ -11,9 +11,15 @@ export default async function ShopCollectionsPage({
   let data = params.id
     ? await prisma.collection.findMany({
         where: {
-          shops: {
+          products: {
             some: {
-              shopId: params.id,
+              product: {
+                shops: {
+                  some: {
+                    shopId: params.id,
+                  },
+                },
+              },
             },
           },
         },
@@ -26,14 +32,19 @@ export default async function ShopCollectionsPage({
           products: {
             select: {
               productId: true,
-            },
-          },
-          shops: {
-            where: {
-              shopId: params.id,
-            },
-            include: {
-              shop: true,
+              product: {
+                include: {
+                  shops: {
+                    where: {
+                      shopId: params.id,
+                    },
+                    select: {
+                      status: true,
+                      shopId: true,
+                    },
+                  },
+                },
+              },
             },
           },
         },

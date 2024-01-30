@@ -9,20 +9,6 @@ export const addShop = async (data: AddShopFormFields) => {
       name: data.name,
       apiKey: data.apiKey,
       shopDomain: data.shopDomain,
-      collections: {
-        create: data.collections.map((collection) => ({
-          collection: {
-            connectOrCreate: {
-              where: {
-                id: collection,
-              },
-              create: {
-                name: collection,
-              },
-            },
-          },
-        })),
-      },
     },
   });
   return collection;
