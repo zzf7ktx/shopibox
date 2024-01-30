@@ -7,3 +7,4 @@ export { addCollection } from "./addCollection";
 export { getCollections } from "./getCollections";
 export { importProducts } from "./importProducts";
 export { addShop } from "./addShop";
+export { addProductsToCollection } from "./addProductsToCollection";
