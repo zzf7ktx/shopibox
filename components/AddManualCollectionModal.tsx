@@ -142,7 +142,7 @@ export default function AddManualCollectionModal({}: AddManualCollectionModalPro
                 />
                 <FormField
                   control={form.control}
-                  name="name"
+                  name="publicName"
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Public name</FormLabel>
@@ -159,7 +159,7 @@ export default function AddManualCollectionModal({}: AddManualCollectionModalPro
                 />
                 <FormField
                   control={form.control}
-                  name="name"
+                  name="description"
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Description</FormLabel>
