@@ -8,3 +8,4 @@ export { getCollections } from "./getCollections";
 export { importProducts } from "./importProducts";
 export { addShop } from "./addShop";
 export { addProductsToCollection } from "./addProductsToCollection";
+export { addProductsToShop } from "./addProductsToShop";

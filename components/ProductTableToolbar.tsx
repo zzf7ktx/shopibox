@@ -10,7 +10,11 @@ import { DataTableViewOptions } from "@/components/ui/DataTableViewOptions";
 import { DataTableFacetedFilter } from "@/components/ui/DataTableFacetedFilter";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { addProductsToCollection, getCollections } from "@/actions";
+import {
+  addProductsToCollection,
+  getCollections,
+  addProductsToShop,
+} from "@/actions";
 import {
   Dialog,
   DialogContent,
@@ -43,6 +47,7 @@ import {
   CommandItem,
 } from "@/components/ui/Command";
 import { ScrollArea } from "@/components/ui/ScrollArea";
+import { ToastAction } from "@/components/ui/Toast";
 import { cn } from "@/lib/utils";
 import {
   CaretSortIcon,
@@ -50,6 +55,8 @@ import {
   Cross2Icon,
   ReloadIcon,
 } from "@radix-ui/react-icons";
+import { getShops } from "@/actions/getShops";
+import Link from "next/link";
 
 interface Option {
   value: string;
@@ -60,8 +67,11 @@ interface ProductTableToolbar<TData> {
   table: Table<TData>;
 }
 
-const formSchema = z.object({
+const collectionFormSchema = z.object({
   collections: z.array(z.string()).min(1).max(100),
+});
+const shopFormSchema = z.object({
+  shop: z.string(),
 });
 
 function AddToCollectionDialog({
@@ -77,14 +87,14 @@ function AddToCollectionDialog({
   const { toast } = useToast();
   const router = useRouter();
 
-  const form = useForm<z.infer<typeof formSchema>>({
-    resolver: zodResolver(formSchema),
+  const form = useForm<z.infer<typeof collectionFormSchema>>({
+    resolver: zodResolver(collectionFormSchema),
     defaultValues: {
       collections: [],
     },
   });
 
-  const onFinish = async (values: z.infer<typeof formSchema>) => {
+  const onFinish = async (values: z.infer<typeof collectionFormSchema>) => {
     try {
       setLoading(true);
       const productsOnCollections = await addProductsToCollection({
@@ -259,6 +269,152 @@ function AddToCollectionDialog({
     </Dialog>
   );
 }
+function AddToShopDialog({
+  shops,
+  selectedProducts,
+}: {
+  shops: Option[];
+  selectedProducts: string[];
+}) {
+  const [loading, setLoading] = useState<boolean>(false);
+  const [open, setOpen] = useState<boolean>(false);
+  const { toast } = useToast();
+  const router = useRouter();
+
+  const form = useForm<z.infer<typeof shopFormSchema>>({
+    resolver: zodResolver(shopFormSchema),
+    defaultValues: {
+      shop: "",
+    },
+  });
+
+  const onFinish = async (values: z.infer<typeof shopFormSchema>) => {
+    try {
+      setLoading(true);
+      const productsOnShop = await addProductsToShop({
+        shopId: values.shop,
+        productIds: selectedProducts,
+      });
+
+      toast({
+        title: "Success",
+        description: `${productsOnShop.count} products are added to shop`,
+        action: (
+          <ToastAction altText="ViewShopProduct" asChild>
+            <Link href={`/main/shops/${values.shop}/products`}>Check out</Link>
+          </ToastAction>
+        ),
+      });
+
+      form.reset();
+      setOpen(false);
+      router.refresh();
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Something wrong",
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const onOpenChange = (newValue: boolean) => {
+    form.reset();
+    setOpen(newValue);
+  };
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogTrigger asChild>
+        <Button variant="default" className="h-8 px-2 lg:px-3">
+          Add to shop
+        </Button>
+      </DialogTrigger>
+      <DialogContent className="max-h-[80%] overflow-y-auto">
+        <DialogHeader>
+          <DialogTitle>Choose shop</DialogTitle>
+          <DialogDescription asChild>
+            <Form {...form}>
+              <form
+                onSubmit={form.handleSubmit(onFinish)}
+                className="space-y-8"
+              >
+                <FormField
+                  control={form.control}
+                  name="shop"
+                  render={({ field }) => (
+                    <FormItem className="flex flex-col">
+                      <FormLabel>Shop</FormLabel>
+                      <Popover>
+                        <PopoverTrigger asChild>
+                          <FormControl>
+                            <Button
+                              variant="outline"
+                              role="combobox"
+                              className={cn(
+                                "w-full h-auto justify-between",
+                                !field.value && "text-muted-foreground"
+                              )}
+                            >
+                              {field.value ? (
+                                <div className="flex gap-1 w-full flex-wrap">
+                                  {field.value}
+                                </div>
+                              ) : (
+                                "Select shop"
+                              )}
+                              <CaretSortIcon className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                            </Button>
+                          </FormControl>
+                        </PopoverTrigger>
+                        <PopoverContent className="mw-[400px] p-0">
+                          <Command>
+                            <CommandInput
+                              placeholder="Search shop..."
+                              className="h-9"
+                            />
+                            <CommandEmpty>No shop found.</CommandEmpty>
+                            <CommandGroup>
+                              <ScrollArea className="max-h-72">
+                                {shops.map((shop, index) => (
+                                  <CommandItem
+                                    key={index}
+                                    value={shop.label}
+                                    onSelect={() => {
+                                      form.setValue("shop", shop.value);
+                                    }}
+                                  >
+                                    {shop.label}
+                                  </CommandItem>
+                                ))}
+                              </ScrollArea>
+                            </CommandGroup>
+                          </Command>
+                        </PopoverContent>
+                      </Popover>
+                      <FormDescription>
+                        Shop for pushing those products
+                      </FormDescription>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <Button type="submit">
+                  {loading && (
+                    <ReloadIcon className="mr-2 h-4 w-4 animate-spin" />
+                  )}
+                  Submit
+                </Button>
+              </form>
+            </Form>
+          </DialogDescription>
+        </DialogHeader>
+      </DialogContent>
+    </Dialog>
+  );
+}
 
 export function ProductTableToolbar<TData>({
   table,
@@ -266,6 +422,8 @@ export function ProductTableToolbar<TData>({
   const isFiltered = table.getState().columnFilters.length > 0;
   const [loadingCollections, setLoadingCollection] = useState<boolean>(false);
   const [collections, setCollections] = useState<Option[]>([]);
+  const [loadingShops, setLoadingShops] = useState<boolean>(false);
+  const [shops, setShops] = useState<Option[]>([]);
   const selectedRows = table.getFilteredSelectedRowModel();
 
   useEffect(() => {
@@ -280,7 +438,19 @@ export function ProductTableToolbar<TData>({
       );
       setLoadingCollection(false);
     };
+    const getShopOptions = async () => {
+      setLoadingShops(true);
+      const shops = await getShops();
+      setShops(
+        shops.map((s) => ({
+          label: s.name,
+          value: s.id,
+        }))
+      );
+      setLoadingShops(false);
+    };
     getCollectionOptions();
+    getShopOptions();
   }, []);
 
   return (
@@ -312,12 +482,20 @@ export function ProductTableToolbar<TData>({
           </Button>
         )}
         {selectedRows.rows.length > 0 && (
-          <AddToCollectionDialog
-            collections={collections}
-            selectedProducts={selectedRows.rows.map(
-              (r) => (r.original as any).id
-            )}
-          />
+          <>
+            <AddToCollectionDialog
+              collections={collections}
+              selectedProducts={selectedRows.rows.map(
+                (r) => (r.original as any).id
+              )}
+            />
+            <AddToShopDialog
+              shops={shops}
+              selectedProducts={selectedRows.rows.map(
+                (r) => (r.original as any).id
+              )}
+            />
+          </>
         )}
       </div>
       <DataTableViewOptions table={table} />
