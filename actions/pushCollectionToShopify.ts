@@ -4,7 +4,7 @@ import getShopifyClient from "@/lib/shopify";
 import axios from "axios";
 import FormData from "form-data";
 import { randomUUID } from "crypto";
-import { Prisma, Product } from "@prisma/client";
+import { Prisma } from "@prisma/client";
 import prisma from "@/lib/prisma";
 
 type ProductDto = Prisma.ProductGetPayload<{
@@ -37,22 +37,20 @@ export const pushCollectionToShopify = async (
       id: shopId,
     },
     include: {
-      collections: {
+      products: {
         where: {
-          collectionId: collectionId,
+          product: {
+            collections: {
+              some: {
+                collectionId: collectionId,
+              },
+            },
+          },
         },
         include: {
-          collection: {
+          product: {
             include: {
-              products: {
-                include: {
-                  product: {
-                    include: {
-                      images: true,
-                    },
-                  },
-                },
-              },
+              images: true,
             },
           },
         },
@@ -67,7 +65,7 @@ export const pushCollectionToShopify = async (
   const shopifyClient = getShopifyClient(shop.shopDomain, shop.apiKey ?? "");
 
   const stringJsonl = buildBulkCreateProductJsonl(
-    shop.collections[0].collection.products.map((p) => p.product)
+    shop.products.map((p) => p.product)
   );
 
   const filename = randomUUID();
@@ -149,15 +147,15 @@ export const pushCollectionToShopify = async (
     return { success: false };
   }
 
-  await prisma.collectionsOnShops.update({
+  await prisma.productsOnShops.updateMany({
     where: {
-      shopId_collectionId: {
-        shopId: shopId,
-        collectionId: collectionId,
+      shopId: shopId,
+      productId: {
+        in: shop.products.map((p) => p.productId),
       },
     },
     data: {
-      noPushedProducts: shop.collections[0].collection.products.length,
+      status: "Published",
     },
   });
 

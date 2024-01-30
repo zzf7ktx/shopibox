@@ -28,11 +28,16 @@ type CollectionOnShop = Prisma.CollectionGetPayload<{
     products: {
       select: {
         productId: true;
-      };
-    };
-    shops: {
-      include: {
-        shop: true;
+        product: {
+          include: {
+            shops: {
+              select: {
+                status: true;
+                shopId: true;
+              };
+            };
+          };
+        };
       };
     };
   };
@@ -52,7 +57,9 @@ const columns: ColumnDef<CollectionOnShop>[] = [
     ),
     cell: ({ row }) => {
       const collection = row.original;
-      const noPushed = collection.shops[0].noPushedProducts;
+      const noPushed = collection.products.filter(
+        (p) => p.product.shops[0].status === "Published"
+      ).length;
       const productCount = collection.products.length;
       return (
         <div className="flex w-[150px] items-center">
@@ -85,7 +92,10 @@ const columns: ColumnDef<CollectionOnShop>[] = [
 function ActionCell({ row }: { row: CollectionOnShop }) {
   const router = useRouter();
   const pushAll = async () => {
-    await pushCollectionToShopify(row.shops[0].shopId, row.id);
+    await pushCollectionToShopify(
+      row.products[0].product.shops[0].shopId,
+      row.id
+    );
     router.refresh();
   };
   return (

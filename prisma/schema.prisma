@@ -20,6 +20,12 @@ enum ImageSyncStatus {
   NotSync
 }
 
+enum ProductSyncStatus {
+  Published
+  Scheduled
+  NotPublished
+}
+
 model Image {
   id          String          @id @default(cuid())
   name        String
@@ -51,6 +57,7 @@ model Product {
 
   images      Image[]
   collections ProductsOnCollections[]
+  shops       ProductsOnShops[]
 
   @@map(name: "products")
 }
@@ -63,7 +70,6 @@ model Collection {
   updatedAt DateTime @updatedAt @map(name: "updated_at")
 
   products ProductsOnCollections[]
-  shops    CollectionsOnShops[]
 
   @@map(name: "collections")
 }
@@ -97,23 +103,23 @@ model Shop {
   createdAt DateTime @default(now()) @map(name: "created_at")
   updatedAt DateTime @updatedAt @map(name: "updated_at")
 
-  maskImages  ShopMaskImage[]
-  collections CollectionsOnShops[]
+  maskImages ShopMaskImage[]
+  products   ProductsOnShops[]
 
   @@map(name: "shops")
 }
 
-model CollectionsOnShops {
-  shop             Shop       @relation(fields: [shopId], references: [id])
-  shopId           String     @map(name: "shop_id")
-  collection       Collection @relation(fields: [collectionId], references: [id])
-  collectionId     String     @map(name: "collection_id")
-  priority         Int?
-  noPushedProducts Int        @default(0)
-  assignedAt       DateTime   @default(now()) @map(name: "assigned_at")
+model ProductsOnShops {
+  shop       Shop              @relation(fields: [shopId], references: [id])
+  shopId     String            @map(name: "shop_id")
+  product    Product           @relation(fields: [productId], references: [id])
+  productId  String            @map(name: "product_id")
+  priority   Int?
+  status     ProductSyncStatus @default(NotPublished)
+  assignedAt DateTime          @default(now()) @map(name: "assigned_at")
 
-  @@id([shopId, collectionId])
-  @@map(name: "collections_on_shops")
+  @@id([shopId, productId])
+  @@map(name: "products_on_shops")
 }
 
 model ShopMaskImage {
