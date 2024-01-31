@@ -44,6 +44,11 @@ type ProductWithCollections = Prisma.ProductGetPayload<{
         collection: true;
       };
     };
+    shops: {
+      include: {
+        shop: true;
+      };
+    };
   };
 }>;
 
