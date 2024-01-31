@@ -139,7 +139,7 @@ const columns: ColumnDef<ProductWithCollections>[] = [
       const collections = row.original.collections;
       return (
         <div className="flex gap-1">
-          {collections.map((item, index) => (
+          {collections?.map((item, index) => (
             <Badge key={index} variant="secondary" className="mb-1 last:mb-0">
               {item.collection.name}
             </Badge>
@@ -162,7 +162,7 @@ const columns: ColumnDef<ProductWithCollections>[] = [
       const collections = row.original.shops;
       return (
         <div className="flex gap-1">
-          {collections.map((item, index) => (
+          {collections?.map((item, index) => (
             <Badge key={index} variant="secondary" className="mb-1 last:mb-0">
               {item.shop.name}
             </Badge>
