@@ -30,7 +30,7 @@ export default function MainLayout({
         </ResizablePanel>
         <ResizableHandle withHandle />
         <ResizablePanel defaultSize={85}>
-          <ScrollArea className="flex h-full p-6">
+          <ScrollArea className="flex h-full p-6 pb-12">
             <span className="font-semibold w-full">{children}</span>
           </ScrollArea>
         </ResizablePanel>
