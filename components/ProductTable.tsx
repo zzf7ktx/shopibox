@@ -32,6 +32,11 @@ type ProductWithCollections = Prisma.ProductGetPayload<{
         collection: true;
       };
     };
+    shops: {
+      include: {
+        shop: true;
+      };
+    };
   };
 }>;
 
@@ -146,6 +151,27 @@ const columns: ColumnDef<ProductWithCollections>[] = [
       return row.original.collections.some((c) =>
         value.includes(c.collectionId)
       );
+    },
+  },
+  {
+    accessorKey: "shops",
+    header: ({ column }) => {
+      return <DataTableColumnHeader column={column} title="Shops" />;
+    },
+    cell: ({ row }) => {
+      const collections = row.original.shops;
+      return (
+        <div className="flex gap-1">
+          {collections.map((item, index) => (
+            <Badge key={index} variant="secondary" className="mb-1 last:mb-0">
+              {item.shop.name}
+            </Badge>
+          ))}
+        </div>
+      );
+    },
+    filterFn: (row, _columnId, value) => {
+      return row.original.shops.some((sh) => value.includes(sh.shopId));
     },
   },
   {

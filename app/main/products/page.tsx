@@ -11,6 +11,11 @@ export default async function Products() {
           collection: true,
         },
       },
+      shops: {
+        include: {
+          shop: true,
+        },
+      },
     },
     orderBy: [
       {

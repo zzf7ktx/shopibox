@@ -471,6 +471,13 @@ export function ProductTableToolbar<TData>({
             options={collections}
           />
         )}
+        {table.getColumn("shops") && (
+          <DataTableFacetedFilter
+            column={table.getColumn("shops")}
+            title="Shops"
+            options={shops}
+          />
+        )}
         {isFiltered && (
           <Button
             variant="ghost"
