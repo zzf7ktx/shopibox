@@ -1,4 +1,5 @@
 export { getProducts } from "./getProducts";
+export { getProduct } from "./getProduct";
 export { uploadImages } from "./uploadImages";
 export { addProduct } from "./addProduct";
 export { updateMetadata } from "./updateMetadata";
@@ -9,3 +10,4 @@ export { importProducts } from "./importProducts";
 export { addShop } from "./addShop";
 export { addProductsToCollection } from "./addProductsToCollection";
 export { addProductsToShop } from "./addProductsToShop";
+export { updateProduct } from "./updateProduct";

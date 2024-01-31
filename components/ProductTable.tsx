@@ -18,11 +18,12 @@ import {
 } from "@/components/ui/HoverCard";
 import { Badge } from "@/components/ui/Badge";
 import { DataTableColumnHeader } from "@/components/ui/DataTableColumnHeader";
-import { Separator } from "@/components/ui/Separator";
+import { ScrollArea } from "@/components/ui/ScrollArea";
 import { Checkbox } from "@/components/ui/Checkbox";
-import { ProductTableToolbar } from "./ProductTableToolbar";
+import { DialogTrigger } from "@/components/ui/Dialog";
 import { DotsHorizontalIcon, ZoomInIcon } from "@radix-ui/react-icons";
-import { ScrollArea } from "./ui/ScrollArea";
+import { ProductTableToolbar } from "./ProductTableToolbar";
+import UpdateProductModal from "./UpdateProductModal";
 
 type ProductWithCollections = Prisma.ProductGetPayload<{
   include: {
@@ -167,25 +168,32 @@ const columns: ColumnDef<ProductWithCollections>[] = [
     cell: ({ row }) => {
       const product = row.original;
       return (
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="ghost" className="h-8 w-8 p-0">
-              <span className="sr-only">Open menu</span>
-              <DotsHorizontalIcon className="h-4 w-4" />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            <DropdownMenuLabel>Actions</DropdownMenuLabel>
-            <DropdownMenuItem
-              onClick={() => navigator.clipboard.writeText(product.id)}
-            >
-              Copy ID
-            </DropdownMenuItem>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem>View images</DropdownMenuItem>
-            <DropdownMenuItem>Edit</DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
+        <UpdateProductModal
+          productId={row.original.id}
+          dialogTrigger={
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" className="h-8 w-8 p-0">
+                  <span className="sr-only">Open menu</span>
+                  <DotsHorizontalIcon className="h-4 w-4" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                <DropdownMenuItem
+                  onClick={() => navigator.clipboard.writeText(product.id)}
+                >
+                  Copy ID
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem>View images</DropdownMenuItem>
+                <DialogTrigger asChild>
+                  <DropdownMenuItem>Edit</DropdownMenuItem>
+                </DialogTrigger>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          }
+        />
       );
     },
   },
