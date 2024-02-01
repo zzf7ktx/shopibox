@@ -11,3 +11,5 @@ export { addShop } from "./addShop";
 export { addProductsToCollection } from "./addProductsToCollection";
 export { addProductsToShop } from "./addProductsToShop";
 export { updateProduct } from "./updateProduct";
+export { publishSingleProduct } from "./publishSingleProduct";
+export { publishProducts } from "./publishProducts";
