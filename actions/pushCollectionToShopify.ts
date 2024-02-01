@@ -16,14 +16,19 @@ type ProductDto = Prisma.ProductGetPayload<{
 const buildBulkCreateProductJsonl = (products: ProductDto[]) => {
   let stringJsonl = "";
   for (let product of products) {
-    const imgStrings = product.images.map((img) => {
-      return `{ "alt": "${img.name}", "originalSource": "${
-        img.cloudLink ?? img.backupLink
-      }", "mediaContentType": "IMAGE" }`;
-    });
-    const media = `[ ${imgStrings.join(", ")} ]`;
-    const input = `{ "title": "${product.name}", "descriptionHtml": "${product.descriptionHtml}", "productType": "${product.category}" }`;
-    stringJsonl += `{ "input": ${input}, "media": ${media} }\n`;
+    const media = product.images.map((img) => ({
+      alt: img.name,
+      originalSource: img.cloudLink ?? img.backupLink ?? img.sourceLink,
+      mediaContentType: "IMAGE",
+    }));
+    const input = {
+      title: product.name,
+      descriptionHtml: product.descriptionHtml,
+      productType: product.category,
+    };
+    stringJsonl += `{ "input": ${JSON.stringify(
+      input
+    )}, "media": ${JSON.stringify(media)} }\n`;
   }
   return stringJsonl;
 };
@@ -39,6 +44,7 @@ export const pushCollectionToShopify = async (
     include: {
       products: {
         where: {
+          status: "NotPublished",
           product: {
             collections: {
               some: {
@@ -58,7 +64,7 @@ export const pushCollectionToShopify = async (
     },
   });
 
-  if (!shop) {
+  if (!shop || shop.products.length === 0) {
     return { success: false };
   }
 
@@ -98,6 +104,10 @@ export const pushCollectionToShopify = async (
   const { data, errors, extensions } = await shopifyClient.request(
     stagedUploadsCreate
   );
+
+  if(!!errors) {
+    throw errors
+  }
 
   const [{ url, parameters }] = data.stagedUploadsCreate.stagedTargets;
 
@@ -144,7 +154,9 @@ export const pushCollectionToShopify = async (
   const result = await shopifyClient.request(importProducts);
 
   if (result.data?.bulkOperationRunMutation?.userErrors?.length > 0) {
-    return { success: false };
+    throw new Error(
+      JSON.stringify(result.data.bulkOperationRunMutation.userErrors)
+    );
   }
 
   await prisma.productsOnShops.updateMany({
