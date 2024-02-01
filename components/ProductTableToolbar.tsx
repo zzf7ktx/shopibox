@@ -74,12 +74,14 @@ const shopFormSchema = z.object({
   shop: z.string(),
 });
 
-function AddToCollectionDialog({
+function AddToCollectionDialog<TData>({
   collections,
   selectedProducts,
+  table,
 }: {
   collections: Option[];
   selectedProducts: string[];
+  table: Table<TData>;
 }) {
   const [loading, setLoading] = useState<boolean>(false);
   const [open, setOpen] = useState<boolean>(false);
@@ -112,6 +114,7 @@ function AddToCollectionDialog({
       form.reset();
       setOpen(false);
       router.refresh();
+      table.toggleAllRowsSelected(false);
     } catch (error) {
       toast({
         title: "Error",
@@ -269,12 +272,14 @@ function AddToCollectionDialog({
     </Dialog>
   );
 }
-function AddToShopDialog({
+function AddToShopDialog<TData>({
   shops,
   selectedProducts,
+  table,
 }: {
   shops: Option[];
   selectedProducts: string[];
+  table: Table<TData>;
 }) {
   const [loading, setLoading] = useState<boolean>(false);
   const [open, setOpen] = useState<boolean>(false);
@@ -309,6 +314,7 @@ function AddToShopDialog({
       form.reset();
       setOpen(false);
       router.refresh();
+      table.toggleAllRowsSelected(false);
     } catch (error) {
       toast({
         title: "Error",
@@ -495,12 +501,14 @@ export function ProductTableToolbar<TData>({
               selectedProducts={selectedRows.rows.map(
                 (r) => (r.original as any).id
               )}
+              table={table}
             />
             <AddToShopDialog
               shops={shops}
               selectedProducts={selectedRows.rows.map(
                 (r) => (r.original as any).id
               )}
+              table={table}
             />
           </>
         )}
