@@ -39,6 +39,7 @@ const formSchema = z.object({
 
 type ProductWithCollections = Prisma.ProductGetPayload<{
   include: {
+    images: true,
     collections: {
       include: {
         collection: true;

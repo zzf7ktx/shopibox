@@ -25,9 +25,20 @@ import { DotsHorizontalIcon, ZoomInIcon } from "@radix-ui/react-icons";
 import { ProductTableToolbar } from "./ProductTableToolbar";
 import UpdateProductModal from "./UpdateProductModal";
 import { getRowRange } from "@/utils";
+import { Popover, PopoverContent, PopoverTrigger } from "./ui/Popover";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "./ui/Tabs";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "./ui/Card";
+import Image from "next/image";
 
 type ProductWithCollections = Prisma.ProductGetPayload<{
   include: {
+    images: true;
     collections: {
       include: {
         collection: true;
@@ -46,6 +57,7 @@ let lastSelectedId = "";
 const columns: ColumnDef<ProductWithCollections>[] = [
   {
     id: "select",
+    size: 20,
     header: ({ table }) => (
       <Checkbox
         checked={
@@ -85,32 +97,91 @@ const columns: ColumnDef<ProductWithCollections>[] = [
     header: ({ column }) => (
       <DataTableColumnHeader column={column} title="Name" />
     ),
+    size: 300,
     cell: ({ row }) => {
       const name: string = row.getValue("name");
       const description: string = row.original.description ?? "";
       const descriptionHtml: string = row.original.descriptionHtml ?? "";
       return (
-        <HoverCard>
-          <HoverCardTrigger className="flex gap-1 items-center">
-            {name} <ZoomInIcon />
-          </HoverCardTrigger>
-          <HoverCardContent className="flex gap-1 w-auto max-w-96">
-            <div className="basis-1/2">
-              <p className="font-500">Plaintext</p>
-              <ScrollArea className="h-96">{description}</ScrollArea>
+        <div className="flex items-center justify-between whitespace-nowrap overflow-hidden">
+          {name}
+        </div>
+      );
+    },
+  },
+
+  {
+    id: "preview",
+    size: 20,
+    cell: ({ row }) => {
+      const product = row.original;
+      return (
+        <Popover>
+          <PopoverTrigger asChild>
+            <div className="flex items-center justify-between overflow-clip">
+              <Button variant="ghost" size="icon">
+                <ZoomInIcon />
+              </Button>
             </div>
-            <div className="basis-1/2">
-              <p className="font-500">HTML</p>
-              <ScrollArea className="h-96">
-                <div
-                  dangerouslySetInnerHTML={{
-                    __html: descriptionHtml,
-                  }}
-                ></div>
-              </ScrollArea>
-            </div>
-          </HoverCardContent>
-        </HoverCard>
+          </PopoverTrigger>
+          <PopoverContent className="w-[400px]" asChild>
+            <Tabs defaultValue="account" className="w-[400px]">
+              <TabsList className="grid w-full grid-cols-3">
+                <TabsTrigger value="plaintext">Plaintext</TabsTrigger>
+                <TabsTrigger value="html">HTML</TabsTrigger>
+                <TabsTrigger value="images">Images</TabsTrigger>
+              </TabsList>
+              <TabsContent value="plaintext">
+                <Card className="grid">
+                  <CardHeader>
+                    <CardTitle>Desciption</CardTitle>
+                    <CardDescription>Desciption in plaintext</CardDescription>
+                  </CardHeader>
+                  <CardContent className="space-y-2">
+                    <ScrollArea className="max-h-80">
+                      {product.description}
+                    </ScrollArea>
+                  </CardContent>
+                </Card>
+              </TabsContent>
+              <TabsContent value="html">
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Desciption HTML</CardTitle>
+                    <CardDescription>Desciption in HTML</CardDescription>
+                  </CardHeader>
+                  <CardContent className="space-y-2">
+                    <ScrollArea className="max-h-80">
+                      <div
+                        dangerouslySetInnerHTML={{
+                          __html: product.descriptionHtml ?? "",
+                        }}
+                      ></div>
+                    </ScrollArea>
+                  </CardContent>
+                </Card>
+              </TabsContent>
+              <TabsContent value="images">
+                <ScrollArea className="grid grid-cols-3 gap-1 max-h-80">
+                  {product.images &&
+                    product.images.map((img, index) => (
+                      <Card key={index}>
+                        <CardContent className="h-[150px] relative">
+                          <Image
+                            src={
+                              img.cloudLink ?? img.backupLink ?? img.sourceLink
+                            }
+                            alt={img.name}
+                            fill
+                          />
+                        </CardContent>
+                      </Card>
+                    ))}
+                </ScrollArea>
+              </TabsContent>
+            </Tabs>
+          </PopoverContent>
+        </Popover>
       );
     },
   },
@@ -154,11 +225,29 @@ const columns: ColumnDef<ProductWithCollections>[] = [
       const collections = row.original.collections;
       return (
         <div className="flex gap-1">
-          {collections?.map((item, index) => (
-            <Badge key={index} variant="secondary" className="mb-1 last:mb-0">
-              {item.collection.name}
-            </Badge>
-          ))}
+          <Badge variant="secondary" className="max-w-48">
+            {collections?.[0].collection.name}
+          </Badge>
+          {collections.length > 1 && (
+            <Popover>
+              <PopoverTrigger asChild>
+                <Badge variant="secondary">{collections.length - 1}+</Badge>
+              </PopoverTrigger>
+              <PopoverContent className="w-[400px]" asChild>
+                <div className="flex gap-1">
+                  {collections?.slice(1).map((item, index) => (
+                    <Badge
+                      key={index}
+                      variant="secondary"
+                      className="mb-1 last:mb-0"
+                    >
+                      {item.collection.name}
+                    </Badge>
+                  ))}
+                </div>
+              </PopoverContent>
+            </Popover>
+          )}
         </div>
       );
     },
@@ -174,14 +263,35 @@ const columns: ColumnDef<ProductWithCollections>[] = [
       return <DataTableColumnHeader column={column} title="Shops" />;
     },
     cell: ({ row }) => {
-      const collections = row.original.shops;
+      const shops = row.original.shops;
+
       return (
         <div className="flex gap-1">
-          {collections?.map((item, index) => (
-            <Badge key={index} variant="secondary" className="mb-1 last:mb-0">
-              {item.shop.name}
+          {shops.length > 0 && (
+            <Badge variant="secondary" className="max-w-48">
+              {shops?.[0]?.shop.name}
             </Badge>
-          ))}
+          )}
+          {shops.length > 1 && (
+            <Popover>
+              <PopoverTrigger asChild>
+                <Badge variant="secondary">{shops.length - 1}+</Badge>
+              </PopoverTrigger>
+              <PopoverContent className="w-[400px]" asChild>
+                <div className="flex gap-1">
+                  {shops?.slice(1).map((item, index) => (
+                    <Badge
+                      key={index}
+                      variant="secondary"
+                      className="mb-1 last:mb-0"
+                    >
+                      {item.shop.name}
+                    </Badge>
+                  ))}
+                </div>
+              </PopoverContent>
+            </Popover>
+          )}
         </div>
       );
     },

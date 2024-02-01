@@ -6,6 +6,7 @@ export const revalidate = 0;
 export default async function Products() {
   let data = await prisma.product.findMany({
     include: {
+      images: true,
       collections: {
         include: {
           collection: true,
