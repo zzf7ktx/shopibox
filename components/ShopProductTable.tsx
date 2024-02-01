@@ -23,6 +23,7 @@ import {
 } from "@radix-ui/react-icons";
 import { useRouter } from "next/navigation";
 import { ShopProductTableToolbar } from "./ShopProductTableToolbar";
+import { getRowRange } from "@/utils";
 
 type ProductOnShop = Prisma.ProductGetPayload<{
   include: {
@@ -35,16 +36,6 @@ type ProductOnShop = Prisma.ProductGetPayload<{
     shops: true;
   };
 }>;
-
-function getRowRange<T>(
-  rows: Row<T>[],
-  currentId: string,
-  selectedId: string
-): Row<T>[] {
-  const rangeStart = +selectedId > +currentId ? currentId : selectedId;
-  const rangeEnd = rangeStart === currentId ? selectedId : currentId;
-  return rows.slice(+rangeStart, +rangeEnd + 1);
-}
 
 let lastSelectedId = "";
 

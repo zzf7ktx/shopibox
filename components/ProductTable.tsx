@@ -24,6 +24,7 @@ import { DialogTrigger } from "@/components/ui/Dialog";
 import { DotsHorizontalIcon, ZoomInIcon } from "@radix-ui/react-icons";
 import { ProductTableToolbar } from "./ProductTableToolbar";
 import UpdateProductModal from "./UpdateProductModal";
+import { getRowRange } from "@/utils";
 
 type ProductWithCollections = Prisma.ProductGetPayload<{
   include: {
@@ -40,6 +41,8 @@ type ProductWithCollections = Prisma.ProductGetPayload<{
   };
 }>;
 
+let lastSelectedId = "";
+
 const columns: ColumnDef<ProductWithCollections>[] = [
   {
     id: "select",
@@ -55,13 +58,25 @@ const columns: ColumnDef<ProductWithCollections>[] = [
         aria-label="Select all"
       />
     ),
-    cell: ({ row }) => (
-      <Checkbox
-        checked={row.getIsSelected()}
-        onCheckedChange={(value: boolean) => row.toggleSelected(!!value)}
-        aria-label="Select row"
-      />
-    ),
+    cell: ({ row, table }) => {
+      return (
+        <Checkbox
+          checked={row.getIsSelected()}
+          onClick={(e) => {
+            if (e.shiftKey) {
+              const { rows, rowsById } = table.getRowModel();
+              const rowsToToggle = getRowRange(rows, row.id, lastSelectedId);
+              const isLastSelected = rowsById[lastSelectedId].getIsSelected();
+              rowsToToggle.forEach((row) => row.toggleSelected(isLastSelected));
+            }
+
+            lastSelectedId = row.id;
+          }}
+          onCheckedChange={(value: boolean) => row.toggleSelected(!!value)}
+          aria-label="Select row"
+        />
+      );
+    },
     enableSorting: false,
     enableHiding: false,
   },
