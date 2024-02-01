@@ -41,7 +41,7 @@ type ProductOnShop = Prisma.ProductGetPayload<{
   };
 }>;
 
-let lastSelectedId = "";
+let lastSelectedId: number = -1;
 
 const columns: ColumnDef<ProductOnShop>[] = [
   {
@@ -65,12 +65,12 @@ const columns: ColumnDef<ProductOnShop>[] = [
           onClick={(e) => {
             if (e.shiftKey) {
               const { rows, rowsById } = table.getRowModel();
-              const rowsToToggle = getRowRange(rows, row.id, lastSelectedId);
+              const rowsToToggle = getRowRange(rows, row.index, lastSelectedId);
               const isLastSelected = rowsById[lastSelectedId].getIsSelected();
               rowsToToggle.forEach((row) => row.toggleSelected(isLastSelected));
             }
 
-            lastSelectedId = row.id;
+            lastSelectedId = row.index;
           }}
           onCheckedChange={(value: boolean) => row.toggleSelected(!!value)}
           aria-label="Select row"

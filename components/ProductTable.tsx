@@ -18,7 +18,6 @@ import {
 } from "@/components/ui/HoverCard";
 import { Badge } from "@/components/ui/Badge";
 import { DataTableColumnHeader } from "@/components/ui/DataTableColumnHeader";
-import { ScrollArea } from "@/components/ui/ScrollArea";
 import { Checkbox } from "@/components/ui/Checkbox";
 import { DialogTrigger } from "@/components/ui/Dialog";
 import { DotsHorizontalIcon, ZoomInIcon } from "@radix-ui/react-icons";
@@ -27,10 +26,7 @@ import UpdateProductModal from "./UpdateProductModal";
 import { getRowRange } from "@/utils";
 import { Popover, PopoverContent, PopoverTrigger } from "./ui/Popover";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "./ui/Tabs";
-import {
-  Card,
-  CardContent,
-} from "./ui/Card";
+import { Card, CardContent } from "@/components/ui/Card";
 import Image from "next/image";
 
 type ProductWithCollections = Prisma.ProductGetPayload<{
@@ -49,7 +45,7 @@ type ProductWithCollections = Prisma.ProductGetPayload<{
   };
 }>;
 
-let lastSelectedId = "";
+let lastSelectedId: number = -1;
 
 const columns: ColumnDef<ProductWithCollections>[] = [
   {
@@ -74,12 +70,12 @@ const columns: ColumnDef<ProductWithCollections>[] = [
           onClick={(e) => {
             if (e.shiftKey) {
               const { rows, rowsById } = table.getRowModel();
-              const rowsToToggle = getRowRange(rows, row.id, lastSelectedId);
+              const rowsToToggle = getRowRange(rows, row.index, lastSelectedId);
               const isLastSelected = rowsById[lastSelectedId].getIsSelected();
               rowsToToggle.forEach((row) => row.toggleSelected(isLastSelected));
             }
 
-            lastSelectedId = row.id;
+            lastSelectedId = row.index;
           }}
           onCheckedChange={(value: boolean) => row.toggleSelected(!!value)}
           aria-label="Select row"
