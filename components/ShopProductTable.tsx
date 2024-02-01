@@ -15,6 +15,7 @@ import { Button } from "@/components/ui/Button";
 import { DataTableColumnHeader } from "@/components/ui/DataTableColumnHeader";
 import { Checkbox } from "@/components/ui/Checkbox";
 import { Badge } from "@/components/ui/Badge";
+import { useToast } from "@/components/ui/useToast";
 import {
   CheckCircledIcon,
   ClockIcon,
@@ -22,8 +23,11 @@ import {
   DotsHorizontalIcon,
 } from "@radix-ui/react-icons";
 import { useRouter } from "next/navigation";
-import { ShopProductTableToolbar } from "./ShopProductTableToolbar";
 import { getRowRange } from "@/utils";
+import { useState } from "react";
+import { CgSpinnerTwoAlt } from "react-icons/cg";
+import { publishSingleProduct } from "@/actions";
+import { ShopProductTableToolbar } from "./ShopProductTableToolbar";
 
 type ProductOnShop = Prisma.ProductGetPayload<{
   include: {
@@ -136,31 +140,59 @@ const columns: ColumnDef<ProductOnShop>[] = [
 
 function ActionCell({ row }: { row: ProductOnShop }) {
   const router = useRouter();
+  const [loading, setLoading] = useState<boolean>(false);
+  const { toast } = useToast();
   const pushToShop = async () => {
-    router.refresh();
+    try {
+      setLoading(true);
+      const result = await publishSingleProduct(row.shops[0].shopId, row.id);
+      toast({
+        title: "Success",
+        description: `Pushed selected product to shop`,
+      });
+      router.refresh();
+    } catch (error) {
+      console.log(error);
+      toast({
+        title: "Error",
+        description: `Something wrong`,
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
+    }
   };
   return (
-    <DropdownMenu>
-      <DropdownMenuTrigger asChild>
-        <Button variant="ghost" className="h-8 w-8 p-0">
-          <span className="sr-only">Open menu</span>
-          <DotsHorizontalIcon className="h-4 w-4" />
-        </Button>
-      </DropdownMenuTrigger>
-      <DropdownMenuContent align="end">
-        <DropdownMenuLabel>Actions</DropdownMenuLabel>
-        <DropdownMenuItem onClick={() => navigator.clipboard.writeText(row.id)}>
-          Copy ID
-        </DropdownMenuItem>
-        <DropdownMenuSeparator />
-        <DropdownMenuItem
-          disabled={row.shops[0].status !== "NotPublished"}
-          onClick={pushToShop}
-        >
-          Push
-        </DropdownMenuItem>
-      </DropdownMenuContent>
-    </DropdownMenu>
+    <>
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <Button variant="ghost" className="h-8 w-8 p-0">
+            <span className="sr-only">Open menu</span>
+            <DotsHorizontalIcon className="h-4 w-4" />
+          </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="end">
+          <DropdownMenuLabel>Actions</DropdownMenuLabel>
+          <DropdownMenuItem
+            onClick={() => navigator.clipboard.writeText(row.id)}
+          >
+            Copy ID
+          </DropdownMenuItem>
+          <DropdownMenuSeparator />
+          <DropdownMenuItem
+            disabled={row.shops[0].status !== "NotPublished"}
+            onClick={pushToShop}
+          >
+            Push
+          </DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
+      {loading && (
+        <div className="backdrop-filter backdrop-blur-sm z-50 h-screen w-screen fixed top-0 left-0 flex items-center justify-center">
+          <CgSpinnerTwoAlt className="animate-spin -ml-1 mr-3 h-10 w-10 text-primary" />
+        </div>
+      )}
+    </>
   );
 }
 

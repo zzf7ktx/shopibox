@@ -6,8 +6,11 @@ import { Input } from "@/components/ui/Input";
 import { DataTableViewOptions } from "@/components/ui/DataTableViewOptions";
 import { Button } from "@/components/ui/Button";
 import { Cross2Icon } from "@radix-ui/react-icons";
-import { getCollections } from "@/actions";
-import { DataTableFacetedFilter } from "./ui/DataTableFacetedFilter";
+import { DataTableFacetedFilter } from "@/components/ui/DataTableFacetedFilter";
+import { useToast } from "@/components/ui/useToast";
+import { getCollections, publishProducts } from "@/actions";
+import { useParams } from "next/navigation";
+import { CgSpinnerTwoAlt } from "react-icons/cg";
 
 interface Option {
   value: string;
@@ -25,6 +28,9 @@ export function ShopProductTableToolbar<TData>({
   const [loadingCollections, setLoadingCollection] = useState<boolean>(false);
   const [collections, setCollections] = useState<Option[]>([]);
   const selectedRows = table.getFilteredSelectedRowModel();
+  const [loading, setLoading] = useState<boolean>(false);
+  const { id } = useParams();
+  const { toast } = useToast();
 
   useEffect(() => {
     const getCollectionOptions = async () => {
@@ -41,45 +47,82 @@ export function ShopProductTableToolbar<TData>({
     getCollectionOptions();
   }, []);
 
+  const pushProducts = async () => {
+    try {
+      if (!id) {
+        return;
+      }
+
+      const shopId = typeof id === "string" ? id : id[0];
+      setLoading(true);
+
+      const result = await publishProducts(
+        shopId,
+        selectedRows.rows.map((r) => (r.original as any).id)
+      );
+
+      toast({
+        title: "Success",
+        description: `Pushed selected products to shop`,
+      });
+    } catch (error) {
+      console.log(error);
+      toast({
+        title: "Error",
+        description: `Something wrong`,
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
-    <div className="flex items-center justify-between mb-3">
-      <div className="flex flex-1 items-center space-x-2">
-        <Input
-          placeholder="Filter Name..."
-          value={(table.getColumn("name")?.getFilterValue() as string) ?? ""}
-          onChange={(event) =>
-            table.getColumn("name")?.setFilterValue(event.target.value)
-          }
-          className="h-8 w-[150px] lg:w-[250px]"
-        />
-        {table.getColumn("collections") && (
-          <DataTableFacetedFilter
-            column={table.getColumn("collections")}
-            title="Collections"
-            options={collections}
+    <>
+      <div className="flex items-center justify-between mb-3">
+        <div className="flex flex-1 items-center space-x-2">
+          <Input
+            placeholder="Filter Name..."
+            value={(table.getColumn("name")?.getFilterValue() as string) ?? ""}
+            onChange={(event) =>
+              table.getColumn("name")?.setFilterValue(event.target.value)
+            }
+            className="h-8 w-[150px] lg:w-[250px]"
           />
-        )}
-        {isFiltered && (
-          <Button
-            variant="ghost"
-            onClick={() => table.resetColumnFilters()}
-            className="h-8 px-2 lg:px-3"
-          >
-            Reset
-            <Cross2Icon className="ml-2 h-4 w-4" />
-          </Button>
-        )}
-        {selectedRows.rows.length > 0 && (
-          <Button
-            variant="default"
-            className="h-8 px-2 lg:px-3"
-            onClick={() => {}}
-          >
-            Push {`'${selectedRows.rows.length}' products`}
-          </Button>
-        )}
+          {table.getColumn("collections") && (
+            <DataTableFacetedFilter
+              column={table.getColumn("collections")}
+              title="Collections"
+              options={collections}
+            />
+          )}
+          {isFiltered && (
+            <Button
+              variant="ghost"
+              onClick={() => table.resetColumnFilters()}
+              className="h-8 px-2 lg:px-3"
+            >
+              Reset
+              <Cross2Icon className="ml-2 h-4 w-4" />
+            </Button>
+          )}
+          {selectedRows.rows.length > 0 && (
+            <Button
+              variant="default"
+              className="h-8 px-2 lg:px-3"
+              onClick={pushProducts}
+            >
+              Push {`'${selectedRows.rows.length}' products`}
+            </Button>
+          )}
+        </div>
+        <DataTableViewOptions table={table} />
       </div>
-      <DataTableViewOptions table={table} />
-    </div>
+      {loading && (
+        <div className="backdrop-filter backdrop-blur-sm z-50 h-screen w-screen fixed top-0 left-0 flex items-center justify-center">
+          <CgSpinnerTwoAlt className="animate-spin -ml-1 mr-3 h-10 w-10 text-primary" />
+        </div>
+      )}
+    </>
   );
 }
