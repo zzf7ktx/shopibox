@@ -30,9 +30,6 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "./ui/Tabs";
 import {
   Card,
   CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
 } from "./ui/Card";
 import Image from "next/image";
 
@@ -100,10 +97,8 @@ const columns: ColumnDef<ProductWithCollections>[] = [
     size: 300,
     cell: ({ row }) => {
       const name: string = row.getValue("name");
-      const description: string = row.original.description ?? "";
-      const descriptionHtml: string = row.original.descriptionHtml ?? "";
       return (
-        <div className="flex items-center justify-between whitespace-nowrap overflow-hidden">
+        <div className="flex items-center justify-between whitespace-nowrap overflow-hidden max-w-80">
           {name}
         </div>
       );
@@ -133,36 +128,24 @@ const columns: ColumnDef<ProductWithCollections>[] = [
               </TabsList>
               <TabsContent value="plaintext">
                 <Card className="grid">
-                  <CardHeader>
-                    <CardTitle>Desciption</CardTitle>
-                    <CardDescription>Desciption in plaintext</CardDescription>
-                  </CardHeader>
-                  <CardContent className="space-y-2">
-                    <ScrollArea className="max-h-80">
-                      {product.description}
-                    </ScrollArea>
+                  <CardContent className="pt-2 max-h-[250px] overflow-auto">
+                    {product.description}
                   </CardContent>
                 </Card>
               </TabsContent>
               <TabsContent value="html">
                 <Card>
-                  <CardHeader>
-                    <CardTitle>Desciption HTML</CardTitle>
-                    <CardDescription>Desciption in HTML</CardDescription>
-                  </CardHeader>
-                  <CardContent className="space-y-2">
-                    <ScrollArea className="max-h-80">
-                      <div
-                        dangerouslySetInnerHTML={{
-                          __html: product.descriptionHtml ?? "",
-                        }}
-                      ></div>
-                    </ScrollArea>
+                  <CardContent className="pt-2 max-h-[250px] overflow-auto">
+                    <div
+                      dangerouslySetInnerHTML={{
+                        __html: product.descriptionHtml ?? "",
+                      }}
+                    ></div>
                   </CardContent>
                 </Card>
               </TabsContent>
               <TabsContent value="images">
-                <ScrollArea className="grid grid-cols-3 gap-1 max-h-80">
+                <div className="grid grid-cols-3 gap-1 max-h-[252px] overflow-auto">
                   {product.images &&
                     product.images.map((img, index) => (
                       <Card key={index}>
@@ -177,7 +160,7 @@ const columns: ColumnDef<ProductWithCollections>[] = [
                         </CardContent>
                       </Card>
                     ))}
-                </ScrollArea>
+                </div>
               </TabsContent>
             </Tabs>
           </PopoverContent>
@@ -221,17 +204,20 @@ const columns: ColumnDef<ProductWithCollections>[] = [
     header: ({ column }) => {
       return <DataTableColumnHeader column={column} title="Collections" />;
     },
+    size: 200,
     cell: ({ row }) => {
       const collections = row.original.collections;
       return (
         <div className="flex gap-1">
           <Badge variant="secondary" className="max-w-48">
-            {collections?.[0].collection.name}
+            {collections?.[0]?.collection.name}
           </Badge>
           {collections.length > 1 && (
             <Popover>
               <PopoverTrigger asChild>
-                <Badge variant="secondary">{collections.length - 1}+</Badge>
+                <Button variant="secondary" size="sm">
+                  {collections.length - 1}+
+                </Button>
               </PopoverTrigger>
               <PopoverContent className="w-[400px]" asChild>
                 <div className="flex gap-1">
@@ -275,7 +261,9 @@ const columns: ColumnDef<ProductWithCollections>[] = [
           {shops.length > 1 && (
             <Popover>
               <PopoverTrigger asChild>
-                <Badge variant="secondary">{shops.length - 1}+</Badge>
+                <Button variant="secondary" size="sm">
+                  {shops.length - 1}+
+                </Button>
               </PopoverTrigger>
               <PopoverContent className="w-[400px]" asChild>
                 <div className="flex gap-1">
@@ -304,6 +292,7 @@ const columns: ColumnDef<ProductWithCollections>[] = [
     header: ({ column }) => {
       return <DataTableColumnHeader column={column} title="Price" />;
     },
+    size: 50,
     cell: ({ row }) => {
       const price = parseFloat(row.getValue("price"));
       const formatted = new Intl.NumberFormat("en-US", {
@@ -316,6 +305,7 @@ const columns: ColumnDef<ProductWithCollections>[] = [
   },
   {
     id: "actions",
+    size: 50,
     cell: ({ row }) => {
       const product = row.original;
       return (
