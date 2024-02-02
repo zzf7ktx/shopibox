@@ -16,22 +16,24 @@ type ProductDto = Prisma.ProductGetPayload<{
 const buildBulkCreateProductJsonl = (products: ProductDto[]) => {
   let stringJsonl = "";
   for (let product of products) {
-    const imgStrings = product.images.map((img) => {
-      return `{ "alt": "${img.name}", "originalSource": "${
-        img.cloudLink ?? img.backupLink
-      }", "mediaContentType": "IMAGE" }`;
-    });
-    const media = `[ ${imgStrings.join(", ")} ]`;
-    const input = `{ "title": "${product.name}", "descriptionHtml": "${product.descriptionHtml}", "productType": "${product.category}" }`;
-    stringJsonl += `{ "input": ${input}, "media": ${media} }\n`;
+    const media = product.images.map((img) => ({
+      alt: img.name,
+      originalSource: img.cloudLink ?? img.backupLink ?? img.sourceLink,
+      mediaContentType: "IMAGE",
+    }));
+    const input = {
+      title: product.name,
+      descriptionHtml: product.descriptionHtml,
+      productType: product.category,
+    };
+    stringJsonl += `{ "input": ${JSON.stringify(
+      input
+    )}, "media": ${JSON.stringify(media)} }\n`;
   }
   return stringJsonl;
 };
 
-export const publishProducts = async (
-  shopId: string,
-  productIds: string[]
-) => {
+export const publishProducts = async (shopId: string, productIds: string[]) => {
   const shop = await prisma.shop.findFirst({
     where: {
       id: shopId,
@@ -39,6 +41,7 @@ export const publishProducts = async (
     include: {
       products: {
         where: {
+          status: "NotPublished",
           productId: {
             in: productIds,
           },
