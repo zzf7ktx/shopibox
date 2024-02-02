@@ -129,6 +129,7 @@ model ShopMaskImage {
   src       String
   positionX Int      @map(name: "position_x")
   positionY Int      @map(name: "position_y")
+  scale     Int
   createdAt DateTime @default(now()) @map(name: "created_at")
   updatedAt DateTime @updatedAt @map(name: "updated_at")
 
