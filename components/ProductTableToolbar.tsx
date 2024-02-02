@@ -78,10 +78,12 @@ function AddToCollectionDialog<TData>({
   collections,
   selectedProducts,
   table,
+  onOpenChangeFn,
 }: {
   collections: Option[];
   selectedProducts: string[];
   table: Table<TData>;
+  onOpenChangeFn: (open: boolean) => void;
 }) {
   const [loading, setLoading] = useState<boolean>(false);
   const [open, setOpen] = useState<boolean>(false);
@@ -115,6 +117,7 @@ function AddToCollectionDialog<TData>({
       setOpen(false);
       router.refresh();
       table.toggleAllRowsSelected(false);
+      onOpenChangeFn(false);
     } catch (error) {
       toast({
         title: "Error",
@@ -140,7 +143,7 @@ function AddToCollectionDialog<TData>({
       </DialogTrigger>
       <DialogContent className="max-h-[80%] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>Chose collections</DialogTitle>
+          <DialogTitle>Choose collections</DialogTitle>
           <DialogDescription asChild>
             <Form {...form}>
               <form
@@ -459,6 +462,18 @@ export function ProductTableToolbar<TData>({
     getShopOptions();
   }, []);
 
+  const onOpenAddCollectionChangeFn = async (open: boolean) => {
+    setLoadingCollection(true);
+    const collections = await getCollections();
+    setCollections(
+      collections.map((c) => ({
+        label: c.name,
+        value: c.id,
+      }))
+    );
+    setLoadingCollection(false);
+  };
+
   return (
     <div className="flex items-center justify-between mb-3">
       <div className="flex flex-1 items-center space-x-2">
@@ -502,6 +517,7 @@ export function ProductTableToolbar<TData>({
                 (r) => (r.original as any).id
               )}
               table={table}
+              onOpenChangeFn={onOpenAddCollectionChangeFn}
             />
             <AddToShopDialog
               shops={shops}
