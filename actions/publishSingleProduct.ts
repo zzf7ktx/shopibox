@@ -1,14 +1,8 @@
 "use server";
 
 import getShopifyClient from "@/lib/shopify";
-import { Prisma } from "@prisma/client";
 import prisma from "@/lib/prisma";
 
-type ProductDto = Prisma.ProductGetPayload<{
-  include: {
-    images: true;
-  };
-}>;
 
 export const publishSingleProduct = async (
   shopId: string,
@@ -34,7 +28,11 @@ export const publishSingleProduct = async (
     },
   });
 
-  if (!shop) {
+  if (
+    !shop ||
+    shop.products.length === 0 ||
+    shop.products[0].status !== "NotPublished"
+  ) {
     return { success: false };
   }
 
@@ -42,7 +40,7 @@ export const publishSingleProduct = async (
 
   const createProduct = `
     mutation productCreate($input: ProductInput!, $media: [CreateMediaInput!]) {
-      productCreate(input: $input) {
+      productCreate(input: $input, media: $media) {
         product {
           id
           title
@@ -64,10 +62,28 @@ export const publishSingleProduct = async (
     }
   `;
 
-  const result = await shopifyClient.request(createProduct);
+  const product = shop.products[0].product;
 
-  if (result.data?.productCreate?.userErrors?.length > 0) {
-    return { success: false };
+  const result = await shopifyClient.request(createProduct, {
+    variables: {
+      input: {
+        title: product.name,
+        descriptionHtml: product.descriptionHtml,
+        productType: product.category,
+      },
+      media: product.images.map((img) => ({
+        alt: img.name,
+        originalSource: img.cloudLink ?? img.backupLink ?? img.sourceLink,
+        mediaContentType: "IMAGE",
+      })),
+    },
+  });
+
+  if (!!result.errors || result.data?.productCreate?.userErrors?.length > 0) {
+    throw (
+      result.errors ??
+      new Error(JSON.stringify(result.data?.productCreate?.userErrors))
+    );
   }
 
   await prisma.productsOnShops.update({

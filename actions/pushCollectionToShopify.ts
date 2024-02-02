@@ -105,8 +105,8 @@ export const pushCollectionToShopify = async (
     stagedUploadsCreate
   );
 
-  if(!!errors) {
-    throw errors
+  if (!!errors) {
+    throw errors;
   }
 
   const [{ url, parameters }] = data.stagedUploadsCreate.stagedTargets;
