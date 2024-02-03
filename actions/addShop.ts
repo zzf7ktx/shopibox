@@ -42,7 +42,7 @@ export const addShop = async (data: AddShopFormFields, formData: FormData) => {
     }
   );
 
-  const collection = await prisma.shop.create({
+  const shop = await prisma.shop.create({
     data: {
       name: data.name,
       apiKey: data.apiKey,
@@ -57,5 +57,5 @@ export const addShop = async (data: AddShopFormFields, formData: FormData) => {
       },
     },
   });
-  return collection;
+  return shop;
 };

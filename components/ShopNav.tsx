@@ -45,10 +45,10 @@ export function ShopNav({
         Products
       </Link>
       <Link
-        href="#"
+        href="./settings"
         className={cn(
           "text-sm font-medium transition-colors hover:text-primary",
-          (!pathname.includes("/#") || !pathname.includes("shops")) &&
+          (!pathname.includes("settings") || !pathname.includes("shops")) &&
             "text-muted-foreground"
         )}
       >
