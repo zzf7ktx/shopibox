@@ -13,3 +13,6 @@ export { addProductsToShop } from "./addProductsToShop";
 export { updateProduct } from "./updateProduct";
 export { publishSingleProduct } from "./publishSingleProduct";
 export { publishProducts } from "./publishProducts";
+export { getShop } from "./getShop";
+export { updateShopGeneral } from "./updateShopGeneral";
+export { updateShopLogo } from "./updateShopLogo";
