@@ -6,6 +6,9 @@ import FormData from "form-data";
 import { randomUUID } from "crypto";
 import { Prisma } from "@prisma/client";
 import prisma from "@/lib/prisma";
+import sharp from "sharp";
+import { UploadApiResponse } from "cloudinary";
+import cloudinary from "@/lib/cloudinary";
 
 type ProductDto = Prisma.ProductGetPayload<{
   include: {
@@ -13,14 +16,83 @@ type ProductDto = Prisma.ProductGetPayload<{
   };
 }>;
 
-const buildBulkCreateProductJsonl = (products: ProductDto[]) => {
+const buildBulkCreateProductJsonl = async (
+  products: ProductDto[],
+  shopInfo: Prisma.ShopGetPayload<{
+    include: {
+      maskImages: true;
+    };
+  }>
+) => {
   let stringJsonl = "";
   for (let product of products) {
-    const media = product.images.map((img) => ({
-      alt: img.name,
-      originalSource: img.cloudLink ?? img.backupLink ?? img.sourceLink,
-      mediaContentType: "IMAGE",
-    }));
+    let media: any[] = [];
+    const shopMaskImage = shopInfo.maskImages[0];
+    if (shopMaskImage.src !== "") {
+      for (let img of product.images) {
+        const imageInput = (
+          await axios({
+            url: img.cloudLink ?? img.backupLink,
+            responseType: "arraybuffer",
+          })
+        ).data as Buffer;
+        const maskImageInput = (
+          await axios({ url: shopMaskImage.src, responseType: "arraybuffer" })
+        ).data as Buffer;
+        const image = sharp(imageInput);
+        const imageMeta = await image.metadata();
+        const imageWidth = imageMeta.width ?? 0;
+        const imageHeight = imageMeta.height ?? 0;
+
+        const maskImage = sharp(maskImageInput);
+        const maskImageResized = await maskImage
+          .resize(
+            Math.round((imageWidth * shopMaskImage.scale) / 100),
+            Math.round((imageHeight * shopMaskImage.scale) / 100)
+          )
+          .toBuffer({ resolveWithObject: true });
+        image.composite([
+          {
+            input: maskImageResized.data,
+            top: Math.round((shopMaskImage.positionY * imageHeight) / 500),
+            left: Math.round((shopMaskImage.positionX * imageWidth) / 500),
+          },
+        ]);
+        const newImageBuffer = await image.toBuffer();
+
+        const uploadResult: UploadApiResponse | undefined = await new Promise(
+          (resolve, reject) => {
+            cloudinary.uploader
+              .upload_stream(
+                {
+                  overwrite: true,
+                  upload_preset: process.env.CLOUDINARY_UPLOAD_PRESET,
+                },
+                (error, uploadResult) => {
+                  if (!!error) {
+                    return reject(error);
+                  }
+                  return resolve(uploadResult);
+                }
+              )
+              .end(newImageBuffer);
+          }
+        );
+
+        media.push({
+          alt: img.name,
+          originalSource: uploadResult?.secure_url ?? img.cloudLink,
+          mediaContentType: "IMAGE",
+        });
+      }
+    } else {
+      media = product.images.map((img) => ({
+        alt: img.name,
+        originalSource: img.cloudLink ?? img.backupLink ?? img.sourceLink,
+        mediaContentType: "IMAGE",
+      }));
+    }
+
     const input = {
       title: product.name,
       descriptionHtml: product.descriptionHtml,
@@ -39,6 +111,7 @@ export const publishProducts = async (shopId: string, productIds: string[]) => {
       id: shopId,
     },
     include: {
+      maskImages: true,
       products: {
         where: {
           status: "NotPublished",
@@ -63,8 +136,9 @@ export const publishProducts = async (shopId: string, productIds: string[]) => {
 
   const shopifyClient = getShopifyClient(shop.shopDomain, shop.apiKey ?? "");
 
-  const stringJsonl = buildBulkCreateProductJsonl(
-    shop.products.map((p) => p.product)
+  const stringJsonl = await buildBulkCreateProductJsonl(
+    shop.products.map((p) => p.product),
+    shop
   );
 
   const filename = randomUUID();

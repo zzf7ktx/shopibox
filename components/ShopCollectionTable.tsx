@@ -12,6 +12,7 @@ import {
   DropdownMenuSeparator,
 } from "@/components/ui/DropdownMenu";
 import { Button } from "@/components/ui/Button";
+import { useToast } from "@/components/ui/useToast";
 import { DataTableColumnHeader } from "@/components/ui/DataTableColumnHeader";
 import {
   CheckCircledIcon,
@@ -20,9 +21,8 @@ import {
   MinusCircledIcon,
 } from "@radix-ui/react-icons";
 import { CollectionTableToolbar } from "./CollectionTableToolbar";
-import { pushCollectionToShopify } from "@/actions/pushCollectionToShopify";
 import { useParams, useRouter } from "next/navigation";
-import { useToast } from "./ui/useToast";
+import { publishCollectionProducts } from "@/actions";
 import { useState } from "react";
 import { CgSpinnerTwoAlt } from "react-icons/cg";
 
@@ -106,7 +106,7 @@ function ActionCell({ row }: { row: CollectionOnShop }) {
   const pushAll = async () => {
     try {
       setLoading(true);
-      await pushCollectionToShopify(shopId, row.id);
+      await publishCollectionProducts(shopId, row.id);
       toast({
         title: "Success",
         description: `Published all products in this collection to shop`,

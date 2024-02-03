@@ -119,8 +119,9 @@ export function ShopProductTableToolbar<TData>({
         <DataTableViewOptions table={table} />
       </div>
       {loading && (
-        <div className="backdrop-filter backdrop-blur-sm z-50 h-screen w-screen fixed top-0 left-0 flex items-center justify-center">
+        <div className="backdrop-filter backdrop-blur-sm z-50 h-screen w-screen fixed top-0 left-0 flex flex-col items-center justify-center">
           <CgSpinnerTwoAlt className="animate-spin -ml-1 mr-3 h-10 w-10 text-primary" />
+          <div>{`Don't close. Adding the products...`}</div>
         </div>
       )}
     </>
