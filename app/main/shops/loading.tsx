@@ -1,5 +1,3 @@
-import CollectionTable from "@/components/CollectionTable";
-
 export default function Loading() {
-  return <CollectionTable loading />;
+  return <div>Loading</div>
 }

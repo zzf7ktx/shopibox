@@ -46,6 +46,7 @@ let lastSelectedId: number = -1;
 const columns: ColumnDef<ProductOnShop>[] = [
   {
     id: "select",
+    size: 20,
     header: ({ table }) => (
       <Checkbox
         checked={
@@ -88,6 +89,7 @@ const columns: ColumnDef<ProductOnShop>[] = [
   },
   {
     accessorKey: "collections",
+    size: 200,
     header: ({ column }) => {
       return <DataTableColumnHeader column={column} title="Collections" />;
     },
@@ -111,6 +113,7 @@ const columns: ColumnDef<ProductOnShop>[] = [
   },
   {
     accessorKey: "shops",
+    size: 200,
     header: ({ column }) => (
       <DataTableColumnHeader column={column} title="Status" />
     ),
@@ -132,6 +135,7 @@ const columns: ColumnDef<ProductOnShop>[] = [
   },
   {
     id: "actions",
+    size: 50,
     cell: ({ row }) => {
       return <ActionCell row={row.original} />;
     },
@@ -188,8 +192,9 @@ function ActionCell({ row }: { row: ProductOnShop }) {
         </DropdownMenuContent>
       </DropdownMenu>
       {loading && (
-        <div className="backdrop-filter backdrop-blur-sm z-50 h-screen w-screen fixed top-0 left-0 flex items-center justify-center">
+        <div className="backdrop-filter backdrop-blur-sm z-50 h-screen w-screen fixed top-0 left-0 flex flex-col items-center justify-center">
           <CgSpinnerTwoAlt className="animate-spin -ml-1 mr-3 h-10 w-10 text-primary" />
+          <div>{`Don't close. Adding the products...`}</div>
         </div>
       )}
     </>
