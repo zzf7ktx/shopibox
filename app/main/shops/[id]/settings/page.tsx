@@ -24,10 +24,6 @@ export default async function ShopSettingPage({
     },
   });
 
-  if (!shop) {
-    return;
-  }
-
   return (
     <div className="flex-1 space-y-4 py-6">
       <div className="flex items-center justify-between space-y-2">
@@ -45,7 +41,7 @@ export default async function ShopSettingPage({
           <ShopGeneralSettings shopInfo={shop!} />
         </TabsContent>
         <TabsContent value="logo" className="space-y-4">
-          <ShopLogoSettings shopInfo={shop} />
+          <ShopLogoSettings shopInfo={shop!} />
         </TabsContent>
         <TabsContent value="images" className="space-y-4"></TabsContent>
       </Tabs>
