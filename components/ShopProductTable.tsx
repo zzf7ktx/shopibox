@@ -22,7 +22,7 @@ import {
   CrossCircledIcon,
   DotsHorizontalIcon,
 } from "@radix-ui/react-icons";
-import { useRouter } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import { getRowRange } from "@/utils";
 import { useState } from "react";
 import { CgSpinnerTwoAlt } from "react-icons/cg";
@@ -146,10 +146,13 @@ function ActionCell({ row }: { row: ProductOnShop }) {
   const router = useRouter();
   const [loading, setLoading] = useState<boolean>(false);
   const { toast } = useToast();
+  const { id } = useParams();
+
+  const shopId = typeof id === "string" ? id : id[0];
   const pushToShop = async () => {
     try {
       setLoading(true);
-      const result = await publishSingleProduct(row.shops[0].shopId, row.id);
+      const result = await publishSingleProduct(shopId, row.id);
       toast({
         title: "Success",
         description: `Pushed selected product to shop`,

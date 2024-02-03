@@ -3,7 +3,6 @@
 import cloudinary from "@/lib/cloudinary";
 import prisma from "@/lib/prisma";
 import { CloudProviders } from "@/types/CloudProviders";
-import { UploadApiResponse } from "cloudinary";
 
 export const uploadImages = async (productId: string, data: FormData) => {
   const files: File[] = data.getAll("files") as unknown as File[];
@@ -27,25 +26,16 @@ export const uploadImages = async (productId: string, data: FormData) => {
     let byteArrayBuffer = await new Response(file).arrayBuffer();
     const buffer = Buffer.from(byteArrayBuffer);
 
-    const uploadResult: UploadApiResponse | undefined = await new Promise(
-      (resolve, reject) => {
-        cloudinary.uploader
-          .upload_stream(
-            {
-              overwrite: true,
-              filename_override: image.id,
-              upload_preset: process.env.CLOUDINARY_UPLOAD_PRESET,
-            },
-            (error, uploadResult) => {
-              if (!!error) {
-                return reject(error);
-              }
-              return resolve(uploadResult);
-            }
-          )
-          .end(buffer);
-      }
-    );
+    const mime = file.type;
+    const encoding = "base64";
+    const base64Data = buffer.toString("base64");
+    const fileUri = "data:" + mime + ";" + encoding + "," + base64Data;
+
+    const uploadResult = await cloudinary.uploader.upload(fileUri, {
+      overwrite: true,
+      public_id: image?.providerRef ?? "",
+      folder: "shopify",
+    });
 
     if (typeof uploadResult === "undefined") {
       continue;

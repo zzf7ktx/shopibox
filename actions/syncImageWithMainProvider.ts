@@ -36,6 +36,7 @@ export const syncImageWithMainProvider = async (
   const uploadResult = await cloudinary.uploader.upload(sourceLink, {
     overwrite: true,
     public_id: image?.providerRef ?? "",
+    folder: "shopify",
   });
 
   await prisma.image.update({
