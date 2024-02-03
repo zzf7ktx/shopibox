@@ -3,7 +3,6 @@
 import getShopifyClient from "@/lib/shopify";
 import prisma from "@/lib/prisma";
 import sharp from "sharp";
-import { UploadApiResponse } from "cloudinary";
 import cloudinary from "@/lib/cloudinary";
 import axios from "axios";
 
@@ -99,27 +98,19 @@ export const publishSingleProduct = async (
           left: Math.round((shopMaskImage.positionX * imageWidth) / 500),
         },
       ]);
+
       const newImageBuffer = await image.toBuffer();
 
-      const uploadResult: UploadApiResponse | undefined = await new Promise(
-        (resolve, reject) => {
-          cloudinary.uploader
-            .upload_stream(
-              {
-                overwrite: true,
-                upload_preset: process.env.CLOUDINARY_UPLOAD_PRESET,
-              },
-              (error, uploadResult) => {
-                if (!!error) {
-                  return reject(error);
-                }
-                return resolve(uploadResult);
-              }
-            )
-            .end(newImageBuffer);
-        }
-      );
+      const mime = "image/jpg";
+      const encoding = "base64";
+      const base64Data = newImageBuffer.toString("base64");
+      const fileUri = "data:" + mime + ";" + encoding + "," + base64Data;
 
+      const uploadResult = await cloudinary.uploader.upload(fileUri, {
+        overwrite: true,
+        public_id: img.providerRef ?? img.id,
+        folder: `shopify/${shopId}`,
+      });
       media.push({
         alt: img.name,
         originalSource: uploadResult?.secure_url ?? img.cloudLink,

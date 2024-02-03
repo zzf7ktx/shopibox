@@ -2,7 +2,6 @@
 
 import cloudinary from "@/lib/cloudinary";
 import prisma from "@/lib/prisma";
-import { UploadApiResponse } from "cloudinary";
 
 export const updateMetadata = async (imageId: string, data: FormData) => {
   const file: File = data.get("file") as unknown as File;
@@ -20,25 +19,16 @@ export const updateMetadata = async (imageId: string, data: FormData) => {
   let byteArrayBuffer = await new Response(file).arrayBuffer();
   const buffer = Buffer.from(byteArrayBuffer);
 
-  const uploadResult: UploadApiResponse | undefined = await new Promise(
-    (resolve, reject) => {
-      cloudinary.uploader
-        .upload_stream(
-          {
-            overwrite: true,
-            public_id: image?.providerRef ?? "",
-            upload_preset: process.env.CLOUDINARY_UPLOAD_PRESET,
-          },
-          (error, uploadResult) => {
-            if (!!error) {
-              return reject(error);
-            }
-            return resolve(uploadResult);
-          }
-        )
-        .end(buffer);
-    }
-  );
+  const mime = "image/jpg";
+  const encoding = "base64";
+  const base64Data = buffer.toString("base64");
+  const fileUri = "data:" + mime + ";" + encoding + "," + base64Data;
+
+  const uploadResult = await cloudinary.uploader.upload(fileUri, {
+    overwrite: true,
+    public_id: image?.providerRef ?? image?.id ?? "",
+    folder: "shopify",
+  });
 
   await prisma.image.update({
     data: {

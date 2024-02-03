@@ -2,7 +2,6 @@
 
 import cloudinary from "@/lib/cloudinary";
 import prisma from "@/lib/prisma";
-import { UploadApiResponse } from "cloudinary";
 
 export interface UpdateShopLogoFormFields {
   maskImageId: string;
@@ -17,34 +16,37 @@ export const updateShopLogo = async (
   formData: FormData
 ) => {
   const file: File = formData.get("file") as unknown as File;
+  const shop = await prisma.shop.findFirst({
+    where: { id: shopId },
+    include: {
+      maskImages: true,
+    },
+  });
+
+  if (!shop) {
+    return;
+  }
 
   let imageSrc: string | undefined = undefined;
   if (String(file) !== "undefined") {
     let byteArrayBuffer = await new Response(file).arrayBuffer();
     const buffer = Buffer.from(byteArrayBuffer);
 
-    const uploadResult: UploadApiResponse | undefined = await new Promise(
-      (resolve, reject) => {
-        cloudinary.uploader
-          .upload_stream(
-            {
-              overwrite: true,
-              upload_preset: process.env.CLOUDINARY_UPLOAD_PRESET,
-            },
-            (error, uploadResult) => {
-              if (!!error) {
-                return reject(error);
-              }
-              return resolve(uploadResult);
-            }
-          )
-          .end(buffer);
-      }
-    );
+    const mime = "image/jpg";
+    const encoding = "base64";
+    const base64Data = buffer.toString("base64");
+    const fileUri = "data:" + mime + ";" + encoding + "," + base64Data;
+
+    const uploadResult = await cloudinary.uploader.upload(fileUri, {
+      overwrite: true,
+      public_id: shop.maskImages?.[0]?.id ?? shop.id,
+      folder: `shopify/${shopId}`,
+    });
+
     imageSrc = uploadResult?.secure_url;
   }
 
-  const shop = await prisma.shopMaskImage.upsert({
+  const updateShop = await prisma.shopMaskImage.upsert({
     where: {
       id: data.maskImageId,
     },
@@ -62,5 +64,5 @@ export const updateShopLogo = async (
       shopId: shopId,
     },
   });
-  return shop;
+  return updateShop;
 };

@@ -107,9 +107,9 @@ export default function ShopLogoSettings({ shopInfo }: ShopLogoSettingsProps) {
       });
 
       form.reset({
-        maskObjectScale: mask.scale ?? 100,
-        maskObjectX: mask.positionX ?? 0,
-        maskObjectY: mask.positionY ?? 0,
+        maskObjectScale: mask?.scale ?? 100,
+        maskObjectX: mask?.positionX ?? 0,
+        maskObjectY: mask?.positionY ?? 0,
         maskObjectSrc: "",
       });
       router.refresh();

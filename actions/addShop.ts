@@ -2,7 +2,6 @@
 
 import cloudinary from "@/lib/cloudinary";
 import prisma from "@/lib/prisma";
-import { UploadApiResponse } from "cloudinary";
 
 export interface AddShopFormFields {
   name: string;
@@ -20,28 +19,6 @@ export const addShop = async (data: AddShopFormFields, formData: FormData) => {
     throw new Error("No file uploaded");
   }
 
-  let byteArrayBuffer = await new Response(file).arrayBuffer();
-  const buffer = Buffer.from(byteArrayBuffer);
-
-  const uploadResult: UploadApiResponse | undefined = await new Promise(
-    (resolve, reject) => {
-      cloudinary.uploader
-        .upload_stream(
-          {
-            overwrite: true,
-            upload_preset: process.env.CLOUDINARY_UPLOAD_PRESET,
-          },
-          (error, uploadResult) => {
-            if (!!error) {
-              return reject(error);
-            }
-            return resolve(uploadResult);
-          }
-        )
-        .end(buffer);
-    }
-  );
-
   const shop = await prisma.shop.create({
     data: {
       name: data.name,
@@ -52,10 +29,49 @@ export const addShop = async (data: AddShopFormFields, formData: FormData) => {
           positionX: data.maskObjectX,
           positionY: data.maskObjectY,
           scale: data.maskObjectScale,
-          src: uploadResult?.secure_url ?? "",
+          src: "",
         },
       },
     },
+    include: {
+      maskImages: true,
+    },
   });
-  return shop;
+
+  let byteArrayBuffer = await new Response(file).arrayBuffer();
+  const buffer = Buffer.from(byteArrayBuffer);
+
+  const mime = file.type;
+  const encoding = "base64";
+  const base64Data = buffer.toString("base64");
+  const fileUri = "data:" + mime + ";" + encoding + "," + base64Data;
+
+  const uploadResult = await cloudinary.uploader.upload(fileUri, {
+    overwrite: true,
+    public_id: shop.maskImages?.[0]?.id ?? shop.id,
+    folder: `shopify/${shop.id}`,
+  });
+
+  const updatedShop = prisma.shop.update({
+    where: {
+      id: shop.id,
+    },
+    data: {
+      maskImages: {
+        update: {
+          where: {
+            id: shop.maskImages?.[0]?.id,
+          },
+          data: {
+            src: uploadResult.secure_url ?? "",
+          },
+        },
+      },
+    },
+    include: {
+      maskImages: true,
+    },
+  });
+
+  return updatedShop;
 };
