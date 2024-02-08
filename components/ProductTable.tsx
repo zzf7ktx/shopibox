@@ -245,16 +245,16 @@ const columns: ColumnDef<ProductWithCollections>[] = [
       return <DataTableColumnHeader column={column} title="Shops" />;
     },
     cell: ({ row }) => {
-      const shops = row.original.shops;
+      const shops = row.original.shops ?? [];
 
       return (
         <div className="flex gap-1">
-          {shops.length > 0 && (
+          {shops?.length > 0 && (
             <Badge variant="secondary" className="max-w-48">
               {shops?.[0]?.shop.name}
             </Badge>
           )}
-          {shops.length > 1 && (
+          {shops?.length > 1 && (
             <Popover>
               <PopoverTrigger asChild>
                 <Button variant="secondary" size="sm">
