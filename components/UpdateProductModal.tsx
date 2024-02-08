@@ -164,7 +164,7 @@ export default function UpdateProductModal({
 
     const getCategories = async () => {
       const result = await convertTxtToJSFlat(
-        "https://res.cloudinary.com/dtp8svzny/raw/upload/v1705205941/shopify/product_taxonomy_byh5fo.txt"
+        "https://res.cloudinary.com/dtp8svzny/raw/upload/v1706975157/settings/ba80fhq2bbit7jpgwz68.txt"
       );
       setCategories(result);
     };
