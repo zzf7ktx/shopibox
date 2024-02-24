@@ -88,7 +88,7 @@ export const importProducts = async (
 
     if (autoSyncImages) {
       for (let image of product.images) {
-        syncImageWithMainProvider(image.id, "default");
+        await syncImageWithMainProvider(image.id, "default");
       }
     }
 
