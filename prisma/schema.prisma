@@ -36,7 +36,7 @@ model Image {
   provider    String?
   providerRef String?         @map(name: "provider_ref")
   syncStatus  ImageSyncStatus @default(NotSync) @map(name: "sync_status")
-  product     Product?        @relation(fields: [productId], references: [id])
+  product     Product?        @relation(fields: [productId], references: [id], onDelete: Cascade)
   productId   String?         @map(name: "product_id")
   createdAt   DateTime        @default(now()) @map(name: "created_at")
   updatedAt   DateTime        @updatedAt @map(name: "updated_at")
@@ -77,9 +77,9 @@ model Collection {
 }
 
 model ProductsOnCollections {
-  product      Product    @relation(fields: [productId], references: [id])
+  product      Product    @relation(fields: [productId], references: [id], onDelete: Cascade)
   productId    String     @map(name: "product_id")
-  collection   Collection @relation(fields: [collectionId], references: [id])
+  collection   Collection @relation(fields: [collectionId], references: [id], onDelete: Cascade)
   collectionId String     @map(name: "collection_id")
   priority     Int?
   assignedAt   DateTime   @default(now()) @map(name: "assigned_at")
@@ -112,9 +112,9 @@ model Shop {
 }
 
 model ProductsOnShops {
-  shop       Shop              @relation(fields: [shopId], references: [id])
+  shop       Shop              @relation(fields: [shopId], references: [id], onDelete: Cascade)
   shopId     String            @map(name: "shop_id")
-  product    Product           @relation(fields: [productId], references: [id])
+  product    Product           @relation(fields: [productId], references: [id], onDelete: Cascade)
   productId  String            @map(name: "product_id")
   priority   Int?
   status     ProductSyncStatus @default(NotPublished)
@@ -133,7 +133,7 @@ model ShopMaskImage {
   createdAt DateTime @default(now()) @map(name: "created_at")
   updatedAt DateTime @updatedAt @map(name: "updated_at")
 
-  shop   Shop?   @relation(fields: [shopId], references: [id])
+  shop   Shop?   @relation(fields: [shopId], references: [id], onDelete: Cascade)
   shopId String? @map(name: "shop_id")
 
   @@map(name: "shop_mask_images")

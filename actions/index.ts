@@ -17,3 +17,4 @@ export { getShop } from "./getShop";
 export { updateShopGeneral } from "./updateShopGeneral";
 export { updateShopLogo } from "./updateShopLogo";
 export { publishCollectionProducts } from "./publishCollectionProducts";
+export { deleteProducts } from "./deleteProducts";
