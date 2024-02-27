@@ -27,19 +27,21 @@ enum ProductSyncStatus {
 }
 
 model Image {
-  id          String          @id @default(cuid())
-  name        String
-  source      ImageSource
-  sourceLink  String?         @map(name: "source_link")
-  cloudLink   String          @map(name: "cloud_link")
-  backupLink  String?         @map(name: "backup_link")
-  provider    String?
-  providerRef String?         @map(name: "provider_ref")
-  syncStatus  ImageSyncStatus @default(NotSync) @map(name: "sync_status")
-  product     Product?        @relation(fields: [productId], references: [id], onDelete: Cascade)
-  productId   String?         @map(name: "product_id")
-  createdAt   DateTime        @default(now()) @map(name: "created_at")
-  updatedAt   DateTime        @updatedAt @map(name: "updated_at")
+  id                 String            @id @default(cuid())
+  name               String
+  source             ImageSource
+  sourceLink         String?           @map(name: "source_link")
+  cloudLink          String            @map(name: "cloud_link")
+  backupLink         String?           @map(name: "backup_link")
+  provider           String?
+  providerRef        String?           @map(name: "provider_ref")
+  syncStatus         ImageSyncStatus   @default(NotSync) @map(name: "sync_status")
+  product            Product?          @relation(fields: [productId], references: [id], onDelete: Cascade)
+  productId          String?           @map(name: "product_id")
+  createdAt          DateTime          @default(now()) @map(name: "created_at")
+  updatedAt          DateTime          @updatedAt @map(name: "updated_at")
+  productVariation   ProductVariation? @relation(fields: [productVariationId], references: [id], onDelete: SetNull)
+  productVariationId String?
 
   @@map(name: "images")
 }
@@ -60,6 +62,21 @@ model Product {
   shops       ProductsOnShops[]
 
   @@map(name: "products")
+}
+
+model ProductVariation {
+  id    String  @id @default(cuid())
+  sku   String?
+  price Float?
+  key   String
+  value String
+
+  createdAt DateTime @default(now()) @map(name: "created_at")
+  updatedAt DateTime @updatedAt @map(name: "updated_at")
+
+  images Image[]
+
+  @@map(name: "product_variations")
 }
 
 model Collection {
