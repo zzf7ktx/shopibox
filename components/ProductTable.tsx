@@ -1,6 +1,6 @@
 "use client";
 import { Prisma } from "@prisma/client";
-import { ColumnDef } from "@tanstack/react-table";
+import { ColumnDef, Row } from "@tanstack/react-table";
 import {
   DropdownMenu,
   DropdownMenuTrigger,
@@ -22,12 +22,13 @@ import { Checkbox } from "@/components/ui/Checkbox";
 import { DialogTrigger } from "@/components/ui/Dialog";
 import { DotsHorizontalIcon, ZoomInIcon } from "@radix-ui/react-icons";
 import { ProductTableToolbar } from "./ProductTableToolbar";
-import UpdateProductModal from "./UpdateProductModal";
+import UpdateProductModal, { UpdateProductDialogs } from "./UpdateProductModal";
 import { getRowRange } from "@/utils";
 import { Popover, PopoverContent, PopoverTrigger } from "./ui/Popover";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "./ui/Tabs";
 import { Card, CardContent } from "@/components/ui/Card";
 import Image from "next/image";
+import { useState } from "react";
 
 type ProductWithCollections = Prisma.ProductGetPayload<{
   include: {
@@ -44,6 +45,52 @@ type ProductWithCollections = Prisma.ProductGetPayload<{
     };
   };
 }>;
+
+function ActionDropDown({ row }: { row: Row<ProductWithCollections> }) {
+  const [dialog, setDialog] = useState(UpdateProductDialogs.ProductInfo);
+
+  const product = row.original;
+  return (
+    <UpdateProductModal
+      dialog={dialog}
+      productId={row.original.id}
+      dialogTrigger={
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="ghost" className="h-8 w-8 p-0">
+              <span className="sr-only">Open menu</span>
+              <DotsHorizontalIcon className="h-4 w-4" />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end">
+            <DropdownMenuLabel>Actions</DropdownMenuLabel>
+            <DropdownMenuItem
+              onClick={() => navigator.clipboard.writeText(product.id)}
+            >
+              Copy ID
+            </DropdownMenuItem>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem>View images</DropdownMenuItem>
+            <DialogTrigger asChild>
+              <DropdownMenuItem
+                onClick={() => setDialog(UpdateProductDialogs.ProductInfo)}
+              >
+                Edit
+              </DropdownMenuItem>
+            </DialogTrigger>
+            <DialogTrigger asChild>
+              <DropdownMenuItem
+                onClick={() => setDialog(UpdateProductDialogs.ProductVariants)}
+              >
+                Edit variants
+              </DropdownMenuItem>
+            </DialogTrigger>
+          </DropdownMenuContent>
+        </DropdownMenu>
+      }
+    />
+  );
+}
 
 let lastSelectedId: number = -1;
 
@@ -100,7 +147,6 @@ const columns: ColumnDef<ProductWithCollections>[] = [
       );
     },
   },
-
   {
     id: "preview",
     size: 20,
@@ -302,37 +348,7 @@ const columns: ColumnDef<ProductWithCollections>[] = [
   {
     id: "actions",
     size: 50,
-    cell: ({ row }) => {
-      const product = row.original;
-      return (
-        <UpdateProductModal
-          productId={row.original.id}
-          dialogTrigger={
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="ghost" className="h-8 w-8 p-0">
-                  <span className="sr-only">Open menu</span>
-                  <DotsHorizontalIcon className="h-4 w-4" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
-                <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                <DropdownMenuItem
-                  onClick={() => navigator.clipboard.writeText(product.id)}
-                >
-                  Copy ID
-                </DropdownMenuItem>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem>View images</DropdownMenuItem>
-                <DialogTrigger asChild>
-                  <DropdownMenuItem>Edit</DropdownMenuItem>
-                </DialogTrigger>
-              </DropdownMenuContent>
-            </DropdownMenu>
-          }
-        />
-      );
-    },
+    cell: ({ row }) => <ActionDropDown row={row} />,
   },
 ];
 

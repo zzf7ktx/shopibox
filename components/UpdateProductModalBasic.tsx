@@ -9,28 +9,14 @@ import {
   useMemo,
   useState,
 } from "react";
-import {
-  updateProduct,
-  getCollections,
-  getProduct,
-  addOrUpdateProductVariants,
-  getProductVariants,
-} from "@/actions";
+import { updateProduct, getCollections, getProduct } from "@/actions";
 import { useRouter } from "next/navigation";
 import * as z from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-import {
-  ControllerRenderProps,
-  FieldValues,
-  UseFormReturn,
-  useFieldArray,
-  useForm,
-} from "react-hook-form";
+import { useForm } from "react-hook-form";
 import { cn } from "@/lib/utils";
 import {
   DialogHeader,
-  Dialog,
-  DialogContent,
   DialogTitle,
   DialogDescription,
 } from "@/components/ui/Dialog";
@@ -61,14 +47,7 @@ import {
 } from "@/components/ui/Command";
 import { Badge } from "@/components/ui/Badge";
 import { ScrollArea } from "@/components/ui/ScrollArea";
-import {
-  CaretSortIcon,
-  CheckIcon,
-  Cross2Icon,
-  PlusIcon,
-  ReloadIcon,
-} from "@radix-ui/react-icons";
-import { Card, CardContent, CardHeader } from "./ui/Card";
+import { CaretSortIcon, CheckIcon, ReloadIcon } from "@radix-ui/react-icons";
 
 const formSchema = z.object({
   name: z
@@ -144,7 +123,7 @@ async function convertTxtToJSFlat(url: string): Promise<Array<Option>> {
   }
 }
 
-export function ProductInfoForm({
+export default function UpdateProductModalBasic({
   productId,
   open,
   setOpen,
@@ -503,297 +482,5 @@ export function ProductInfoForm({
         </Form>
       </DialogDescription>
     </DialogHeader>
-  );
-}
-
-function ProductVariantValueCombobox({
-  field,
-  form,
-}: {
-  field: ControllerRenderProps<FieldValues, `variants.${number}.values`>;
-  form: UseFormReturn<FieldValues, any, undefined>;
-}) {
-  const [values, setValues] = useState<Option[]>([]);
-  return (
-    <Popover>
-      <PopoverTrigger asChild>
-        <FormControl>
-          <Button
-            variant="outline"
-            role="combobox"
-            className={cn(
-              "w-full h-auto justify-between",
-              !field.value && "text-muted-foreground"
-            )}
-          >
-            {field.value ? (
-              <div className="flex gap-1 w-full flex-wrap">
-                {field.value
-                  .map((current: any) => {
-                    return current;
-                  })
-                  .map((selected: any, index: number) => (
-                    <Badge key={index} variant="secondary">
-                      <Cross2Icon
-                        onClick={() => {
-                          const newValue = field.value.filter(
-                            (cur: any) => cur !== selected
-                          );
-                          form.setValue(field.name, newValue);
-                        }}
-                      />
-                      {selected}
-                    </Badge>
-                  ))}
-              </div>
-            ) : (
-              "Create values"
-            )}
-            <CaretSortIcon className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-          </Button>
-        </FormControl>
-      </PopoverTrigger>
-      <PopoverContent className="mw-[400px] p-0">
-        <Command>
-          <CommandInput
-            onValueChange={(e) =>
-              setValues((prev) => {
-                let newData = [...prev];
-                newData[0] = {
-                  label: e,
-                  value: e,
-                };
-                return newData;
-              })
-            }
-            placeholder="Create values"
-            className="h-9"
-          />
-          <CommandGroup>
-            <ScrollArea className="max-h-72">
-              {values.map((value) => (
-                <span key={value?.value ?? ""}>
-                  {typeof value !== "undefined" && (
-                    <CommandItem
-                      value={value.label}
-                      onSelect={() => {
-                        const newValue = field.value.includes(value.value)
-                          ? field.value.filter(
-                              (cur: any) => cur !== value.value
-                            )
-                          : field.value.concat(value.value);
-                        form.setValue(field.name, newValue);
-                      }}
-                    >
-                      {value.label}
-                      <CheckIcon
-                        className={cn(
-                          "ml-auto h-4 w-4",
-                          field?.value?.includes(value.value)
-                            ? "opacity-100"
-                            : "opacity-0"
-                        )}
-                      />
-                    </CommandItem>
-                  )}
-                </span>
-              ))}
-            </ScrollArea>
-          </CommandGroup>
-        </Command>
-      </PopoverContent>
-    </Popover>
-  );
-}
-
-export function ProductVariantsForm({
-  productId,
-  open,
-  setOpen,
-}: {
-  productId: string;
-  open: boolean;
-  setOpen: Dispatch<SetStateAction<boolean>>;
-}) {
-  const form = useForm();
-
-  const { fields, append, remove } = useFieldArray({
-    control: form.control,
-    name: "variants",
-  });
-
-  const handleAddNew = () =>
-    append({
-      name: "",
-      values: [],
-    });
-  const handleRemove = (index: number) => remove(index);
-
-  const [loading, setLoading] = useState<boolean>(false);
-  const [loadingProductVariants, setLoadingProductVariants] =
-    useState<boolean>(false);
-  const [productVariantsData, setProductVariantsData] = useState<
-    { name: string; values: string[] }[]
-  >([]);
-
-  const router = useRouter();
-  const { toast } = useToast();
-
-  useEffect(() => {
-    form.reset();
-  }, [open]);
-
-  useEffect(() => {}, []);
-
-  useEffect(() => {
-    const getVariants = async () => {
-      setLoadingProductVariants(true);
-      let variants = await getProductVariants(productId);
-      let output: { [key: string]: string[] } = {};
-      for (let variant of variants) {
-        let name = variant.key;
-        let value = variant.value;
-
-        if (!output[name]) {
-          output[name] = [];
-        }
-
-        output[name].push(value);
-      }
-
-      console.log(output);
-
-      form.reset();
-
-      for (let [key, values] of Object.entries(output)) {
-        append({
-          name: key,
-          values: values,
-        });
-      }
-
-      setLoadingProductVariants(false);
-    };
-    productId && open && getVariants();
-  }, [productId, open]);
-
-  const onFinish = async (values: any) => {
-    try {
-      setLoading(true);
-      const variants = await addOrUpdateProductVariants(productId, values);
-
-      toast({
-        title: "Success",
-        description: "Update product variants successfully.",
-      });
-
-      setOpen(false);
-      router.refresh();
-      form.reset();
-    } catch (error) {
-      toast({
-        title: "Error",
-        description: "Something wrong",
-        variant: "destructive",
-      });
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  return (
-    <DialogHeader>
-      <DialogTitle>Update product variants</DialogTitle>
-      <DialogDescription asChild>
-        <Form {...form}>
-          <form onSubmit={form.handleSubmit(onFinish)} className="space-y-8">
-            {fields.map((field, index) => (
-              <Card key={field.id}>
-                <CardHeader>
-                  <Button
-                    size="icon"
-                    className="ms-auto"
-                    onClick={() => handleRemove(index)}
-                    variant="outline"
-                  >
-                    <Cross2Icon />
-                  </Button>
-                </CardHeader>
-                <CardContent className="flex flex-col gap-2">
-                  <FormField
-                    control={form.control}
-                    name={`variants.${index}.name`}
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormControl>
-                          <Input placeholder="Name" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={form.control}
-                    name={`variants.${index}.values`}
-                    render={({ field }) => (
-                      <FormItem className="flex flex-col">
-                        <ProductVariantValueCombobox
-                          field={field}
-                          form={form}
-                        />
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </CardContent>
-              </Card>
-            ))}
-            <Button type="button" onClick={() => handleAddNew()} variant="link">
-              <PlusIcon /> Add new option
-            </Button>
-            <br />
-            <Button type="submit">
-              {loading && <ReloadIcon className="mr-2 h-4 w-4 animate-spin" />}
-              Save
-            </Button>
-          </form>
-        </Form>
-      </DialogDescription>
-    </DialogHeader>
-  );
-}
-
-export default function UpdateProductModal({
-  dialogTrigger,
-  productId,
-  dialog,
-}: UpdateProductModalProps) {
-  const [open, setOpen] = useState<boolean>(false);
-
-  const onOpenChange = (newValue: boolean) => {
-    setOpen(newValue);
-  };
-
-  return (
-    <>
-      <Dialog open={open} onOpenChange={onOpenChange}>
-        {dialogTrigger}
-        <DialogContent className="max-h-[80%] overflow-y-auto">
-          {dialog === UpdateProductDialogs.ProductVariants ? (
-            <ProductVariantsForm
-              productId={productId}
-              open={open}
-              setOpen={setOpen}
-            />
-          ) : (
-            <ProductInfoForm
-              productId={productId}
-              open={open}
-              setOpen={setOpen}
-            />
-          )}
-        </DialogContent>
-      </Dialog>
-    </>
   );
 }
