@@ -17,6 +17,7 @@ export default async function Products() {
           shop: true,
         },
       },
+      variants: true,
     },
     orderBy: [
       {

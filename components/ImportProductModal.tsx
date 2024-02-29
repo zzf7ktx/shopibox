@@ -39,7 +39,7 @@ const formSchema = z.object({
 
 type ProductWithCollections = Prisma.ProductGetPayload<{
   include: {
-    images: true,
+    images: true;
     collections: {
       include: {
         collection: true;
@@ -50,6 +50,7 @@ type ProductWithCollections = Prisma.ProductGetPayload<{
         shop: true;
       };
     };
+    variants: true;
   };
 }>;
 
@@ -62,6 +63,7 @@ export default function ImportProductModal({
 }: ImportProductModalProps) {
   const [imported, setImported] = useState<ProductWithCollections[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
+  const [loadingFile, setLoadingFile] = useState<boolean>(false);
   const [open, setOpen] = useState<boolean>(false);
   const router = useRouter();
   const { toast } = useToast();
@@ -74,33 +76,62 @@ export default function ImportProductModal({
   });
 
   const onFileChange = async (e: ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files![0];
+    try {
+      setLoadingFile(true);
+      const file = e.target.files![0];
 
-    Csv.parse(file, {
-      worker: true,
-      header: true,
-      complete: function (results: any) {
-        const columnValues = results.data.map(
-          (line: any, index: number) =>
-            ({
-              id: String(index),
-              name: line?.["title"],
-              description: line?.["description_text"],
-              descriptionHtml: line?.["description_html"],
-              price: parseCurrency(line?.["price"] ?? ""),
-              category: line?.["category"],
-              collections: [
-                {
-                  collection: {
-                    name: line?.["collection"],
-                  },
-                },
-              ],
-            } as ProductWithCollections)
-        );
-        setImported(columnValues);
-      },
-    });
+      await new Promise((resolve, reject) =>
+        Csv.parse(file, {
+          worker: true,
+          header: true,
+          complete: function (results: any) {
+            const columnValues = results.data.map(
+              (line: any, index: number) => {
+                const variants = !line?.["variants"]
+                  ? []
+                  : JSON.parse(line?.["variants"]).reduce(
+                      (acc: any[], cur: any) =>
+                        acc.concat(
+                          cur.values.map((cv: any) => ({
+                            key: cur.name,
+                            value: cv,
+                          }))
+                        ),
+                      [] as { key: string; value: string }[]
+                    );
+                return {
+                  id: String(index),
+                  name: line?.["title"],
+                  description: line?.["description_text"],
+                  descriptionHtml: line?.["description_html"],
+                  price: parseCurrency(line?.["price"] ?? ""),
+                  category: line?.["category"],
+                  variants,
+                  collections: [
+                    {
+                      collection: {
+                        name: line?.["collection"],
+                      },
+                    },
+                  ],
+                } as ProductWithCollections;
+              }
+            );
+            setImported(columnValues);
+            resolve(columnValues);
+          },
+        })
+      );
+    } catch (error) {
+      console.log(error);
+      toast({
+        title: "Error",
+        description: "Something error",
+        variant: "destructive",
+      });
+    } finally {
+      setLoadingFile(false);
+    }
   };
 
   const onFinish = async ({
@@ -118,7 +149,6 @@ export default function ImportProductModal({
 
       const formData = new FormData();
       formData.append("file", importFile);
-      console.log("tete", autoSyncImages);
       const result = await importProducts(formData, autoSyncImages);
       toast({
         title: "Success",
@@ -141,6 +171,9 @@ export default function ImportProductModal({
   };
 
   const onOpenChange = (newValue: boolean) => {
+    if (loading) {
+      return;
+    }
     form.reset();
     setImported([]);
     setOpen(newValue);
@@ -180,7 +213,7 @@ export default function ImportProductModal({
                         Choose file csv.
                       </FormDescription>
                       <FormMessage />
-                      <ProductTable data={imported} />
+                      <ProductTable data={imported} loading={loadingFile} />
                     </FormItem>
                   )}
                 />
@@ -205,7 +238,7 @@ export default function ImportProductModal({
                     </FormItem>
                   )}
                 />
-                <Button type="submit">
+                <Button type="submit" disabled={loading}>
                   {loading && (
                     <ReloadIcon className="mr-2 h-4 w-4 animate-spin" />
                   )}
