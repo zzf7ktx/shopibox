@@ -60,6 +60,7 @@ model Product {
   images      Image[]
   collections ProductsOnCollections[]
   shops       ProductsOnShops[]
+  variants    ProductVariation[]
 
   @@map(name: "products")
 }
@@ -74,7 +75,9 @@ model ProductVariation {
   createdAt DateTime @default(now()) @map(name: "created_at")
   updatedAt DateTime @updatedAt @map(name: "updated_at")
 
-  images Image[]
+  images    Image[]
+  Product   Product? @relation(fields: [productId], references: [id])
+  productId String?
 
   @@map(name: "product_variations")
 }
