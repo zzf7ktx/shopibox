@@ -25,17 +25,20 @@ import {
 import { Input } from "@/components/ui/Input";
 import { ChangeEvent, ReactNode, useState } from "react";
 import { DataTablePagination } from "@/components/ui/DataTablePagination";
+import { CgSpinnerTwoAlt } from "react-icons/cg";
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
   data: TData[];
   toolbar?: (table: TableType<TData>) => ReactNode;
+  loading?: boolean;
 }
 
 export function DataTable<TData, TValue>({
   columns,
   data,
   toolbar,
+  loading,
 }: DataTableProps<TData, TValue>) {
   const [sorting, setSorting] = useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
@@ -100,7 +103,16 @@ export function DataTable<TData, TValue>({
             ))}
           </TableHeader>
           <TableBody>
-            {table.getRowModel().rows?.length ? (
+            {loading ? (
+              <TableRow>
+                <TableCell
+                  colSpan={columns.length}
+                  className="h-24 text-center"
+                >
+                  <CgSpinnerTwoAlt className="animate-spin m-auto h-10 w-10 text-primary" />
+                </TableCell>
+              </TableRow>
+            ) : table.getRowModel().rows?.length ? (
               table.getRowModel().rows.map((row) => (
                 <TableRow
                   key={row.id}

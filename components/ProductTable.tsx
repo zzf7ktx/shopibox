@@ -43,6 +43,7 @@ type ProductWithCollections = Prisma.ProductGetPayload<{
         shop: true;
       };
     };
+    variants: true;
   };
 }>;
 
@@ -330,6 +331,24 @@ const columns: ColumnDef<ProductWithCollections>[] = [
     },
   },
   {
+    accessorKey: "variants",
+    header: ({ column }) => {
+      return <DataTableColumnHeader column={column} title="Variants" />;
+    },
+    cell: ({ row }) => {
+      const variants = row.original.variants ?? [];
+
+      return (
+        <div className="flex gap-1">
+          <Badge variant="secondary">{variants.length}</Badge>
+        </div>
+      );
+    },
+    filterFn: (row, _columnId, value) => {
+      return row.original.shops.some((sh) => value.includes(sh.shopId));
+    },
+  },
+  {
     accessorKey: "price",
     header: ({ column }) => {
       return <DataTableColumnHeader column={column} title="Price" />;
@@ -365,6 +384,7 @@ export default function ProductTable({
     <DataTable
       columns={columns}
       data={data}
+      loading={loading}
       toolbar={(table) => <ProductTableToolbar table={table} />}
     />
   );

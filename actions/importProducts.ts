@@ -5,7 +5,7 @@ import prisma from "@/lib/prisma";
 import { parseCurrency } from "@/utils";
 import { ImageSource } from "@prisma/client";
 import { Readable } from "stream";
-import { syncImageWithMainProvider } from ".";
+import { addOrUpdateProductVariants, syncImageWithMainProvider } from ".";
 
 export const importProducts = async (
   data: FormData,
@@ -24,6 +24,9 @@ export const importProducts = async (
       complete: (results: any) => {
         const columnValues = results.data.map((line: any, index: number) => {
           const images = !line?.["images"] ? [] : JSON.parse(line?.["images"]);
+          const variants = !line?.["variants"]
+            ? []
+            : JSON.parse(line?.["variants"]);
           return {
             id: String(index),
             name: line?.["title"],
@@ -33,6 +36,7 @@ export const importProducts = async (
             category: line?.["category"],
             collections: !!line?.["collection"] ? [line?.["collection"]] : [],
             images,
+            variants,
           };
         });
         resolve(columnValues);
@@ -85,6 +89,10 @@ export const importProducts = async (
         images: true,
       },
     });
+
+    if (!!data.variants) {
+      addOrUpdateProductVariants(product.id, data);
+    }
 
     if (autoSyncImages) {
       for (let image of product.images) {

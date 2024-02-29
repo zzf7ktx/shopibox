@@ -52,7 +52,7 @@ import {
   PlusIcon,
   ReloadIcon,
 } from "@radix-ui/react-icons";
-import { Card, CardContent, CardHeader } from "./ui/Card";
+import { Card, CardContent } from "./ui/Card";
 
 export enum UpdateProductDialogs {
   ProductInfo = "ProductInfo",
@@ -268,29 +268,29 @@ export default function UpdateProductModalVariants({
           <form onSubmit={form.handleSubmit(onFinish)} className="space-y-8">
             {fields.map((field, index) => (
               <Card key={field.id}>
-                <CardHeader>
-                  <Button
-                    size="icon"
-                    className="ms-auto"
-                    onClick={() => handleRemove(index)}
-                    variant="outline"
-                  >
-                    <Cross2Icon />
-                  </Button>
-                </CardHeader>
-                <CardContent className="flex flex-col gap-2">
-                  <FormField
-                    control={form.control}
-                    name={`variants.${index}.name`}
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormControl>
-                          <Input placeholder="Name" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
+                <CardContent className="flex flex-col gap-2 mt-6">
+                  <div className="flex gap-2 w-full">
+                    <FormField
+                      control={form.control}
+                      name={`variants.${index}.name`}
+                      render={({ field }) => (
+                        <FormItem className="w-full">
+                          <FormControl>
+                            <Input placeholder="Name" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <Button
+                      type="button"
+                      variant="destructive"
+                      size="icon"
+                      onClick={() => handleRemove(index)}
+                    >
+                      <Cross2Icon />
+                    </Button>
+                  </div>
                   <FormField
                     control={form.control}
                     name={`variants.${index}.values`}
