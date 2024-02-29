@@ -12,6 +12,7 @@ import cloudinary from "@/lib/cloudinary";
 type ProductDto = Prisma.ProductGetPayload<{
   include: {
     images: true;
+    variants: true;
   };
 }>;
 
@@ -85,10 +86,35 @@ const buildBulkCreateProductJsonl = async (
       }));
     }
 
+    let names = new Set();
+    for (let variant of product.variants ?? []) {
+      names.add(variant.key);
+    }
+
+    let variants = [];
+    for (let item of product.variants ?? []) {
+      let obj = {
+        options: [] as string[],
+      };
+      for (let name of Array.from(names)) {
+        if (item.key === name) {
+          obj.options.push(item.value);
+        }
+      }
+      let exists = variants.some(
+        (o) => JSON.stringify(o.options) === JSON.stringify(obj.options)
+      );
+      if (!exists) {
+        variants.push(obj);
+      }
+    }
+
     const input = {
       title: product.name,
       descriptionHtml: product.descriptionHtml,
       productType: product.category,
+      options: Array.from(names),
+      variants: variants,
     };
     stringJsonl += `{ "input": ${JSON.stringify(
       input
@@ -122,6 +148,7 @@ export const publishCollectionProducts = async (
           product: {
             include: {
               images: true,
+              variants: true,
             },
           },
         },
