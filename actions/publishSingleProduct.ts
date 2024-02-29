@@ -24,6 +24,7 @@ export const publishSingleProduct = async (
           product: {
             include: {
               images: true,
+              variants: true,
             },
           },
         },
@@ -125,12 +126,35 @@ export const publishSingleProduct = async (
     }));
   }
 
+  let names = new Set();
+  for (let variant of shop.products[0].product.variants ?? []) {
+    names.add(variant.key);
+  }
+
+  let variants = [];
+  for (let item of (shop.products[0].product.variants ?? [])) {
+    let obj = {
+      options: [] as string[]
+    };
+    for (let name of Array.from(names)) {
+      if (item.key === name) {
+        obj.options.push(item.value);
+      }
+    }
+    let exists = variants.some(o => JSON.stringify(o.options) === JSON.stringify(obj.options));
+    if (!exists) {
+      variants.push(obj);
+    }
+  }
+
   const result = await shopifyClient.request(createProduct, {
     variables: {
       input: {
         title: product.name,
         descriptionHtml: product.descriptionHtml,
         productType: product.category,
+        options: Array.from(names),
+        variants: variants,
       },
       media,
     },
