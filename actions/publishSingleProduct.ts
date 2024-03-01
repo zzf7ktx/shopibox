@@ -25,6 +25,11 @@ export const publishSingleProduct = async (
             include: {
               images: true,
               variants: true,
+              collections: {
+                include: {
+                  collection: true,
+                },
+              },
             },
           },
         },
@@ -42,8 +47,71 @@ export const publishSingleProduct = async (
 
   const shopifyClient = getShopifyClient(shop.shopDomain, shop.apiKey ?? "");
 
+  const getCollectionResponse = await shopifyClient.fetch(`
+    query {
+      collections(first: 5) {
+        edges {
+          node {
+            id
+            title
+          }
+        }
+      }
+    }
+  `);
+
+  let shopifyCollections: {
+    id: string;
+    title: string;
+  }[] = (await getCollectionResponse.json()).data.collections.edges.map(
+    (e: any) => e.node
+  );
+
+  let productCollections = shop.products[0].product.collections.map((c) => ({
+    title: c.collection.name,
+    description: c.collection.description,
+  }));
+
+  let collectionsToJoin: string[] = [];
+
+  for (let productCollection of productCollections) {
+    let collectionInfo = shopifyCollections.find(
+      (sc) => sc.title === productCollection.title
+    );
+    if (!collectionInfo) {
+      const createCollectionQuery = `
+        mutation collectionCreate($input: CollectionInput!) {
+          collectionCreate(input: $input) {
+            collection {
+              id
+              title
+              descriptionHtml
+              handle
+              sortOrder
+            }
+            userErrors {
+              field
+              message
+            }
+          }
+        }
+      `;
+      const result = await shopifyClient.request(createCollectionQuery, {
+        variables: {
+          input: {
+            title: productCollection.title,
+            descriptionHtml: productCollection.description,
+          },
+        },
+      });
+      collectionsToJoin.push(result.data.collectionCreate.collection.id);
+    } else {
+      collectionsToJoin.push(collectionInfo.id);
+    }
+  }
+
   const createProduct = `
-    mutation productCreate($input: ProductInput!, $media: [CreateMediaInput!]) {
+    mutation ProductCreate($input: ProductInput!, $media: [CreateMediaInput!]) {
       productCreate(input: $input, media: $media) {
         product {
           id
@@ -132,16 +200,18 @@ export const publishSingleProduct = async (
   }
 
   let variants = [];
-  for (let item of (shop.products[0].product.variants ?? [])) {
+  for (let item of shop.products[0].product.variants ?? []) {
     let obj = {
-      options: [] as string[]
+      options: [] as string[],
     };
     for (let name of Array.from(names)) {
       if (item.key === name) {
         obj.options.push(item.value);
       }
     }
-    let exists = variants.some(o => JSON.stringify(o.options) === JSON.stringify(obj.options));
+    let exists = variants.some(
+      (o) => JSON.stringify(o.options) === JSON.stringify(obj.options)
+    );
     if (!exists) {
       variants.push(obj);
     }
@@ -155,6 +225,7 @@ export const publishSingleProduct = async (
         productType: product.category,
         options: Array.from(names),
         variants: variants,
+        collectionsToJoin: collectionsToJoin,
       },
       media,
     },

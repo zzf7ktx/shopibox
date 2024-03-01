@@ -1,7 +1,7 @@
 "use server";
 
 import getShopifyClient from "@/lib/shopify";
-import axios from "axios";
+import axios, { all } from "axios";
 import FormData from "form-data";
 import { randomUUID } from "crypto";
 import { Prisma } from "@prisma/client";
@@ -13,11 +13,17 @@ type ProductDto = Prisma.ProductGetPayload<{
   include: {
     images: true;
     variants: true;
+    collections: {
+      include: {
+        collection: true;
+      };
+    };
   };
 }>;
 
 const buildBulkCreateProductJsonl = async (
   products: ProductDto[],
+  collectionMap: { [key: string]: string },
   shopInfo: Prisma.ShopGetPayload<{
     include: {
       maskImages: true;
@@ -115,6 +121,9 @@ const buildBulkCreateProductJsonl = async (
       productType: product.category,
       options: Array.from(names),
       variants: variants,
+      collectionsToJoin: product.collections.map(
+        (collection) => collectionMap[collection.collection.name]
+      ),
     };
     stringJsonl += `{ "input": ${JSON.stringify(
       input
@@ -149,6 +158,11 @@ export const publishCollectionProducts = async (
             include: {
               images: true,
               variants: true,
+              collections: {
+                include: {
+                  collection: true,
+                },
+              },
             },
           },
         },
@@ -162,8 +176,85 @@ export const publishCollectionProducts = async (
 
   const shopifyClient = getShopifyClient(shop.shopDomain, shop.apiKey ?? "");
 
+  let allProductCollections: { title: string; description: string | null }[] =
+    [];
+  for (let product of shop.products) {
+    for (let collection of product.product.collections) {
+      if (
+        !allProductCollections.some(
+          (c) => c.title === collection.collection.name
+        )
+      ) {
+        allProductCollections.push({
+          title: collection.collection.name,
+          description: collection.collection.description,
+        });
+      }
+    }
+  }
+
+  const getCollectionResponse = await shopifyClient.fetch(`
+    query {
+      collections(first: 5) {
+        edges {
+          node {
+            id
+            title
+          }
+        }
+      }
+    }
+  `);
+
+  let shopifyCollections: {
+    id: string;
+    title: string;
+  }[] = (await getCollectionResponse.json()).data.collections.edges.map(
+    (e: any) => e.node
+  );
+
+  let collectionsToJoinMap: { [key: string]: string } = {};
+  for (let productCollection of allProductCollections) {
+    let collectionInfo = shopifyCollections.find(
+      (sc) => sc.title === productCollection.title
+    );
+    if (!collectionInfo) {
+      const createCollectionQuery = `
+        mutation collectionCreate($input: CollectionInput!) {
+          collectionCreate(input: $input) {
+            collection {
+              id
+              title
+              descriptionHtml
+              handle
+              sortOrder
+            }
+            userErrors {
+              field
+              message
+            }
+          }
+        }
+      `;
+      const result = await shopifyClient.request(createCollectionQuery, {
+        variables: {
+          input: {
+            title: productCollection.title,
+            descriptionHtml: productCollection.description,
+          },
+        },
+      });
+
+      collectionsToJoinMap[productCollection.title] =
+        result.data.collectionCreate.collection.id;
+    } else {
+      collectionsToJoinMap[productCollection.title] = collectionInfo.id;
+    }
+  }
+
   const stringJsonl = await buildBulkCreateProductJsonl(
     shop.products.map((p) => p.product),
+    collectionsToJoinMap,
     shop
   );
 
