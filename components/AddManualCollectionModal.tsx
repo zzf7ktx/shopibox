@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { ReactNode, useState } from "react";
 import { useRouter } from "next/navigation";
 import { addCollection } from "@/actions";
 import * as z from "zod";
@@ -12,7 +12,6 @@ import {
   DialogDescription,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from "@/components/ui/Dialog";
 import { Button } from "@/components/ui/Button";
 import {
@@ -55,9 +54,13 @@ const formSchema = z.object({
   ),
 });
 
-export interface AddManualCollectionModalProps {}
+export interface AddManualCollectionModalProps {
+  dialogTrigger: ReactNode;
+}
 
-export default function AddManualCollectionModal({}: AddManualCollectionModalProps) {
+export default function AddManualCollectionModal({
+  dialogTrigger,
+}: AddManualCollectionModalProps) {
   const [loading, setLoading] = useState<boolean>(false);
   const [open, setOpen] = useState(false);
   const router = useRouter();
@@ -110,11 +113,7 @@ export default function AddManualCollectionModal({}: AddManualCollectionModalPro
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogTrigger asChild>
-        <Button>
-          <PlusCircledIcon className="mr-2 h-4 w-4" /> Upload
-        </Button>
-      </DialogTrigger>
+      {dialogTrigger}
       <DialogContent>
         <DialogHeader>
           <DialogTitle>Add collection manually</DialogTitle>

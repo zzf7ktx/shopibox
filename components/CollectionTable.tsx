@@ -95,6 +95,7 @@ export default function CollectionTable({
     <DataTable
       columns={columns}
       data={data}
+      loading={loading}
       toolbar={(table) => <CollectionTableToolbar table={table} />}
     />
   );
