@@ -3,6 +3,7 @@ import {
   Image as ImageInfo,
   ImageSource,
   ImageSyncStatus,
+  Prisma,
 } from "@prisma/client";
 import { useRouter } from "next/navigation";
 import { syncImageWithMainProvider } from "@/actions";
@@ -34,8 +35,56 @@ import { DataTable } from "@/components/ui/DataTable";
 import { DialogTrigger } from "@/components/ui/Dialog";
 import { ImageTableToolbar } from "./ImageTableToolbar";
 import ViewMetadataModal from "./ViewMetadataModal";
+import { getRowRange } from "@/utils";
+import { Checkbox } from "./ui/Checkbox";
+import Link from "next/link";
 
-const columns: ColumnDef<ImageInfo>[] = [
+type ImageWithProduct = Prisma.ImageGetPayload<{
+  include: {
+    product: true;
+  };
+}>;
+
+let lastSelectedId: number = -1;
+
+const columns: ColumnDef<ImageWithProduct>[] = [
+  {
+    id: "select",
+    size: 20,
+    header: ({ table }) => (
+      <Checkbox
+        checked={
+          table.getIsAllPageRowsSelected() ||
+          (table.getIsSomePageRowsSelected() && "indeterminate")
+        }
+        onCheckedChange={(value: boolean) =>
+          table.toggleAllPageRowsSelected(!!value)
+        }
+        aria-label="Select all"
+      />
+    ),
+    cell: ({ row, table }) => {
+      return (
+        <Checkbox
+          checked={row.getIsSelected()}
+          onClick={(e) => {
+            if (e.shiftKey) {
+              const { rows, rowsById } = table.getRowModel();
+              const rowsToToggle = getRowRange(rows, row.index, lastSelectedId);
+              const isLastSelected = rowsById[lastSelectedId].getIsSelected();
+              rowsToToggle.forEach((row) => row.toggleSelected(isLastSelected));
+            }
+
+            lastSelectedId = row.index;
+          }}
+          onCheckedChange={(value: boolean) => row.toggleSelected(!!value)}
+          aria-label="Select row"
+        />
+      );
+    },
+    enableSorting: false,
+    enableHiding: false,
+  },
   {
     accessorKey: "name",
     header: ({ column }) => (
@@ -103,9 +152,14 @@ const columns: ColumnDef<ImageInfo>[] = [
     },
   },
   {
-    accessorKey: "productId",
+    accessorKey: "product",
     header: ({ column }) => (
       <DataTableColumnHeader column={column} title="Product" />
+    ),
+    cell: ({ row }) => (
+      <Link href={`/products/${row.original.product?.id ?? ""}`}>
+        {row.original.product?.name}
+      </Link>
     ),
   },
 
@@ -140,6 +194,7 @@ const columns: ColumnDef<ImageInfo>[] = [
   },
   {
     id: "actions",
+    size: 50,
     cell: ({ row }) => <CloudSyncCell image={row.original} />,
   },
 ];
@@ -190,7 +245,7 @@ function CloudSyncCell({ image }: { image: ImageInfo }) {
 }
 
 export interface ImageTableProps {
-  data?: Array<ImageInfo>;
+  data?: Array<ImageWithProduct>;
   loading?: boolean;
 }
 
@@ -199,6 +254,7 @@ export default function ImageTable({ data = [], loading }: ImageTableProps) {
     <DataTable
       columns={columns}
       data={data}
+      loading={loading}
       toolbar={(table) => <ImageTableToolbar table={table} />}
     />
   );

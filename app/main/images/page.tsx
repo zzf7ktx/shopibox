@@ -5,6 +5,9 @@ export const revalidate = 0;
 
 export default async function Images() {
   let data = await prisma.image.findMany({
+    include: {
+      product: true,
+    },
     orderBy: [
       {
         createdAt: "desc",
