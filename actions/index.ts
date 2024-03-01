@@ -20,3 +20,4 @@ export { publishCollectionProducts } from "./publishCollectionProducts";
 export { deleteProducts } from "./deleteProducts";
 export { addOrUpdateProductVariants } from "./addOrUpdateProductVariants";
 export { getProductVariants } from "./getProductVariants";
+export { importCollections } from "./importCollections";
