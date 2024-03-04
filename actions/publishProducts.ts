@@ -42,6 +42,7 @@ const buildBulkCreateProductJsonl = async (
             responseType: "arraybuffer",
           })
         ).data as Buffer;
+
         const maskImageInput = (
           await axios({ url: shopMaskImage.src, responseType: "arraybuffer" })
         ).data as Buffer;
@@ -120,7 +121,7 @@ const buildBulkCreateProductJsonl = async (
       productType: product.category,
       options: Array.from(names),
       variants: variants,
-      collectionsToJoin: product.collections.map(
+      collectionsToJoin: (product?.collections ?? []).map(
         (collection) => collectionMap[collection.collection.name]
       ),
     };
@@ -171,7 +172,7 @@ export const publishProducts = async (shopId: string, productIds: string[]) => {
   let allProductCollections: { title: string; description: string | null }[] =
     [];
   for (let product of shop.products) {
-    for (let collection of product.product.collections) {
+    for (let collection of product.product?.collections ?? []) {
       if (
         !allProductCollections.some(
           (c) => c.title === collection.collection.name

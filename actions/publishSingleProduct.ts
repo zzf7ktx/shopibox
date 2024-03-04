@@ -67,10 +67,12 @@ export const publishSingleProduct = async (
     (e: any) => e.node
   );
 
-  let productCollections = shop.products[0].product.collections.map((c) => ({
-    title: c.collection.name,
-    description: c.collection.description,
-  }));
+  let productCollections = (shop.products[0].product?.collections ?? []).map(
+    (c) => ({
+      title: c.collection.name,
+      description: c.collection.description,
+    })
+  );
 
   let collectionsToJoin: string[] = [];
 
