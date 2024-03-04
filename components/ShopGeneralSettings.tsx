@@ -156,7 +156,7 @@ export default function ShopGeneralSettings({
             </FormItem>
           )}
         />
-        <Button type="submit">
+        <Button type="submit" disabled={loading}>
           {loading && <ReloadIcon className="mr-2 h-4 w-4 animate-spin" />}
           Update
         </Button>

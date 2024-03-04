@@ -232,6 +232,9 @@ export default function AddManualProductModal({
   };
 
   const onOpenChange = (newValue: boolean) => {
+    if (loading) {
+      return;
+    }
     setOpen(newValue);
     form.reset();
   };
@@ -489,7 +492,7 @@ export default function AddManualProductModal({
                       </FormItem>
                     )}
                   />
-                  <Button type="submit">
+                  <Button type="submit" disabled={loading}>
                     {loading && (
                       <ReloadIcon className="mr-2 h-4 w-4 animate-spin" />
                     )}

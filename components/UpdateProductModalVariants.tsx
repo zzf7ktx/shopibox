@@ -311,7 +311,7 @@ export default function UpdateProductModalVariants({
               <PlusIcon /> Add new option
             </Button>
             <br />
-            <Button type="submit">
+            <Button type="submit" disabled={loading}>
               {loading && <ReloadIcon className="mr-2 h-4 w-4 animate-spin" />}
               Save
             </Button>

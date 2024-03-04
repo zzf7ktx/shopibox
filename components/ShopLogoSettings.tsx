@@ -256,7 +256,7 @@ export default function ShopLogoSettings({ shopInfo }: ShopLogoSettingsProps) {
           </div>
         </div>
 
-        <Button type="submit">
+        <Button type="submit" disabled={loading}>
           {loading && <ReloadIcon className="mr-2 h-4 w-4 animate-spin" />}
           Update
         </Button>

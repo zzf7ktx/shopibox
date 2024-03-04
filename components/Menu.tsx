@@ -43,7 +43,6 @@ export function Menu() {
           <MenubarItem>
             Import... <MenubarShortcut>⌘O</MenubarShortcut>
           </MenubarItem>
-          <MenubarSeparator />
         </MenubarContent>
       </MenubarMenu>
       <MenubarMenu>
