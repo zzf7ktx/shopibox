@@ -110,6 +110,9 @@ function AddToShopDialog({
   };
 
   const onOpenChange = (newValue: boolean) => {
+    if (loading) {
+      return;
+    }
     form.reset();
     setOpen(newValue);
   };
@@ -190,7 +193,7 @@ function AddToShopDialog({
                     </FormItem>
                   )}
                 />
-                <Button type="submit">
+                <Button type="submit" disabled={loading}>
                   {loading && (
                     <ReloadIcon className="mr-2 h-4 w-4 animate-spin" />
                   )}

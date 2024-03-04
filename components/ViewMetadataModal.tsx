@@ -116,6 +116,9 @@ export default function ViewMetadataModal({
   }, [imageSrc, open]);
 
   const onOpenChange = (newValue: boolean) => {
+    if (loading) {
+      return;
+    }
     setOpen(newValue);
     form.reset();
   };
@@ -149,7 +152,7 @@ export default function ViewMetadataModal({
                   />
                 ))}
 
-                <Button type="submit">
+                <Button type="submit" disabled={loading}>
                   {loading && (
                     <ReloadIcon className="mr-2 h-4 w-4 animate-spin" />
                   )}

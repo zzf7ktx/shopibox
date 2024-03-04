@@ -132,6 +132,9 @@ function AddToCollectionDialog<TData>({
   };
 
   const onOpenChange = (newValue: boolean) => {
+    if (loading) {
+      return;
+    }
     form.reset();
     setOpen(newValue);
   };
@@ -263,7 +266,7 @@ function AddToCollectionDialog<TData>({
                     </FormItem>
                   )}
                 />
-                <Button type="submit">
+                <Button type="submit" disabled={loading}>
                   {loading && (
                     <ReloadIcon className="mr-2 h-4 w-4 animate-spin" />
                   )}
@@ -332,6 +335,9 @@ function AddToShopDialog<TData>({
   };
 
   const onOpenChange = (newValue: boolean) => {
+    if (loading) {
+      return;
+    }
     form.reset();
     setOpen(newValue);
   };
@@ -412,7 +418,7 @@ function AddToShopDialog<TData>({
                     </FormItem>
                   )}
                 />
-                <Button type="submit">
+                <Button type="submit" disabled={loading}>
                   {loading && (
                     <ReloadIcon className="mr-2 h-4 w-4 animate-spin" />
                   )}
@@ -465,8 +471,15 @@ function DeleteProductDialog<TData>({
     }
   };
 
+  const onOpenChange = (open: boolean) => {
+    if (loading) {
+      return;
+    }
+    setOpen(open);
+  };
+
   return (
-    <Dialog open={open} onOpenChange={(open) => setOpen(open)}>
+    <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogTrigger asChild>
         <Button variant="destructive" className="h-8 px-2 lg:px-3">
           Delete
@@ -485,7 +498,9 @@ function DeleteProductDialog<TData>({
             {loading && <ReloadIcon className="mr-2 h-4 w-4 animate-spin" />}
             Delete
           </Button>
-          <Button variant="outline">Cancel</Button>
+          <Button variant="outline" onClick={() => onOpenChange(false)}>
+            Cancel
+          </Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>

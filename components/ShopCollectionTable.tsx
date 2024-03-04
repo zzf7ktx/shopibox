@@ -117,6 +117,7 @@ function ActionCell({ row }: { row: CollectionOnShop }) {
       toast({
         title: "Error",
         description: `Something error`,
+        variant: "destructive",
       });
     } finally {
       setLoading(false);
