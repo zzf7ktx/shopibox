@@ -23,3 +23,4 @@ export { getProductVariants } from "./getProductVariants";
 export { importCollections } from "./importCollections";
 export { updateCollection } from "./updateCollection";
 export { getCollection } from "./getCollection";
+export { deleteImages } from "./deleteImages";

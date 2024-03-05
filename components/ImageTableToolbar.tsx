@@ -5,6 +5,7 @@ import {
   Cross2Icon,
   CrossCircledIcon,
   HandIcon,
+  ReloadIcon,
   RocketIcon,
 } from "@radix-ui/react-icons";
 import { Table } from "@tanstack/react-table";
@@ -13,12 +14,101 @@ import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { DataTableViewOptions } from "@/components/ui/DataTableViewOptions";
 import { DataTableFacetedFilter } from "@/components/ui/DataTableFacetedFilter";
+import { useState } from "react";
+import { useToast } from "./ui/useToast";
+import { useRouter } from "next/navigation";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "./ui/Dialog";
+import { deleteImages } from "@/actions";
+
+function DeleteImageDialog<TData>({
+  selectedImages,
+  table,
+}: {
+  selectedImages: string[];
+  table: Table<TData>;
+}) {
+  const [loading, setLoading] = useState<boolean>(false);
+  const [open, setOpen] = useState<boolean>(false);
+  const { toast } = useToast();
+  const router = useRouter();
+
+  const onFinish = async () => {
+    try {
+      setLoading(true);
+
+      await deleteImages(selectedImages);
+
+      toast({
+        title: "Success",
+        description: `${selectedImages.length} ${
+          selectedImages.length > 1 ? "images" : "image"
+        } are deleted`,
+      });
+
+      setOpen(false);
+      router.refresh();
+      table.toggleAllRowsSelected(false);
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Something wrong",
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const onOpenChange = (open: boolean) => {
+    if (loading) {
+      return;
+    }
+    setOpen(open);
+  };
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogTrigger asChild>
+        <Button variant="destructive" className="h-8 px-2 lg:px-3">
+          Delete
+        </Button>
+      </DialogTrigger>
+      <DialogContent className="max-h-[80%] overflow-y-auto">
+        <DialogHeader>
+          <DialogTitle>Delete image</DialogTitle>
+          <DialogDescription>
+            Do you want to delete permanently{" "}
+            {selectedImages.length > 1 ? "these images" : "this image"}?
+          </DialogDescription>
+        </DialogHeader>
+        <DialogFooter>
+          <Button variant="destructive" onClick={onFinish} disabled={loading}>
+            {loading && <ReloadIcon className="mr-2 h-4 w-4 animate-spin" />}
+            Delete
+          </Button>
+          <Button variant="outline" onClick={() => onOpenChange(false)}>
+            Cancel
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
 
 interface ImageTableToolbar<TData> {
   table: Table<TData>;
 }
 
 export function ImageTableToolbar<TData>({ table }: ImageTableToolbar<TData>) {
+  const selectedRows = table.getFilteredSelectedRowModel();
   const isFiltered = table.getState().columnFilters.length > 0;
   const sources = Object.entries(ImageSource).map(([key, value]) => ({
     label: key,
@@ -66,6 +156,16 @@ export function ImageTableToolbar<TData>({ table }: ImageTableToolbar<TData>) {
             Reset
             <Cross2Icon className="ml-2 h-4 w-4" />
           </Button>
+        )}
+        {selectedRows.rows.length > 0 && (
+          <>
+            <DeleteImageDialog
+              selectedImages={selectedRows.rows.map(
+                (r) => (r.original as any).id
+              )}
+              table={table}
+            />
+          </>
         )}
       </div>
       <DataTableViewOptions table={table} />
