@@ -26,7 +26,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "./ui/Dialog";
-import { deleteImages } from "@/actions";
+import { deleteImages, syncManyImagesWithMainProvider } from "@/actions";
 
 function DeleteImageDialog<TData>({
   selectedImages,
@@ -103,6 +103,82 @@ function DeleteImageDialog<TData>({
   );
 }
 
+function SyncImageDialog<TData>({
+  selectedImages,
+  table,
+}: {
+  selectedImages: string[];
+  table: Table<TData>;
+}) {
+  const [loading, setLoading] = useState<boolean>(false);
+  const [open, setOpen] = useState<boolean>(false);
+  const { toast } = useToast();
+  const router = useRouter();
+
+  const onFinish = async () => {
+    try {
+      setLoading(true);
+
+      await syncManyImagesWithMainProvider(selectedImages, "default");
+
+      toast({
+        title: "Success",
+        description: `${selectedImages.length} ${
+          selectedImages.length > 1 ? "images" : "image"
+        } are synced`,
+      });
+
+      setOpen(false);
+      router.refresh();
+      table.toggleAllRowsSelected(false);
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Something wrong",
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const onOpenChange = (open: boolean) => {
+    if (loading) {
+      return;
+    }
+    setOpen(open);
+  };
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogTrigger asChild>
+        <Button variant="default" className="h-8 px-2 lg:px-3">
+          Sync
+        </Button>
+      </DialogTrigger>
+      <DialogContent className="max-h-[80%] overflow-y-auto">
+        <DialogHeader>
+          <DialogTitle>Sync images</DialogTitle>
+          <DialogDescription>
+            Do you want to sync{" "}
+            {selectedImages.length > 1 ? "these images" : "this image"} to
+            cloud?
+          </DialogDescription>
+        </DialogHeader>
+        <DialogFooter>
+          <Button variant="default" onClick={onFinish} disabled={loading}>
+            {loading && <ReloadIcon className="mr-2 h-4 w-4 animate-spin" />}
+            Sync
+          </Button>
+          <Button variant="outline" onClick={() => onOpenChange(false)}>
+            Cancel
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
 interface ImageTableToolbar<TData> {
   table: Table<TData>;
 }
@@ -159,6 +235,12 @@ export function ImageTableToolbar<TData>({ table }: ImageTableToolbar<TData>) {
         )}
         {selectedRows.rows.length > 0 && (
           <>
+            <SyncImageDialog
+              selectedImages={selectedRows.rows.map(
+                (r) => (r.original as any).id
+              )}
+              table={table}
+            />
             <DeleteImageDialog
               selectedImages={selectedRows.rows.map(
                 (r) => (r.original as any).id
