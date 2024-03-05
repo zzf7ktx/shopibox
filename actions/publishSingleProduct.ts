@@ -5,6 +5,8 @@ import prisma from "@/lib/prisma";
 import sharp from "sharp";
 import cloudinary from "@/lib/cloudinary";
 import axios from "axios";
+import { cartesian, groupByKey } from "@/utils";
+import { syncImageWithMainProvider } from ".";
 
 export const publishSingleProduct = async (
   shopId: string,
@@ -139,8 +141,13 @@ export const publishSingleProduct = async (
   const product = shop.products[0].product;
   let media: any[] = [];
   const shopMaskImage = shop.maskImages[0];
-  if (shopMaskImage.src !== "") {
+  if (!!shopMaskImage?.src) {
     for (let img of product.images) {
+      if (!img.cloudLink) {
+        const res = await syncImageWithMainProvider(img.id, "default");
+        img.cloudLink = res.url ?? "";
+      }
+
       const imageInput = (
         await axios({
           url: img.cloudLink ?? img.backupLink,
@@ -182,11 +189,19 @@ export const publishSingleProduct = async (
         public_id: img.providerRef ?? img.id,
         folder: `shopify/${shopId}`,
       });
-      media.push({
-        alt: img.name,
-        originalSource: uploadResult?.secure_url ?? img.cloudLink,
-        mediaContentType: "IMAGE",
-      });
+      media = [];
+      for (let img of product.images) {
+        if (!img.cloudLink) {
+          const res = await syncImageWithMainProvider(img.id, "default");
+          img.cloudLink = res.url ?? "";
+        }
+
+        media.push({
+          alt: img.name,
+          originalSource: img.cloudLink,
+          mediaContentType: "IMAGE",
+        });
+      }
     }
   } else {
     media = product.images.map((img) => ({
@@ -201,23 +216,11 @@ export const publishSingleProduct = async (
     names.add(variant.key);
   }
 
-  let variants = [];
-  for (let item of shop.products[0].product.variants ?? []) {
-    let obj = {
-      options: [] as string[],
-    };
-    for (let name of Array.from(names)) {
-      if (item.key === name) {
-        obj.options.push(item.value);
-      }
-    }
-    let exists = variants.some(
-      (o) => JSON.stringify(o.options) === JSON.stringify(obj.options)
-    );
-    if (!exists) {
-      variants.push(obj);
-    }
-  }
+  let variants = cartesian(
+    ...groupByKey(shop.products[0].product.variants ?? []).map((v) => v.values)
+  ).map((v) => ({
+    options: v,
+  }));
 
   const result = await shopifyClient.request(createProduct, {
     variables: {

@@ -48,4 +48,5 @@ export const syncImageWithMainProvider = async (
       id: image?.id,
     },
   });
+  return { success: true, url: uploadResult.secure_url };
 };

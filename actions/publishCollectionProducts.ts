@@ -8,6 +8,8 @@ import { Prisma } from "@prisma/client";
 import prisma from "@/lib/prisma";
 import sharp from "sharp";
 import cloudinary from "@/lib/cloudinary";
+import { cartesian, groupByKey } from "@/utils";
+import { syncImageWithMainProvider } from ".";
 
 type ProductDto = Prisma.ProductGetPayload<{
   include: {
@@ -35,8 +37,12 @@ const buildBulkCreateProductJsonl = async (
   for (let product of products) {
     let media: any[] = [];
     const shopMaskImage = shopInfo.maskImages[0];
-    if (shopMaskImage.src !== "") {
+    if (!!shopMaskImage?.src) {
       for (let img of product.images) {
+        if (!img.cloudLink) {
+          const res = await syncImageWithMainProvider(img.id, "default");
+          img.cloudLink = res.url ?? "";
+        }
         const imageInput = (
           await axios({
             url: img.cloudLink ?? img.backupLink,
@@ -85,11 +91,19 @@ const buildBulkCreateProductJsonl = async (
         });
       }
     } else {
-      media = product.images.map((img) => ({
-        alt: img.name,
-        originalSource: img.cloudLink ?? img.backupLink ?? img.sourceLink,
-        mediaContentType: "IMAGE",
-      }));
+      media = [];
+      for (let img of product.images) {
+        if (!img.cloudLink) {
+          const res = await syncImageWithMainProvider(img.id, "default");
+          img.cloudLink = res.url ?? "";
+        }
+
+        media.push({
+          alt: img.name,
+          originalSource: img.cloudLink,
+          mediaContentType: "IMAGE",
+        });
+      }
     }
 
     let names = new Set();
@@ -97,23 +111,11 @@ const buildBulkCreateProductJsonl = async (
       names.add(variant.key);
     }
 
-    let variants = [];
-    for (let item of product.variants ?? []) {
-      let obj = {
-        options: [] as string[],
-      };
-      for (let name of Array.from(names)) {
-        if (item.key === name) {
-          obj.options.push(item.value);
-        }
-      }
-      let exists = variants.some(
-        (o) => JSON.stringify(o.options) === JSON.stringify(obj.options)
-      );
-      if (!exists) {
-        variants.push(obj);
-      }
-    }
+    let variants = cartesian(
+      ...groupByKey(product.variants ?? []).map((v) => v.values)
+    ).map((v) => ({
+      options: v,
+    }));
 
     const input = {
       title: product.name,
