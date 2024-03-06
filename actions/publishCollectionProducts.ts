@@ -26,6 +26,7 @@ type ProductDto = Prisma.ProductGetPayload<{
 const buildBulkCreateProductJsonl = async (
   products: ProductDto[],
   collectionMap: { [key: string]: string },
+  locationIds: { id: string }[],
   shopInfo: Prisma.ShopGetPayload<{
     include: {
       maskImages: true;
@@ -115,6 +116,15 @@ const buildBulkCreateProductJsonl = async (
       ...groupByKey(product.variants ?? []).map((v) => v.values)
     ).map((v) => ({
       options: v,
+      price: product.price ?? 0,
+      inventoryItem: {
+        tracked: true,
+      },
+      inventoryPolicy: "CONTINUE",
+      inventoryQuantities: locationIds.map((l) => ({
+        availableQuantity: 10000000,
+        locationId: l.id ?? 0,
+      })),
     }));
 
     const input = {
@@ -254,9 +264,30 @@ export const publishCollectionProducts = async (
     }
   }
 
+  const getLocationResponse = await shopifyClient.fetch(`
+  query {
+    locations(first: 1) {
+      edges {
+        node {
+          id
+        }
+      }
+    }
+  }
+`);
+
+  let locations = (await getLocationResponse.json()).data?.locations?.edges;
+
   const stringJsonl = await buildBulkCreateProductJsonl(
     shop.products.map((p) => p.product),
     collectionsToJoinMap,
+    locations?.length > 0
+      ? [
+          {
+            id: locations[0]?.node?.id ?? 0,
+          },
+        ]
+      : [],
     shop
   );
 

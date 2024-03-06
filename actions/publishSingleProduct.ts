@@ -211,17 +211,50 @@ export const publishSingleProduct = async (
     }));
   }
 
+  const getLocationResponse = await shopifyClient.fetch(`
+        query {
+          locations(first: 1) {
+            edges {
+              node {
+                id
+              }
+            }
+          }
+        }
+      `);
+
+  let locations = (await getLocationResponse.json()).data?.locations?.edges;
+
   let names = new Set();
   for (let variant of shop.products[0].product.variants ?? []) {
     names.add(variant.key);
   }
 
-  let variants = cartesian(
-    ...groupByKey(shop.products[0].product.variants ?? []).map((v) => v.values)
-  ).map((v) => ({
-    options: v,
-  }));
-
+  // Temporally solution: fix 10000000 for first location
+  let variants =
+    !product?.variants || product?.variants.length === 0
+      ? []
+      : cartesian(
+          ...groupByKey(shop.products[0].product.variants ?? []).map(
+            (v) => v.values
+          )
+        ).map((v) => ({
+          options: v,
+          price: product.price ?? 0,
+          inventoryItem: {
+            tracked: true
+          },
+          inventoryPolicy: 'CONTINUE',
+          inventoryQuantities:
+            locations?.length > 0
+              ? [
+                  {
+                    availableQuantity: 10000000,
+                    locationId: locations[0]?.node?.id ?? 0,
+                  },
+                ]
+              : [],
+        }));
   const result = await shopifyClient.request(createProduct, {
     variables: {
       input: {
