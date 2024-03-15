@@ -25,3 +25,4 @@ export { updateCollection } from "./updateCollection";
 export { getCollection } from "./getCollection";
 export { deleteImages } from "./deleteImages";
 export { syncManyImagesWithMainProvider } from "./syncManyImagesWithMainProvider";
+export { setProductsToUnpublished } from "./setProductsToUnpublished";
