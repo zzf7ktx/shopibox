@@ -8,8 +8,12 @@ import { Button } from "@/components/ui/Button";
 import { Cross2Icon } from "@radix-ui/react-icons";
 import { DataTableFacetedFilter } from "@/components/ui/DataTableFacetedFilter";
 import { useToast } from "@/components/ui/useToast";
-import { getCollections, publishProducts } from "@/actions";
-import { useParams } from "next/navigation";
+import {
+  getCollections,
+  publishProducts,
+  setProductsToUnpublished,
+} from "@/actions";
+import { useParams, useRouter } from "next/navigation";
 import { CgSpinnerTwoAlt } from "react-icons/cg";
 
 interface Option {
@@ -31,6 +35,7 @@ export function ShopProductTableToolbar<TData>({
   const [loading, setLoading] = useState<boolean>(false);
   const { id } = useParams();
   const { toast } = useToast();
+  const router = useRouter();
 
   useEffect(() => {
     const getCollectionOptions = async () => {
@@ -65,6 +70,40 @@ export function ShopProductTableToolbar<TData>({
         title: "Success",
         description: `Pushed selected products to shop`,
       });
+
+      router.refresh();
+    } catch (error) {
+      console.log(error);
+      toast({
+        title: "Error",
+        description: `Something wrong`,
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const forceSetProductsToUnpublished = async () => {
+    try {
+      if (!id) {
+        return;
+      }
+
+      const shopId = typeof id === "string" ? id : id[0];
+      setLoading(true);
+
+      const result = await setProductsToUnpublished(
+        shopId,
+        selectedRows.rows.map((r) => (r.original as any).id)
+      );
+
+      toast({
+        title: "Success",
+        description: `Set selected products to unpublished`,
+      });
+
+      router.refresh();
     } catch (error) {
       console.log(error);
       toast({
@@ -113,6 +152,15 @@ export function ShopProductTableToolbar<TData>({
               onClick={pushProducts}
             >
               Push {`'${selectedRows.rows.length}' products`}
+            </Button>
+          )}
+          {selectedRows.rows.length > 0 && (
+            <Button
+              variant="destructive"
+              className="h-8 px-2 lg:px-3"
+              onClick={forceSetProductsToUnpublished}
+            >
+              Force unpublished {`'${selectedRows.rows.length}' products`}
             </Button>
           )}
         </div>
