@@ -128,6 +128,7 @@ const buildBulkCreateProductJsonl = async (
               availableQuantity: 10000000,
               locationId: l.id ?? 0,
             })),
+            taxable: false,
           }));
 
     const input = {

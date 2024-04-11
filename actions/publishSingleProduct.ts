@@ -244,6 +244,7 @@ export const publishSingleProduct = async (
           inventoryItem: {
             tracked: true
           },
+          taxable: false,
           inventoryPolicy: 'CONTINUE',
           inventoryQuantities:
             locations?.length > 0
