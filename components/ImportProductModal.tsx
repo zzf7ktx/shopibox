@@ -149,10 +149,10 @@ export default function ImportProductModal({
 
       const formData = new FormData();
       formData.append("file", importFile);
-      const result = await importProducts(formData, autoSyncImages);
+      const result = importProducts(formData, autoSyncImages);
       toast({
         title: "Success",
-        description: `${result?.length ?? 0} products added.`,
+        description: `Processed to import products.`,
       });
 
       form.reset();

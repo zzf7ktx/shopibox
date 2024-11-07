@@ -14,21 +14,21 @@ export async function GET() {
       job.uploadedProducts + job.batchSize
     );
 
-    const result = await publishProducts(job.shopId, batchProduct, true);
+    publishProducts(job.shopId, batchProduct, true).then((result) => {
+      if (result.success) {
+        job.uploadedProducts += result.data ?? 0;
+      }
 
-    if (result.success) {
-      job.uploadedProducts += result.data ?? 0;
-    }
+      if (job.uploadedProducts === job.productIds.length) {
+        job.status = "Succeeded";
+      }
 
-    if (job.uploadedProducts === job.productIds.length) {
-      job.status = "Succeeded";
-    }
-
-    await prisma.job.update({
-      data: job,
-      where: {
-        id: job.id,
-      },
+      prisma.job.update({
+        data: job,
+        where: {
+          id: job.id,
+        },
+      });
     });
   }
 
