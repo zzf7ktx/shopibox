@@ -3,7 +3,14 @@ import { Button } from "./ui/Button";
 import { usePathname } from "next/navigation";
 import { ReactNode } from "react";
 import Link from "next/link";
-import { LuAlertTriangle, LuFolder, LuGlobe, LuImage, LuShoppingBag } from "react-icons/lu";
+import {
+  LuAlertTriangle,
+  LuFolder,
+  LuGlobe,
+  LuImage,
+  LuRocket,
+  LuShoppingBag,
+} from "react-icons/lu";
 
 interface SidebarProps extends React.HTMLAttributes<HTMLDivElement> {}
 
@@ -45,6 +52,11 @@ export function Sidebar({ className }: SidebarProps) {
       href: "/main/shops",
       icon: <LuGlobe />,
       title: "Shops",
+    },
+    {
+      href: "/main/jobs",
+      icon: <LuRocket />,
+      title: "Jobs",
     },
   ];
 

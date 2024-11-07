@@ -10,6 +10,7 @@ import sharp from "sharp";
 import cloudinary from "@/lib/cloudinary";
 import { cartesian, groupByKey } from "@/utils";
 import { syncImageWithMainProvider } from ".";
+import { rewriteProductTitles } from "./rewriteProductTitle";
 
 type ProductDto = Prisma.ProductGetPayload<{
   include: {
@@ -95,8 +96,12 @@ const buildBulkCreateProductJsonl = async (
       media = [];
       for (let img of product.images) {
         if (!img.cloudLink) {
-          const res = await syncImageWithMainProvider(img.id, "default");
-          img.cloudLink = res.url ?? "";
+          try {
+            const res = await syncImageWithMainProvider(img.id, "default");
+            img.cloudLink = res.url ?? "";
+          } catch (error) {
+            img.cloudLink = img.sourceLink ?? "";
+          }
         }
 
         media.push({
@@ -148,7 +153,11 @@ const buildBulkCreateProductJsonl = async (
   return stringJsonl;
 };
 
-export const publishProducts = async (shopId: string, productIds: string[]) => {
+export const publishProducts = async (
+  shopId: string,
+  productIds: string[],
+  autoRewriteTitle: boolean = false
+) => {
   const shop = await prisma.shop.findFirst({
     where: {
       id: shopId,
@@ -181,6 +190,25 @@ export const publishProducts = async (shopId: string, productIds: string[]) => {
 
   if (!shop) {
     return { success: false };
+  }
+
+  if (shop.products.length === 0) {
+    return { success: false };
+  }
+
+  // Temp: Rewrite products title including collection name
+  if (autoRewriteTitle) {
+    const rewrote = await rewriteProductTitles(
+      shop.products.map((p) => p.product)
+    );
+    for (let i = 0; i < shop.products.length; i++) {
+      const reProduct = rewrote.find(
+        (r) => r.id == shop.products[i].product.id
+      );
+
+      shop.products[i].product.name =
+        reProduct?.name ?? shop.products[i].product.name;
+    }
   }
 
   const shopifyClient = getShopifyClient(shop.shopDomain, shop.apiKey ?? "");
@@ -379,5 +407,5 @@ export const publishProducts = async (shopId: string, productIds: string[]) => {
     },
   });
 
-  return { success: true };
+  return { success: true, data: shop.products.length };
 };

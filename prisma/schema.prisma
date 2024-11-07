@@ -127,6 +127,7 @@ model Shop {
 
   maskImages ShopMaskImage[]
   products   ProductsOnShops[]
+  Job        Job[]
 
   @@map(name: "shops")
 }
@@ -157,4 +158,26 @@ model ShopMaskImage {
   shopId String? @map(name: "shop_id")
 
   @@map(name: "shop_mask_images")
+}
+
+enum JobStatus {
+  Scheduled
+  Succeeded
+  Failed
+}
+
+model Job {
+  id               String    @id @default(cuid())
+  status           JobStatus @default(Scheduled) @map(name: "status")
+  productIds       String[]  @default([]) @map("product_ids")
+  uploadedProducts Int       @default(0) @map("uploaded_products")
+  batchSize        Int       @default(0) @map("batch_size")
+
+  shop   Shop?  @relation(fields: [shopId], references: [id], onDelete: Cascade)
+  shopId String @map(name: "shop_id")
+
+  createdAt DateTime @default(now()) @map(name: "created_at")
+  updatedAt DateTime @updatedAt @map(name: "updated_at")
+
+  @@map(name: "jobs")
 }
