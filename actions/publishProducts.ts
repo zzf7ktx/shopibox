@@ -24,6 +24,7 @@ type ProductDto = Prisma.ProductGetPayload<{
   };
 }>;
 
+export const maxDuration = 60;
 const buildBulkCreateProductJsonl = async (
   products: ProductDto[],
   collectionMap: { [key: string]: string },

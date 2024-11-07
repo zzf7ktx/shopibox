@@ -7,6 +7,7 @@ import { ImageSource } from "@prisma/client";
 import { Readable } from "stream";
 import { addOrUpdateProductVariants, syncImageWithMainProvider } from ".";
 
+export const maxDuration = 60;
 export const importProducts = async (
   data: FormData,
   autoSyncImages: boolean = false
