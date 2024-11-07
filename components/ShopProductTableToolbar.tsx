@@ -11,6 +11,7 @@ import { useToast } from "@/components/ui/useToast";
 import {
   getCollections,
   publishProducts,
+  publishShopProducts,
   setProductsToUnpublished,
 } from "@/actions";
 import { useParams, useRouter } from "next/navigation";
@@ -69,6 +70,35 @@ export function ShopProductTableToolbar<TData>({
       toast({
         title: "Success",
         description: `Pushed selected products to shop`,
+      });
+
+      router.refresh();
+    } catch (error) {
+      console.log(error);
+      toast({
+        title: "Error",
+        description: `Something wrong`,
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const pushShopProducts = async () => {
+    try {
+      if (!id) {
+        return;
+      }
+
+      const shopId = typeof id === "string" ? id : id[0];
+      setLoading(true);
+
+      const result = await publishShopProducts(shopId);
+
+      toast({
+        title: "Success",
+        description: `Scheduled publish products to shop`,
       });
 
       router.refresh();
@@ -145,6 +175,15 @@ export function ShopProductTableToolbar<TData>({
               <Cross2Icon className="ml-2 h-4 w-4" />
             </Button>
           )}
+          {
+            <Button
+              variant="default"
+              className="h-8 px-2 lg:px-3"
+              onClick={pushShopProducts}
+            >
+              Schedule
+            </Button>
+          }
           {selectedRows.rows.length > 0 && (
             <Button
               variant="default"
