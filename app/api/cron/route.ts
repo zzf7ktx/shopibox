@@ -2,6 +2,7 @@ import { publishProducts } from "@/actions";
 import prisma from "@/lib/prisma";
 
 export const maxDuration = 60;
+
 export async function GET() {
   const jobs = await prisma.job.findMany({
     where: {
