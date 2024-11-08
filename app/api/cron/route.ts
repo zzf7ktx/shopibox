@@ -16,21 +16,21 @@ export async function GET() {
       job.uploadedProducts + job.batchSize
     );
 
-    publishProducts(job.shopId, batchProduct, true).then((result) => {
-      if (result.success) {
-        job.uploadedProducts += result.data ?? 0;
-      }
+    const result = await publishProducts(job.shopId, batchProduct, true);
 
-      if (job.uploadedProducts === job.productIds.length) {
-        job.status = "Succeeded";
-      }
+    if (result.success) {
+      job.uploadedProducts += result.data ?? 0;
+    }
 
-      prisma.job.update({
-        data: job,
-        where: {
-          id: job.id,
-        },
-      });
+    if (job.uploadedProducts === job.productIds.length) {
+      job.status = "Succeeded";
+    }
+
+   await  prisma.job.update({
+      data: job,
+      where: {
+        id: job.id,
+      },
     });
   }
 
