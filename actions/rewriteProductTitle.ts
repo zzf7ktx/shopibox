@@ -64,7 +64,7 @@ export const rewriteProductTitles = async (
   const newProducts = [];
   for (let i = 0; i < products.length; i++) {
     const product = products[i];
-    product.name = productTitles[i].replaceAll('"', "");
+    product.name = productTitles[i]?.replaceAll('"', "");
     newProducts.push(product);
   }
 
