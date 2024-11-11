@@ -10,6 +10,8 @@ export async function GET() {
     },
   });
 
+  const results = [];
+
   for (const job of jobs) {
     const batchProduct = job.productIds.slice(
       job.uploadedProducts,
@@ -26,7 +28,9 @@ export async function GET() {
       job.status = "Succeeded";
     }
 
-   await  prisma.job.update({
+    results.push(result);
+
+    await prisma.job.update({
       data: job,
       where: {
         id: job.id,
@@ -34,5 +38,11 @@ export async function GET() {
     });
   }
 
-  return Response.json({ success: true });
+  return Response.json({
+    success: true,
+    data: {
+      results: results,
+      jobs,
+    },
+  });
 }
