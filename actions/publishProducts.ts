@@ -407,5 +407,5 @@ export const publishProducts = async (
     },
   });
 
-  return { success: true, data: shop.products.length };
+  return { success: true, data: {no: shop.products.length, result: result} };
 };

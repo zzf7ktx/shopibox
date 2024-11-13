@@ -2,6 +2,7 @@ import { publishProducts } from "@/actions";
 import prisma from "@/lib/prisma";
 
 export const maxDuration = 60;
+export const revalidate = 0;
 
 export async function GET() {
   const jobs = await prisma.job.findMany({
@@ -21,7 +22,7 @@ export async function GET() {
     const result = await publishProducts(job.shopId, batchProduct, true);
 
     if (result.success) {
-      job.uploadedProducts += result.data ?? 0;
+      job.uploadedProducts += result.data?.no ?? 0;
     }
 
     if (job.uploadedProducts === job.productIds.length) {
