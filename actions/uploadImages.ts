@@ -1,8 +1,8 @@
 "use server";
 
-import cloudinary from "@/lib/cloudinary";
+import storage from "@/lib/storage";
 import prisma from "@/lib/prisma";
-import { CloudProviders } from "@/types/CloudProviders";
+import { StorageProvider } from "@/types/StorageProvider";
 
 export const uploadImages = async (productId: string, data: FormData) => {
   const files: File[] = data.getAll("files") as unknown as File[];
@@ -31,9 +31,9 @@ export const uploadImages = async (productId: string, data: FormData) => {
     const base64Data = buffer.toString("base64");
     const fileUri = "data:" + mime + ";" + encoding + "," + base64Data;
 
-    const uploadResult = await cloudinary.uploader.upload(fileUri, {
+    const uploadResult = await storage.upload(fileUri, {
       overwrite: true,
-      public_id: image?.providerRef ?? "",
+      publicId: image?.providerRef ?? "",
       folder: "shopify",
     });
 
@@ -43,9 +43,9 @@ export const uploadImages = async (productId: string, data: FormData) => {
 
     await prisma.image.update({
       data: {
-        cloudLink: uploadResult.secure_url,
-        provider: CloudProviders.Cloudinary,
-        providerRef: uploadResult.public_id,
+        cloudLink: uploadResult.secureUrl,
+        provider: StorageProvider.Cloudinary,
+        providerRef: uploadResult.publicId,
         syncStatus: "Synced",
       },
       where: {

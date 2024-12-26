@@ -3,7 +3,7 @@
 import getShopifyClient from "@/lib/shopify";
 import prisma from "@/lib/prisma";
 import sharp from "sharp";
-import cloudinary from "@/lib/cloudinary";
+import storage from "@/lib/storage";
 import axios from "axios";
 import { cartesian, groupByKey } from "@/utils";
 import { syncImageWithMainProvider } from ".";
@@ -184,9 +184,9 @@ export const publishSingleProduct = async (
       const base64Data = newImageBuffer.toString("base64");
       const fileUri = "data:" + mime + ";" + encoding + "," + base64Data;
 
-      const uploadResult = await cloudinary.uploader.upload(fileUri, {
+      const uploadResult = await storage.upload(fileUri, {
         overwrite: true,
-        public_id: img.providerRef ?? img.id,
+        publicId: img.providerRef ?? img.id,
         folder: `shopify/${shopId}`,
       });
       media = [];
@@ -242,10 +242,10 @@ export const publishSingleProduct = async (
           options: v,
           price: product.price ?? 0,
           inventoryItem: {
-            tracked: true
+            tracked: true,
           },
           taxable: false,
-          inventoryPolicy: 'CONTINUE',
+          inventoryPolicy: "CONTINUE",
           inventoryQuantities:
             locations?.length > 0
               ? [

@@ -1,6 +1,6 @@
 "use server";
 
-import cloudinary from "@/lib/cloudinary";
+import storage from "@/lib/storage";
 import prisma from "@/lib/prisma";
 import { ImageSourceType } from "@/types/ImageSourceType";
 
@@ -33,20 +33,20 @@ export const syncImageWithMainProvider = async (
       break;
   }
 
-  const uploadResult = await cloudinary.uploader.upload(sourceLink, {
+  const uploadResult = await storage.upload(sourceLink, {
     overwrite: true,
-    public_id: image?.providerRef ?? "",
+    publicId: image?.providerRef ?? "",
     folder: "shopify",
   });
 
   await prisma.image.update({
     data: {
       syncStatus: "Synced",
-      cloudLink: uploadResult.secure_url,
+      cloudLink: uploadResult.secureUrl,
     },
     where: {
       id: image?.id,
     },
   });
-  return { success: true, url: uploadResult.secure_url };
+  return { success: true, url: uploadResult.secureUrl };
 };
