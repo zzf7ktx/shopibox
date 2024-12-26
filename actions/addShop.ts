@@ -1,6 +1,6 @@
 "use server";
 
-import cloudinary from "@/lib/cloudinary";
+import storage from "@/lib/storage";
 import prisma from "@/lib/prisma";
 
 export interface AddShopFormFields {
@@ -46,9 +46,9 @@ export const addShop = async (data: AddShopFormFields, formData: FormData) => {
   const base64Data = buffer.toString("base64");
   const fileUri = "data:" + mime + ";" + encoding + "," + base64Data;
 
-  const uploadResult = await cloudinary.uploader.upload(fileUri, {
+  const uploadResult = await storage.upload(fileUri, {
     overwrite: true,
-    public_id: shop.maskImages?.[0]?.id ?? shop.id,
+    publicId: shop.maskImages?.[0]?.id ?? shop.id,
     folder: `shopify/${shop.id}`,
   });
 
@@ -63,7 +63,7 @@ export const addShop = async (data: AddShopFormFields, formData: FormData) => {
             id: shop.maskImages?.[0]?.id,
           },
           data: {
-            src: uploadResult.secure_url ?? "",
+            src: uploadResult.secureUrl ?? "",
           },
         },
       },

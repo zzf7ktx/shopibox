@@ -7,7 +7,7 @@ import { randomUUID } from "crypto";
 import { Prisma } from "@prisma/client";
 import prisma from "@/lib/prisma";
 import sharp from "sharp";
-import cloudinary from "@/lib/cloudinary";
+import storage from "@/lib/storage";
 import { cartesian, groupByKey } from "@/utils";
 import { syncImageWithMainProvider } from ".";
 import { rewriteProductTitles } from "./rewriteProductTitle";
@@ -80,15 +80,15 @@ const buildBulkCreateProductJsonl = async (
         const base64Data = newImageBuffer.toString("base64");
         const fileUri = "data:" + mime + ";" + encoding + "," + base64Data;
 
-        const uploadResult = await cloudinary.uploader.upload(fileUri, {
+        const uploadResult = await storage.upload(fileUri, {
           overwrite: true,
-          public_id: img.providerRef ?? img.id,
+          publicId: img.providerRef ?? img.id,
           folder: `shopify/${shopInfo.id}`,
         });
 
         media.push({
           alt: img.name,
-          originalSource: uploadResult?.secure_url ?? img.cloudLink,
+          originalSource: uploadResult?.secureUrl ?? img.cloudLink,
           mediaContentType: "IMAGE",
         });
       }
@@ -407,5 +407,5 @@ export const publishProducts = async (
     },
   });
 
-  return { success: true, data: {no: shop.products.length, result: result} };
+  return { success: true, data: { no: shop.products.length, result: result } };
 };
