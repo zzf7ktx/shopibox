@@ -1,5 +1,6 @@
 import { StorageProvider } from "@/types/StorageProvider";
 import cloudinaryService from "./cloudinary";
+import azureBlobService from "./azureBlob";
 
 export interface UploadOptions {
   overwrite: boolean;
@@ -25,46 +26,50 @@ export interface GetResult {
 const upload = (
   url: string,
   options: UploadOptions,
-  provider: StorageProvider = StorageProvider.Cloudinary
+  provider: StorageProvider = StorageProvider.Azure
 ): Promise<UploadResult> => {
   switch (provider) {
     case StorageProvider.Cloudinary:
-    default:
       return cloudinaryService.upload(url, options);
+    default:
+      return azureBlobService.upload(url, options);
   }
 };
 
 const uploadFile = (
   file: File,
   options: UploadOptions,
-  provider: StorageProvider = StorageProvider.Cloudinary
+  provider: StorageProvider = StorageProvider.Azure
 ): Promise<UploadResult> => {
   switch (provider) {
     case StorageProvider.Cloudinary:
-    default:
       return cloudinaryService.uploadFile(file, options);
+    default:
+      return azureBlobService.uploadFile(file, options);
   }
 };
 
 const remove = (
   id: string,
-  provider: StorageProvider = StorageProvider.Cloudinary
+  provider: StorageProvider = StorageProvider.Azure
 ) => {
   switch (provider) {
     case StorageProvider.Cloudinary:
-    default:
       return cloudinaryService.remove(id);
+    default:
+      return azureBlobService.remove(id);
   }
 };
 
 const get = (
   id: string,
-  provider: StorageProvider = StorageProvider.Cloudinary
+  provider: StorageProvider = StorageProvider.Azure
 ): Promise<GetResult> => {
   switch (provider) {
     case StorageProvider.Cloudinary:
-    default:
       return cloudinaryService.get(id);
+    default:
+      return azureBlobService.get(id);
   }
 };
 
