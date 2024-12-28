@@ -22,12 +22,18 @@ export const updateShopGeneral = async (
       name: data.name,
       shopDomain: data.shopDomain,
       status: data.status,
-      ...(data.apiKey
-        ? {
-            apiKey: data.apiKey,
-          }
-        : {}),
+      credential: {
+        update: {
+          shopDomain: data.shopDomain,
+          ...(data.apiKey
+            ? {
+                apiKey: data.apiKey,
+              }
+            : {}),
+        },
+      },
     },
   });
+
   return shop;
 };

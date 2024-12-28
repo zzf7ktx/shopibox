@@ -125,18 +125,29 @@ model Shop {
   name       String         @unique
   syncStatus ShopSyncStatus @default(NotPublished) @map(name: "sync_status")
   status     ShopStatus     @default(Draft) @map(name: "status")
-  apiKey     String?        @map(name: "api_key")
-  provider   String         @default("self")
-  shopDomain String         @default("") @map("shop_domain")
+
+  provider   String @default("self")
+  shopDomain String @default("") @map("shop_domain")
 
   createdAt DateTime @default(now()) @map(name: "created_at")
   updatedAt DateTime @updatedAt @map(name: "updated_at")
 
-  maskImages ShopMaskImage[]
-  products   ProductsOnShops[]
-  Job        Job[]
+  maskImages        ShopMaskImage[]
+  products          ProductsOnShops[]
+  job               Job[]
+  credential        ShopCredentials   @relation(fields: [shopCredentialsId], references: [id])
+  shopCredentialsId String            @map("shop_credentials_id")
 
   @@map(name: "shops")
+}
+
+model ShopCredentials {
+  id         String  @id @default(cuid())
+  shopDomain String  @default("") @map("shop_domain")
+  apiKey     String? @map(name: "api_key")
+  Shop       Shop[]
+
+  @@map(name: "shop_credentials")
 }
 
 model ProductsOnShops {

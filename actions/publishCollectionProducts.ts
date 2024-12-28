@@ -154,6 +154,7 @@ export const publishCollectionProducts = async (
       id: shopId,
     },
     include: {
+      credential: true,
       maskImages: true,
       products: {
         where: {
@@ -195,7 +196,10 @@ export const publishCollectionProducts = async (
     return { success: false, data: "Shop is not active" };
   }
 
-  const shopifyClient = getShopifyClient(shop.shopDomain, shop.apiKey ?? "");
+  const shopifyClient = getShopifyClient(
+    shop.shopDomain,
+    shop.credential.apiKey ?? ""
+  );
 
   let allProductCollections: { title: string; description: string | null }[] =
     [];
