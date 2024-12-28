@@ -7,6 +7,7 @@ import storage from "@/lib/storage";
 import axios from "axios";
 import { cartesian, groupByKey } from "@/utils";
 import { syncImageWithMainProvider } from ".";
+import { ShopStatus } from "@prisma/client";
 
 export const publishSingleProduct = async (
   shopId: string,
@@ -39,12 +40,20 @@ export const publishSingleProduct = async (
     },
   });
 
-  if (
-    !shop ||
-    shop.products.length === 0 ||
-    shop.products[0].status !== "NotPublished"
-  ) {
-    return { success: false };
+  if (!shop) {
+    return { success: false, data: "Shop is not exist" };
+  }
+
+  if (shop.products.length === 0) {
+    return { success: false, data: "There is no products in shop" };
+  }
+
+  if (shop.status != ShopStatus.Active) {
+    return { success: false, data: "Shop is not active" };
+  }
+
+  if (shop.products[0].status !== "NotPublished") {
+    return { success: false, data: "Product is not published yet" };
   }
 
   const shopifyClient = getShopifyClient(shop.shopDomain, shop.apiKey ?? "");

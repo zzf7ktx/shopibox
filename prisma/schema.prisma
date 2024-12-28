@@ -114,10 +114,17 @@ enum ShopSyncStatus {
   NotPublished
 }
 
+enum ShopStatus {
+  Active
+  Draft
+  Closed
+}
+
 model Shop {
   id         String         @id @default(cuid())
   name       String         @unique
   syncStatus ShopSyncStatus @default(NotPublished) @map(name: "sync_status")
+  status     ShopStatus     @default(Draft) @map(name: "status")
   apiKey     String?        @map(name: "api_key")
   provider   String         @default("self")
   shopDomain String         @default("") @map("shop_domain")

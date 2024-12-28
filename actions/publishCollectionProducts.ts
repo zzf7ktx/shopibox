@@ -4,7 +4,7 @@ import getShopifyClient from "@/lib/shopify";
 import axios, { all } from "axios";
 import FormData from "form-data";
 import { randomUUID } from "crypto";
-import { Prisma } from "@prisma/client";
+import { Prisma, ShopStatus } from "@prisma/client";
 import prisma from "@/lib/prisma";
 import sharp from "sharp";
 import storage from "@/lib/storage";
@@ -183,8 +183,16 @@ export const publishCollectionProducts = async (
     },
   });
 
-  if (!shop || shop.products.length === 0) {
-    return { success: false };
+  if (!shop) {
+    return { success: false, data: "Shop is not exist" };
+  }
+
+  if (shop.products.length === 0) {
+    return { success: false, data: "There is no products in shop" };
+  }
+
+  if (shop.status != ShopStatus.Active) {
+    return { success: false, data: "Shop is not active" };
   }
 
   const shopifyClient = getShopifyClient(shop.shopDomain, shop.apiKey ?? "");

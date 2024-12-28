@@ -10,6 +10,7 @@ export const getShop = async (id: string) => {
     select: {
       id: true,
       name: true,
+      status: true,
       syncStatus: true,
       provider: true,
       maskImages: true,
