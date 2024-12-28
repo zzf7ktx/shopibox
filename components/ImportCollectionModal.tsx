@@ -16,7 +16,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/Dialog";
-import { importCollections } from "@/actions";
+import { importCollections } from "@/actions/manage";
 import { useToast } from "@/components/ui/useToast";
 import {
   Form,
@@ -145,26 +145,26 @@ export default function ImportCollectionModal({
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       {dialogTrigger}
-      <DialogContent className="w-full max-w-[80%] max-h-[80%] overflow-auto">
+      <DialogContent className='w-full max-w-[80%] max-h-[80%] overflow-auto'>
         <DialogHeader>
           <DialogTitle>Import collections</DialogTitle>
           <DialogDescription asChild>
             <Form {...form}>
               <form
                 onSubmit={form.handleSubmit(onFinish)}
-                className="space-y-8"
+                className='space-y-8'
               >
                 <FormField
                   control={form.control}
-                  name="file"
+                  name='file'
                   render={({ field: { onChange, value, ...rest } }) => (
                     <FormItem>
                       <FormLabel>File</FormLabel>
                       <FormControl>
                         <Input
-                          type="file"
-                          accept=".csv"
-                          placeholder="abc.csv"
+                          type='file'
+                          accept='.csv'
+                          placeholder='abc.csv'
                           {...rest}
                           onChange={(event) => {
                             onFileChange(event);
@@ -172,7 +172,7 @@ export default function ImportCollectionModal({
                           }}
                         />
                       </FormControl>
-                      <FormDescription className="flex gap-1">
+                      <FormDescription className='flex gap-1'>
                         Choose file csv.
                       </FormDescription>
                       <FormMessage />
@@ -180,9 +180,9 @@ export default function ImportCollectionModal({
                     </FormItem>
                   )}
                 />
-                <Button type="submit" disabled={loading}>
+                <Button type='submit' disabled={loading}>
                   {loading && (
-                    <ReloadIcon className="mr-2 h-4 w-4 animate-spin" />
+                    <ReloadIcon className='mr-2 h-4 w-4 animate-spin' />
                   )}
                   Submit
                 </Button>

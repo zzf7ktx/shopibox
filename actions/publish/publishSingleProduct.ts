@@ -6,7 +6,7 @@ import sharp from "sharp";
 import storage from "@/lib/storage";
 import axios from "axios";
 import { cartesian, groupByKey } from "@/utils";
-import { syncImageWithMainProvider } from ".";
+import { syncImageWithMainProvider } from "..";
 import { ShopStatus } from "@prisma/client";
 
 export const publishSingleProduct = async (

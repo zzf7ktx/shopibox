@@ -5,7 +5,10 @@ import prisma from "@/lib/prisma";
 import { parseCurrency } from "@/utils";
 import { ImageSource } from "@prisma/client";
 import { Readable } from "stream";
-import { addOrUpdateProductVariants, syncImageWithMainProvider } from ".";
+import {
+  addOrUpdateProductVariants,
+  syncImageWithMainProvider,
+} from "@/actions/manage";
 
 export const importProducts = async (
   data: FormData,

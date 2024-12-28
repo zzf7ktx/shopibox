@@ -2,7 +2,7 @@
 
 import { ChangeEvent, ReactNode, useState } from "react";
 import { useRouter } from "next/navigation";
-import { addShop } from "@/actions";
+import { addShop } from "@/actions/manage";
 import * as z from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
@@ -124,7 +124,7 @@ export default function AddShopModal({ dialogTrigger }: AddShopModalProps) {
       toast({
         title: "Success",
         description: "Add shop successfully. Add some product to this shop",
-        action: <ToastAction altText="AddProducts">Add products</ToastAction>,
+        action: <ToastAction altText='AddProducts'>Add products</ToastAction>,
       });
 
       form.reset();
@@ -152,23 +152,23 @@ export default function AddShopModal({ dialogTrigger }: AddShopModalProps) {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       {dialogTrigger}
-      <DialogContent className="w-full max-w-[80%] max-h-[80%] overflow-auto">
+      <DialogContent className='w-full max-w-[80%] max-h-[80%] overflow-auto'>
         <DialogHeader>
           <DialogTitle>Add shop</DialogTitle>
           <DialogDescription asChild>
             <Form {...form}>
               <form
                 onSubmit={form.handleSubmit(onFinish)}
-                className="space-y-8"
+                className='space-y-8'
               >
                 <FormField
                   control={form.control}
-                  name="name"
+                  name='name'
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Name</FormLabel>
                       <FormControl>
-                        <Input placeholder="name shop" {...field} />
+                        <Input placeholder='name shop' {...field} />
                       </FormControl>
                       <FormDescription>
                         This is your public shop name.
@@ -179,13 +179,13 @@ export default function AddShopModal({ dialogTrigger }: AddShopModalProps) {
                 />
                 <FormField
                   control={form.control}
-                  name="shopDomain"
+                  name='shopDomain'
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Shop Domain</FormLabel>
                       <FormControl>
                         <Input
-                          placeholder="https://2baf97-4.myshopify.com"
+                          placeholder='https://2baf97-4.myshopify.com'
                           {...field}
                         />
                       </FormControl>
@@ -198,12 +198,12 @@ export default function AddShopModal({ dialogTrigger }: AddShopModalProps) {
                 />
                 <FormField
                   control={form.control}
-                  name="apiKey"
+                  name='apiKey'
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Api key</FormLabel>
                       <FormControl>
-                        <Input placeholder="" {...field} type="password" />
+                        <Input placeholder='' {...field} type='password' />
                       </FormControl>
                       <FormDescription>
                         The api key for this shop.
@@ -219,22 +219,22 @@ export default function AddShopModal({ dialogTrigger }: AddShopModalProps) {
                     pushed to this shop
                   </FormDescription>
 
-                  <div className="flex md:flex-column gap-4">
-                    <div className="flex flex-col gap-1">
-                      <Card className="w-[500px] h-[500px] p-0">
-                        <CardContent className="p-0">
-                          <div className="w-[500px] h-[500px] relative">
+                  <div className='flex md:flex-column gap-4'>
+                    <div className='flex flex-col gap-1'>
+                      <Card className='w-[500px] h-[500px] p-0'>
+                        <CardContent className='p-0'>
+                          <div className='w-[500px] h-[500px] relative'>
                             <img
                               src={backgroundImage}
-                              alt="background"
+                              alt='background'
                               width={500}
                               height={500}
                             />
                             {imagePreview && (
                               <img
-                                className="absolute"
+                                className='absolute'
                                 src={imagePreview ?? ""}
-                                alt="image"
+                                alt='image'
                                 style={{
                                   width:
                                     (form.watch().maskObjectScale * 500) / 100,
@@ -261,26 +261,26 @@ export default function AddShopModal({ dialogTrigger }: AddShopModalProps) {
                         </CardContent>
                       </Card>
                       <Input
-                        className="mb-2"
-                        placeholder="Choose the image for preview"
-                        type="file"
+                        className='mb-2'
+                        placeholder='Choose the image for preview'
+                        type='file'
                         onChange={(event) => {
                           const { displayUrls } = getImageData(event);
                           setBackgroundImage(displayUrls[0]);
                         }}
                       />
                     </div>
-                    <div className="flex md:flex-col gap-2">
+                    <div className='flex md:flex-col gap-2'>
                       <FormField
                         control={form.control}
-                        name="maskObjectSrc"
+                        name='maskObjectSrc'
                         render={({ field: { onChange, value, ...rest } }) => (
                           <FormItem>
                             <FormLabel>Logo - Src</FormLabel>
                             <FormControl>
                               <Input
-                                type="file"
-                                placeholder="abc.jpg"
+                                type='file'
+                                placeholder='abc.jpg'
                                 {...rest}
                                 onChange={(event) => {
                                   const { files, displayUrls } =
@@ -290,7 +290,7 @@ export default function AddShopModal({ dialogTrigger }: AddShopModalProps) {
                                 }}
                               />
                             </FormControl>
-                            <FormDescription className="flex gap-1">
+                            <FormDescription className='flex gap-1'>
                               Choose mask object image.
                             </FormDescription>
                             <FormMessage />
@@ -299,12 +299,12 @@ export default function AddShopModal({ dialogTrigger }: AddShopModalProps) {
                       />
                       <FormField
                         control={form.control}
-                        name="maskObjectX"
+                        name='maskObjectX'
                         render={({ field }) => (
                           <FormItem>
                             <FormLabel>Logo - X</FormLabel>
                             <FormControl>
-                              <Input placeholder="X" {...field} type="number" />
+                              <Input placeholder='X' {...field} type='number' />
                             </FormControl>
                             <FormDescription>Logo X position</FormDescription>
                             <FormMessage />
@@ -313,12 +313,12 @@ export default function AddShopModal({ dialogTrigger }: AddShopModalProps) {
                       />
                       <FormField
                         control={form.control}
-                        name="maskObjectY"
+                        name='maskObjectY'
                         render={({ field }) => (
                           <FormItem>
                             <FormLabel>Logo - Y</FormLabel>
                             <FormControl>
-                              <Input placeholder="Y" {...field} type="number" />
+                              <Input placeholder='Y' {...field} type='number' />
                             </FormControl>
                             <FormDescription>Logo Y position</FormDescription>
                             <FormMessage />
@@ -327,15 +327,15 @@ export default function AddShopModal({ dialogTrigger }: AddShopModalProps) {
                       />
                       <FormField
                         control={form.control}
-                        name="maskObjectScale"
+                        name='maskObjectScale'
                         render={({ field }) => (
                           <FormItem>
                             <FormLabel>Logo - Scale</FormLabel>
                             <FormControl>
                               <Input
-                                placeholder="Scale"
+                                placeholder='Scale'
                                 {...field}
-                                type="number"
+                                type='number'
                               />
                             </FormControl>
                             <FormDescription>Logo scale</FormDescription>
@@ -347,9 +347,9 @@ export default function AddShopModal({ dialogTrigger }: AddShopModalProps) {
                   </div>
                 </div>
 
-                <Button type="submit" disabled={loading}>
+                <Button type='submit' disabled={loading}>
                   {loading && (
-                    <ReloadIcon className="mr-2 h-4 w-4 animate-spin" />
+                    <ReloadIcon className='mr-2 h-4 w-4 animate-spin' />
                   )}
                   Submit
                 </Button>

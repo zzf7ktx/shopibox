@@ -15,7 +15,8 @@ import {
   getCollections,
   addProductsToShop,
   deleteProducts,
-} from "@/actions";
+  getShops,
+} from "@/actions/manage";
 import {
   Dialog,
   DialogContent,
@@ -57,7 +58,6 @@ import {
   Cross2Icon,
   ReloadIcon,
 } from "@radix-ui/react-icons";
-import { getShops } from "@/actions/getShops";
 import Link from "next/link";
 import { Checkbox } from "./ui/Checkbox";
 

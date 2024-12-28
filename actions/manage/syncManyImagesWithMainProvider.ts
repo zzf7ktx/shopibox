@@ -1,7 +1,7 @@
 "use server";
 
 import { ImageSourceType } from "@/types/ImageSourceType";
-import { syncImageWithMainProvider } from ".";
+import { syncImageWithMainProvider } from "..";
 
 export const syncManyImagesWithMainProvider = async (
   imageIds: string[],

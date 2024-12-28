@@ -26,7 +26,8 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "./ui/Dialog";
-import { deleteImages, syncManyImagesWithMainProvider } from "@/actions";
+import { syncManyImagesWithMainProvider } from "@/actions";
+import { deleteImages } from "@/actions/manage";
 
 function DeleteImageDialog<TData>({
   selectedImages,
@@ -77,11 +78,11 @@ function DeleteImageDialog<TData>({
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogTrigger asChild>
-        <Button variant="destructive" className="h-8 px-2 lg:px-3">
+        <Button variant='destructive' className='h-8 px-2 lg:px-3'>
           Delete
         </Button>
       </DialogTrigger>
-      <DialogContent className="max-h-[80%] overflow-y-auto">
+      <DialogContent className='max-h-[80%] overflow-y-auto'>
         <DialogHeader>
           <DialogTitle>Delete image</DialogTitle>
           <DialogDescription>
@@ -90,11 +91,11 @@ function DeleteImageDialog<TData>({
           </DialogDescription>
         </DialogHeader>
         <DialogFooter>
-          <Button variant="destructive" onClick={onFinish} disabled={loading}>
-            {loading && <ReloadIcon className="mr-2 h-4 w-4 animate-spin" />}
+          <Button variant='destructive' onClick={onFinish} disabled={loading}>
+            {loading && <ReloadIcon className='mr-2 h-4 w-4 animate-spin' />}
             Delete
           </Button>
-          <Button variant="outline" onClick={() => onOpenChange(false)}>
+          <Button variant='outline' onClick={() => onOpenChange(false)}>
             Cancel
           </Button>
         </DialogFooter>
@@ -152,11 +153,11 @@ function SyncImageDialog<TData>({
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogTrigger asChild>
-        <Button variant="default" className="h-8 px-2 lg:px-3">
+        <Button variant='default' className='h-8 px-2 lg:px-3'>
           Sync
         </Button>
       </DialogTrigger>
-      <DialogContent className="max-h-[80%] overflow-y-auto">
+      <DialogContent className='max-h-[80%] overflow-y-auto'>
         <DialogHeader>
           <DialogTitle>Sync images</DialogTitle>
           <DialogDescription>
@@ -166,11 +167,11 @@ function SyncImageDialog<TData>({
           </DialogDescription>
         </DialogHeader>
         <DialogFooter>
-          <Button variant="default" onClick={onFinish} disabled={loading}>
-            {loading && <ReloadIcon className="mr-2 h-4 w-4 animate-spin" />}
+          <Button variant='default' onClick={onFinish} disabled={loading}>
+            {loading && <ReloadIcon className='mr-2 h-4 w-4 animate-spin' />}
             Sync
           </Button>
-          <Button variant="outline" onClick={() => onOpenChange(false)}>
+          <Button variant='outline' onClick={() => onOpenChange(false)}>
             Cancel
           </Button>
         </DialogFooter>
@@ -199,38 +200,38 @@ export function ImageTableToolbar<TData>({ table }: ImageTableToolbar<TData>) {
   }));
 
   return (
-    <div className="flex items-center justify-between mb-3">
-      <div className="flex flex-1 items-center space-x-2">
+    <div className='flex items-center justify-between mb-3'>
+      <div className='flex flex-1 items-center space-x-2'>
         <Input
-          placeholder="Filter Name..."
+          placeholder='Filter Name...'
           value={(table.getColumn("name")?.getFilterValue() as string) ?? ""}
           onChange={(event) =>
             table.getColumn("name")?.setFilterValue(event.target.value)
           }
-          className="h-8 w-[150px] lg:w-[250px]"
+          className='h-8 w-[150px] lg:w-[250px]'
         />
         {table.getColumn("source") && (
           <DataTableFacetedFilter
             column={table.getColumn("source")}
-            title="Source"
+            title='Source'
             options={sources}
           />
         )}
         {table.getColumn("syncStatus") && (
           <DataTableFacetedFilter
             column={table.getColumn("syncStatus")}
-            title="Cloud status"
+            title='Cloud status'
             options={statuses}
           />
         )}
         {isFiltered && (
           <Button
-            variant="ghost"
+            variant='ghost'
             onClick={() => table.resetColumnFilters()}
-            className="h-8 px-2 lg:px-3"
+            className='h-8 px-2 lg:px-3'
           >
             Reset
-            <Cross2Icon className="ml-2 h-4 w-4" />
+            <Cross2Icon className='ml-2 h-4 w-4' />
           </Button>
         )}
         {selectedRows.rows.length > 0 && (

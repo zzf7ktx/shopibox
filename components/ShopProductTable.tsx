@@ -1,7 +1,7 @@
 "use client";
 
 import { Prisma } from "@prisma/client";
-import { ColumnDef, Row } from "@tanstack/react-table";
+import { ColumnDef } from "@tanstack/react-table";
 import { DataTable } from "@/components/ui/DataTable";
 import {
   DropdownMenu,
@@ -26,7 +26,7 @@ import { useParams, useRouter } from "next/navigation";
 import { getRowRange } from "@/utils";
 import { useState } from "react";
 import { CgSpinnerTwoAlt } from "react-icons/cg";
-import { publishSingleProduct } from "@/actions";
+import { publishSingleProduct } from "@/actions/publish";
 import { ShopProductTableToolbar } from "./ShopProductTableToolbar";
 
 type ProductOnShop = Prisma.ProductGetPayload<{
@@ -56,7 +56,7 @@ const columns: ColumnDef<ProductOnShop>[] = [
         onCheckedChange={(value: boolean) =>
           table.toggleAllPageRowsSelected(!!value)
         }
-        aria-label="Select all"
+        aria-label='Select all'
       />
     ),
     cell: ({ row, table }) => {
@@ -74,7 +74,7 @@ const columns: ColumnDef<ProductOnShop>[] = [
             lastSelectedId = row.index;
           }}
           onCheckedChange={(value: boolean) => row.toggleSelected(!!value)}
-          aria-label="Select row"
+          aria-label='Select row'
         />
       );
     },
@@ -84,21 +84,21 @@ const columns: ColumnDef<ProductOnShop>[] = [
   {
     accessorKey: "name",
     header: ({ column }) => (
-      <DataTableColumnHeader column={column} title="Name" />
+      <DataTableColumnHeader column={column} title='Name' />
     ),
   },
   {
     accessorKey: "collections",
     size: 200,
     header: ({ column }) => {
-      return <DataTableColumnHeader column={column} title="Collections" />;
+      return <DataTableColumnHeader column={column} title='Collections' />;
     },
     cell: ({ row }) => {
       const collections = row.original.collections;
       return (
-        <div className="flex gap-1">
+        <div className='flex gap-1'>
           {collections?.map((item, index) => (
-            <Badge key={index} variant="secondary" className="mb-1 last:mb-0">
+            <Badge key={index} variant='secondary' className='mb-1 last:mb-0'>
               {item.collection.name}
             </Badge>
           ))}
@@ -115,18 +115,18 @@ const columns: ColumnDef<ProductOnShop>[] = [
     accessorKey: "shops",
     size: 200,
     header: ({ column }) => (
-      <DataTableColumnHeader column={column} title="Status" />
+      <DataTableColumnHeader column={column} title='Status' />
     ),
     cell: ({ row }) => {
       const productStatus = row.original.shops[0].status;
       return (
-        <div className="flex w-[150px] items-center">
+        <div className='flex w-[150px] items-center'>
           {productStatus === "Published" ? (
-            <CheckCircledIcon className="mr-2 h-4 w-4 text-green-700" />
+            <CheckCircledIcon className='mr-2 h-4 w-4 text-green-700' />
           ) : productStatus === "NotPublished" ? (
-            <CrossCircledIcon className="mr-2 h-4 w-4 text-red-700" />
+            <CrossCircledIcon className='mr-2 h-4 w-4 text-red-700' />
           ) : (
-            <ClockIcon className="mr-2 h-4 w-4 text-yellow-700" />
+            <ClockIcon className='mr-2 h-4 w-4 text-yellow-700' />
           )}
           <span>{productStatus}</span>
         </div>
@@ -173,12 +173,12 @@ function ActionCell({ row }: { row: ProductOnShop }) {
     <>
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <Button variant="ghost" className="h-8 w-8 p-0">
-            <span className="sr-only">Open menu</span>
-            <DotsHorizontalIcon className="h-4 w-4" />
+          <Button variant='ghost' className='h-8 w-8 p-0'>
+            <span className='sr-only'>Open menu</span>
+            <DotsHorizontalIcon className='h-4 w-4' />
           </Button>
         </DropdownMenuTrigger>
-        <DropdownMenuContent align="end">
+        <DropdownMenuContent align='end'>
           <DropdownMenuLabel>Actions</DropdownMenuLabel>
           <DropdownMenuItem
             onClick={() => navigator.clipboard.writeText(row.id)}
@@ -195,8 +195,8 @@ function ActionCell({ row }: { row: ProductOnShop }) {
         </DropdownMenuContent>
       </DropdownMenu>
       {loading && (
-        <div className="backdrop-filter backdrop-blur-sm z-50 h-screen w-screen fixed top-0 left-0 flex flex-col items-center justify-center">
-          <CgSpinnerTwoAlt className="animate-spin -ml-1 mr-3 h-10 w-10 text-primary" />
+        <div className='backdrop-filter backdrop-blur-sm z-50 h-screen w-screen fixed top-0 left-0 flex flex-col items-center justify-center'>
+          <CgSpinnerTwoAlt className='animate-spin -ml-1 mr-3 h-10 w-10 text-primary' />
           <div>{`Don't close. Adding the products...`}</div>
         </div>
       )}

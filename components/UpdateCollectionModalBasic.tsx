@@ -2,7 +2,7 @@
 
 import { Collection } from "@prisma/client";
 import { Dispatch, SetStateAction, useEffect, useMemo, useState } from "react";
-import { updateCollection, getCollection } from "@/actions";
+import { updateCollection, getCollection } from "@/actions/manage";
 import { useRouter } from "next/navigation";
 import * as z from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -125,15 +125,15 @@ export default function UpdateCollectionModalBasic({
       <DialogTitle>Update collection</DialogTitle>
       <DialogDescription asChild>
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onFinish)} className="space-y-8">
+          <form onSubmit={form.handleSubmit(onFinish)} className='space-y-8'>
             <FormField
               control={form.control}
-              name="name"
+              name='name'
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Name</FormLabel>
                   <FormControl>
-                    <Input placeholder="Collection A" {...field} />
+                    <Input placeholder='Collection A' {...field} />
                   </FormControl>
                   <FormDescription>
                     This is your collection name.
@@ -144,12 +144,12 @@ export default function UpdateCollectionModalBasic({
             />
             <FormField
               control={form.control}
-              name="description"
+              name='description'
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Description</FormLabel>
                   <FormControl>
-                    <Textarea placeholder="This is collection A" {...field} />
+                    <Textarea placeholder='This is collection A' {...field} />
                   </FormControl>
                   <FormDescription>
                     This is the detail of collection.
@@ -159,8 +159,8 @@ export default function UpdateCollectionModalBasic({
               )}
             />
 
-            <Button type="submit" disabled={loading}>
-              {loading && <ReloadIcon className="mr-2 h-4 w-4 animate-spin" />}
+            <Button type='submit' disabled={loading}>
+              {loading && <ReloadIcon className='mr-2 h-4 w-4 animate-spin' />}
               Submit
             </Button>
           </form>

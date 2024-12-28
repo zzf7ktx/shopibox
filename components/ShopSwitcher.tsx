@@ -27,8 +27,8 @@ import {
 } from "@/components/ui/Popover";
 import AddShopModal from "./AddShopModal";
 import { useParams, usePathname, useRouter } from "next/navigation";
-import { getShops } from "@/actions/getShops";
-import { Prisma, Shop } from "@prisma/client";
+import { getShops } from "@/actions/manage";
+import { Prisma } from "@prisma/client";
 
 const groups = [
   {
@@ -119,28 +119,28 @@ export default function ShopSwitcher({ className }: ShopSwitcherProps) {
         <Popover open={open} onOpenChange={setOpen} modal={true}>
           <PopoverTrigger asChild>
             <Button
-              variant="outline"
-              role="combobox"
+              variant='outline'
+              role='combobox'
               aria-expanded={open}
-              aria-label="Select a shop"
+              aria-label='Select a shop'
               className={cn("w-[200px] justify-between", className)}
             >
-              <Avatar className="mr-2 h-5 w-5">
+              <Avatar className='mr-2 h-5 w-5'>
                 <AvatarImage
                   src={`https://avatar.vercel.sh/${selectedShop.value}.png`}
                   alt={selectedShop.label}
-                  className="grayscale"
+                  className='grayscale'
                 />
                 <AvatarFallback>SC</AvatarFallback>
               </Avatar>
               {selectedShop.label}
-              <CaretSortIcon className="ml-auto h-4 w-4 shrink-0 opacity-50" />
+              <CaretSortIcon className='ml-auto h-4 w-4 shrink-0 opacity-50' />
             </Button>
           </PopoverTrigger>
-          <PopoverContent className="w-[200px] p-0">
+          <PopoverContent className='w-[200px] p-0'>
             <Command>
               <CommandList>
-                <CommandInput placeholder="Search shop..." />
+                <CommandInput placeholder='Search shop...' />
                 <CommandEmpty>No shop found.</CommandEmpty>
                 {shopOptions.map((group) => (
                   <CommandGroup key={group.label} heading={group.label}>
@@ -154,13 +154,13 @@ export default function ShopSwitcher({ className }: ShopSwitcherProps) {
                             `/main/shops/${shop.value}/${currentSub}`
                           );
                         }}
-                        className="text-sm"
+                        className='text-sm'
                       >
-                        <Avatar className="mr-2 h-5 w-5">
+                        <Avatar className='mr-2 h-5 w-5'>
                           <AvatarImage
                             src={`https://avatar.vercel.sh/${shop.value}.png`}
                             alt={shop.label}
-                            className="grayscale"
+                            className='grayscale'
                           />
                           <AvatarFallback>SC</AvatarFallback>
                         </Avatar>
@@ -183,7 +183,7 @@ export default function ShopSwitcher({ className }: ShopSwitcherProps) {
                 <CommandGroup>
                   <DialogTrigger asChild>
                     <CommandItem>
-                      <PlusCircledIcon className="mr-2 h-5 w-5" />
+                      <PlusCircledIcon className='mr-2 h-5 w-5' />
                       Create Shop
                     </CommandItem>
                   </DialogTrigger>

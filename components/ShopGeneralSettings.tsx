@@ -1,13 +1,11 @@
 "use client";
 
-import { ChangeEvent, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import * as z from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { useRouter } from "next/navigation";
-
 import { Button } from "@/components/ui/Button";
-import { Card, CardContent } from "@/components/ui/Card";
 import {
   Form,
   FormField,
@@ -18,11 +16,10 @@ import {
   FormMessage,
 } from "@/components/ui/Form";
 import { useToast } from "@/components/ui/useToast";
-import { ToastAction } from "@/components/ui/Toast";
 import { Input } from "@/components/ui/Input";
 import { ReloadIcon } from "@radix-ui/react-icons";
-import { addShop, updateShopGeneral } from "@/actions";
-import { Prisma, Shop } from "@prisma/client";
+import { updateShopGeneral } from "@/actions/manage";
+import { Prisma } from "@prisma/client";
 
 const formSchema = z.object({
   name: z
@@ -108,15 +105,15 @@ export default function ShopGeneralSettings({
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onFinish)} className="space-y-8">
+      <form onSubmit={form.handleSubmit(onFinish)} className='space-y-8'>
         <FormField
           control={form.control}
-          name="name"
+          name='name'
           render={({ field }) => (
             <FormItem>
               <FormLabel>Name</FormLabel>
               <FormControl>
-                <Input placeholder="name shop" {...field} />
+                <Input placeholder='name shop' {...field} />
               </FormControl>
               <FormDescription>This is your public shop name.</FormDescription>
               <FormMessage />
@@ -125,13 +122,13 @@ export default function ShopGeneralSettings({
         />
         <FormField
           control={form.control}
-          name="shopDomain"
+          name='shopDomain'
           render={({ field }) => (
             <FormItem>
               <FormLabel>Shop Domain</FormLabel>
               <FormControl>
                 <Input
-                  placeholder="https://2baf97-4.myshopify.com"
+                  placeholder='https://2baf97-4.myshopify.com'
                   {...field}
                 />
               </FormControl>
@@ -144,20 +141,20 @@ export default function ShopGeneralSettings({
         />
         <FormField
           control={form.control}
-          name="apiKey"
+          name='apiKey'
           render={({ field }) => (
             <FormItem>
               <FormLabel>Api key</FormLabel>
               <FormControl>
-                <Input placeholder="" {...field} type="password" />
+                <Input placeholder='' {...field} type='password' />
               </FormControl>
               <FormDescription>The api key for this shop.</FormDescription>
               <FormMessage />
             </FormItem>
           )}
         />
-        <Button type="submit" disabled={loading}>
-          {loading && <ReloadIcon className="mr-2 h-4 w-4 animate-spin" />}
+        <Button type='submit' disabled={loading}>
+          {loading && <ReloadIcon className='mr-2 h-4 w-4 animate-spin' />}
           Update
         </Button>
       </form>

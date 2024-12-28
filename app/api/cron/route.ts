@@ -1,6 +1,5 @@
-import { publishProducts } from "@/actions";
+import { publishProducts } from "@/actions/publish";
 import prisma from "@/lib/prisma";
-import { unknown } from "zod";
 
 export const maxDuration = 60;
 export const revalidate = 0;
