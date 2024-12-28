@@ -8,12 +8,12 @@ import { Button } from "@/components/ui/Button";
 import { Cross2Icon } from "@radix-ui/react-icons";
 import { DataTableFacetedFilter } from "@/components/ui/DataTableFacetedFilter";
 import { useToast } from "@/components/ui/useToast";
+import { getCollections } from "@/actions/manage";
 import {
-  getCollections,
   publishProducts,
   publishShopProducts,
   setProductsToUnpublished,
-} from "@/actions";
+} from "@/actions/publish";
 import { useParams, useRouter } from "next/navigation";
 import { CgSpinnerTwoAlt } from "react-icons/cg";
 
@@ -148,37 +148,37 @@ export function ShopProductTableToolbar<TData>({
 
   return (
     <>
-      <div className="flex items-center justify-between mb-3">
-        <div className="flex flex-1 items-center space-x-2">
+      <div className='flex items-center justify-between mb-3'>
+        <div className='flex flex-1 items-center space-x-2'>
           <Input
-            placeholder="Filter Name..."
+            placeholder='Filter Name...'
             value={(table.getColumn("name")?.getFilterValue() as string) ?? ""}
             onChange={(event) =>
               table.getColumn("name")?.setFilterValue(event.target.value)
             }
-            className="h-8 w-[150px] lg:w-[250px]"
+            className='h-8 w-[150px] lg:w-[250px]'
           />
           {table.getColumn("collections") && (
             <DataTableFacetedFilter
               column={table.getColumn("collections")}
-              title="Collections"
+              title='Collections'
               options={collections}
             />
           )}
           {isFiltered && (
             <Button
-              variant="ghost"
+              variant='ghost'
               onClick={() => table.resetColumnFilters()}
-              className="h-8 px-2 lg:px-3"
+              className='h-8 px-2 lg:px-3'
             >
               Reset
-              <Cross2Icon className="ml-2 h-4 w-4" />
+              <Cross2Icon className='ml-2 h-4 w-4' />
             </Button>
           )}
           {
             <Button
-              variant="default"
-              className="h-8 px-2 lg:px-3"
+              variant='default'
+              className='h-8 px-2 lg:px-3'
               onClick={pushShopProducts}
             >
               Schedule
@@ -186,8 +186,8 @@ export function ShopProductTableToolbar<TData>({
           }
           {selectedRows.rows.length > 0 && (
             <Button
-              variant="default"
-              className="h-8 px-2 lg:px-3"
+              variant='default'
+              className='h-8 px-2 lg:px-3'
               onClick={pushProducts}
             >
               Push {`'${selectedRows.rows.length}' products`}
@@ -195,8 +195,8 @@ export function ShopProductTableToolbar<TData>({
           )}
           {selectedRows.rows.length > 0 && (
             <Button
-              variant="destructive"
-              className="h-8 px-2 lg:px-3"
+              variant='destructive'
+              className='h-8 px-2 lg:px-3'
               onClick={forceSetProductsToUnpublished}
             >
               Force unpublished {`'${selectedRows.rows.length}' products`}
@@ -206,8 +206,8 @@ export function ShopProductTableToolbar<TData>({
         <DataTableViewOptions table={table} />
       </div>
       {loading && (
-        <div className="backdrop-filter backdrop-blur-sm z-50 h-screen w-screen fixed top-0 left-0 flex flex-col items-center justify-center">
-          <CgSpinnerTwoAlt className="animate-spin -ml-1 mr-3 h-10 w-10 text-primary" />
+        <div className='backdrop-filter backdrop-blur-sm z-50 h-screen w-screen fixed top-0 left-0 flex flex-col items-center justify-center'>
+          <CgSpinnerTwoAlt className='animate-spin -ml-1 mr-3 h-10 w-10 text-primary' />
           <div>{`Don't close. Adding the products...`}</div>
         </div>
       )}

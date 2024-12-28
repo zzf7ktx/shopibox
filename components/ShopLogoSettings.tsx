@@ -22,7 +22,7 @@ import { useToast } from "@/components/ui/useToast";
 import { ToastAction } from "@/components/ui/Toast";
 import { ReloadIcon } from "@radix-ui/react-icons";
 import { Prisma } from "@prisma/client";
-import { updateShopLogo } from "@/actions";
+import { updateShopLogo } from "@/actions/manage";
 
 const formSchema = z.object({
   maskObjectSrc: z.any(),
@@ -103,7 +103,7 @@ export default function ShopLogoSettings({ shopInfo }: ShopLogoSettingsProps) {
       toast({
         title: "Success",
         description: "Add shop successfully. Add some product to this shop",
-        action: <ToastAction altText="AddProducts">Add products</ToastAction>,
+        action: <ToastAction altText='AddProducts'>Add products</ToastAction>,
       });
 
       form.reset({
@@ -127,7 +127,7 @@ export default function ShopLogoSettings({ shopInfo }: ShopLogoSettingsProps) {
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onFinish)} className="space-y-8">
+      <form onSubmit={form.handleSubmit(onFinish)} className='space-y-8'>
         <div>
           <FormLabel>Logo in images {`(500x500)`}</FormLabel>
           <FormDescription>
@@ -135,24 +135,24 @@ export default function ShopLogoSettings({ shopInfo }: ShopLogoSettingsProps) {
             to this shop
           </FormDescription>
 
-          <div className="flex md:flex-column gap-4">
-            <div className="flex flex-col gap-1">
-              <Card className="w-[500px] h-[500px] p-0">
-                <CardContent className="p-0">
-                  <div className="w-[500px] h-[500px] relative">
+          <div className='flex md:flex-column gap-4'>
+            <div className='flex flex-col gap-1'>
+              <Card className='w-[500px] h-[500px] p-0'>
+                <CardContent className='p-0'>
+                  <div className='w-[500px] h-[500px] relative'>
                     <img
                       src={backgroundImage}
-                      alt="background"
+                      alt='background'
                       width={500}
                       height={500}
                     />
                     {(imagePreview || shopInfo.maskImages?.[0]?.src) && (
                       <img
-                        className="absolute"
+                        className='absolute'
                         src={
                           imagePreview ?? shopInfo.maskImages?.[0]?.src ?? ""
                         }
-                        alt="image"
+                        alt='image'
                         style={{
                           width: (form.watch().maskObjectScale * 500) / 100,
                           height: (form.watch().maskObjectScale * 500) / 100,
@@ -175,26 +175,26 @@ export default function ShopLogoSettings({ shopInfo }: ShopLogoSettingsProps) {
                 </CardContent>
               </Card>
               <Input
-                className="mb-2"
-                placeholder="Choose the image for preview"
-                type="file"
+                className='mb-2'
+                placeholder='Choose the image for preview'
+                type='file'
                 onChange={(event) => {
                   const { displayUrls } = getImageData(event);
                   setBackgroundImage(displayUrls[0]);
                 }}
               />
             </div>
-            <div className="flex md:flex-col gap-2">
+            <div className='flex md:flex-col gap-2'>
               <FormField
                 control={form.control}
-                name="maskObjectSrc"
+                name='maskObjectSrc'
                 render={({ field: { onChange, value, ...rest } }) => (
                   <FormItem>
                     <FormLabel>Logo - Src</FormLabel>
                     <FormControl>
                       <Input
-                        type="file"
-                        placeholder="abc.jpg"
+                        type='file'
+                        placeholder='abc.jpg'
                         {...rest}
                         onChange={(event) => {
                           const { files, displayUrls } = getImageData(event);
@@ -203,7 +203,7 @@ export default function ShopLogoSettings({ shopInfo }: ShopLogoSettingsProps) {
                         }}
                       />
                     </FormControl>
-                    <FormDescription className="flex gap-1">
+                    <FormDescription className='flex gap-1'>
                       Choose mask object image.
                     </FormDescription>
                     <FormMessage />
@@ -212,12 +212,12 @@ export default function ShopLogoSettings({ shopInfo }: ShopLogoSettingsProps) {
               />
               <FormField
                 control={form.control}
-                name="maskObjectX"
+                name='maskObjectX'
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Logo - X</FormLabel>
                     <FormControl>
-                      <Input placeholder="X" {...field} type="number" />
+                      <Input placeholder='X' {...field} type='number' />
                     </FormControl>
                     <FormDescription>Logo X position</FormDescription>
                     <FormMessage />
@@ -226,12 +226,12 @@ export default function ShopLogoSettings({ shopInfo }: ShopLogoSettingsProps) {
               />
               <FormField
                 control={form.control}
-                name="maskObjectY"
+                name='maskObjectY'
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Logo - Y</FormLabel>
                     <FormControl>
-                      <Input placeholder="Y" {...field} type="number" />
+                      <Input placeholder='Y' {...field} type='number' />
                     </FormControl>
                     <FormDescription>Logo Y position</FormDescription>
                     <FormMessage />
@@ -240,12 +240,12 @@ export default function ShopLogoSettings({ shopInfo }: ShopLogoSettingsProps) {
               />
               <FormField
                 control={form.control}
-                name="maskObjectScale"
+                name='maskObjectScale'
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Logo - Scale</FormLabel>
                     <FormControl>
-                      <Input placeholder="Scale" {...field} type="number" />
+                      <Input placeholder='Scale' {...field} type='number' />
                     </FormControl>
                     <FormDescription>Logo scale</FormDescription>
                     <FormMessage />
@@ -256,8 +256,8 @@ export default function ShopLogoSettings({ shopInfo }: ShopLogoSettingsProps) {
           </div>
         </div>
 
-        <Button type="submit" disabled={loading}>
-          {loading && <ReloadIcon className="mr-2 h-4 w-4 animate-spin" />}
+        <Button type='submit' disabled={loading}>
+          {loading && <ReloadIcon className='mr-2 h-4 w-4 animate-spin' />}
           Update
         </Button>
       </form>

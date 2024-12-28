@@ -7,7 +7,10 @@ import {
   useEffect,
   useState,
 } from "react";
-import { addOrUpdateProductVariants, getProductVariants } from "@/actions";
+import {
+  addOrUpdateProductVariants,
+  getProductVariants,
+} from "@/actions/manage";
 import { useRouter } from "next/navigation";
 import {
   ControllerRenderProps,
@@ -84,17 +87,17 @@ function ProductVariantValueCombobox({
       <PopoverTrigger asChild>
         <FormControl>
           <Button
-            variant="outline"
-            role="combobox"
+            variant='outline'
+            role='combobox'
             className={cn(
               "w-full h-auto justify-between",
               !field.value && "text-muted-foreground"
             )}
           >
             {field.value ? (
-              <div className="flex gap-1 w-full flex-wrap">
+              <div className='flex gap-1 w-full flex-wrap'>
                 {field.value.map((selected: string, index: number) => (
-                  <Badge key={index} variant="secondary">
+                  <Badge key={index} variant='secondary'>
                     <Cross2Icon
                       onClick={() => {
                         const newValue = field.value.filter(
@@ -110,11 +113,11 @@ function ProductVariantValueCombobox({
             ) : (
               "Create values"
             )}
-            <CaretSortIcon className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+            <CaretSortIcon className='ml-2 h-4 w-4 shrink-0 opacity-50' />
           </Button>
         </FormControl>
       </PopoverTrigger>
-      <PopoverContent className="mw-[400px] p-0">
+      <PopoverContent className='mw-[400px] p-0'>
         <Command>
           <CommandInput
             onValueChange={(e) =>
@@ -127,11 +130,11 @@ function ProductVariantValueCombobox({
                 return newData;
               })
             }
-            placeholder="Create values"
-            className="h-9"
+            placeholder='Create values'
+            className='h-9'
           />
           <CommandGroup>
-            <ScrollArea className="max-h-72">
+            <ScrollArea className='max-h-72'>
               {values.map((value) => (
                 <span key={value?.value ?? ""}>
                   {typeof value !== "undefined" && (
@@ -265,27 +268,27 @@ export default function UpdateProductModalVariants({
       <DialogTitle>Update product variants</DialogTitle>
       <DialogDescription asChild>
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onFinish)} className="space-y-8">
+          <form onSubmit={form.handleSubmit(onFinish)} className='space-y-8'>
             {fields.map((field, index) => (
               <Card key={field.id}>
-                <CardContent className="flex flex-col gap-2 mt-6">
-                  <div className="flex gap-2 w-full">
+                <CardContent className='flex flex-col gap-2 mt-6'>
+                  <div className='flex gap-2 w-full'>
                     <FormField
                       control={form.control}
                       name={`variants.${index}.name`}
                       render={({ field }) => (
-                        <FormItem className="w-full">
+                        <FormItem className='w-full'>
                           <FormControl>
-                            <Input placeholder="Name" {...field} />
+                            <Input placeholder='Name' {...field} />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
                       )}
                     />
                     <Button
-                      type="button"
-                      variant="destructive"
-                      size="icon"
+                      type='button'
+                      variant='destructive'
+                      size='icon'
                       onClick={() => handleRemove(index)}
                     >
                       <Cross2Icon />
@@ -295,7 +298,7 @@ export default function UpdateProductModalVariants({
                     control={form.control}
                     name={`variants.${index}.values`}
                     render={({ field }) => (
-                      <FormItem className="flex flex-col">
+                      <FormItem className='flex flex-col'>
                         <ProductVariantValueCombobox
                           field={field}
                           form={form}
@@ -307,12 +310,12 @@ export default function UpdateProductModalVariants({
                 </CardContent>
               </Card>
             ))}
-            <Button type="button" onClick={() => handleAddNew()} variant="link">
+            <Button type='button' onClick={() => handleAddNew()} variant='link'>
               <PlusIcon /> Add new option
             </Button>
             <br />
-            <Button type="submit" disabled={loading}>
-              {loading && <ReloadIcon className="mr-2 h-4 w-4 animate-spin" />}
+            <Button type='submit' disabled={loading}>
+              {loading && <ReloadIcon className='mr-2 h-4 w-4 animate-spin' />}
               Save
             </Button>
           </form>

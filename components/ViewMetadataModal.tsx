@@ -4,8 +4,6 @@ import { ReactNode, useEffect, useState } from "react";
 import metadata, { MetaTags, RawMetadata } from "@/lib/metadata";
 import { updateMetadata } from "@/actions";
 import { useRouter } from "next/navigation";
-import * as z from "zod";
-import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import {
   Dialog,
@@ -13,7 +11,6 @@ import {
   DialogDescription,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from "@/components/ui/Dialog";
 import { Button } from "@/components/ui/Button";
 import {
@@ -22,7 +19,6 @@ import {
   FormItem,
   FormLabel,
   FormControl,
-  FormDescription,
   FormMessage,
 } from "@/components/ui/Form";
 import { Input } from "@/components/ui/Input";
@@ -133,7 +129,7 @@ export default function ViewMetadataModal({
             <Form {...form}>
               <form
                 onSubmit={form.handleSubmit(onFinish)}
-                className="space-y-8"
+                className='space-y-8'
               >
                 {Object.entries(MetaTags).map(([tag, code]) => (
                   <FormField
@@ -152,9 +148,9 @@ export default function ViewMetadataModal({
                   />
                 ))}
 
-                <Button type="submit" disabled={loading}>
+                <Button type='submit' disabled={loading}>
                   {loading && (
-                    <ReloadIcon className="mr-2 h-4 w-4 animate-spin" />
+                    <ReloadIcon className='mr-2 h-4 w-4 animate-spin' />
                   )}
                   Submit
                 </Button>

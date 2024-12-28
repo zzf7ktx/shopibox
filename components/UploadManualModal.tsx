@@ -2,7 +2,7 @@
 
 import { Product } from "@prisma/client";
 import { ChangeEvent, ReactNode, useEffect, useState } from "react";
-import { getProducts, uploadImages } from "@/actions";
+import { getProducts, uploadImages } from "@/actions/manage";
 import { useRouter } from "next/navigation";
 import * as z from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -161,46 +161,46 @@ export default function UploadManualModal({
             <Form {...form}>
               <form
                 onSubmit={form.handleSubmit(onFinish)}
-                className="space-y-8"
+                className='space-y-8'
               >
                 <FormField
                   control={form.control}
-                  name="productId"
+                  name='productId'
                   render={({ field }) => (
-                    <FormItem className="flex flex-col">
+                    <FormItem className='flex flex-col'>
                       <FormLabel>Product</FormLabel>
                       <Popover>
                         <PopoverTrigger asChild>
                           <FormControl>
                             <Button
                               disabled={!!productKey}
-                              variant="outline"
-                              role="combobox"
+                              variant='outline'
+                              role='combobox'
                               className={cn(
                                 "w-full h-auto justify-between",
                                 !field.value && "text-muted-foreground"
                               )}
                             >
                               {field.value ? (
-                                <div className="flex gap-1 w-full flex-wrap">
+                                <div className='flex gap-1 w-full flex-wrap'>
                                   {field.value}
                                 </div>
                               ) : (
                                 "Select product"
                               )}
-                              <CaretSortIcon className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                              <CaretSortIcon className='ml-2 h-4 w-4 shrink-0 opacity-50' />
                             </Button>
                           </FormControl>
                         </PopoverTrigger>
-                        <PopoverContent className="mw-[400px] p-0">
+                        <PopoverContent className='mw-[400px] p-0'>
                           <Command>
                             <CommandInput
-                              placeholder="Search product..."
-                              className="h-9"
+                              placeholder='Search product...'
+                              className='h-9'
                             />
                             <CommandEmpty>No product found.</CommandEmpty>
                             <CommandGroup>
-                              <ScrollArea className="max-h-72">
+                              <ScrollArea className='max-h-72'>
                                 {productOptions.map((opt, index) => (
                                   <CommandItem
                                     key={index}
@@ -234,15 +234,15 @@ export default function UploadManualModal({
                 />
                 <FormField
                   control={form.control}
-                  name="files"
+                  name='files'
                   render={({ field: { onChange, value, ...rest } }) => (
                     <FormItem>
                       <FormLabel>Images</FormLabel>
                       <FormControl>
                         <Input
-                          type="file"
+                          type='file'
                           multiple
-                          placeholder="shadcn"
+                          placeholder='shadcn'
                           {...rest}
                           onChange={(event) => {
                             const { files, displayUrls } = getImageData(event);
@@ -251,7 +251,7 @@ export default function UploadManualModal({
                           }}
                         />
                       </FormControl>
-                      <FormDescription className="flex gap-1">
+                      <FormDescription className='flex gap-1'>
                         {imagePreview.map((img) => (
                           <Image
                             key={img}
@@ -268,9 +268,9 @@ export default function UploadManualModal({
                   )}
                 />
 
-                <Button type="submit" disabled={loading}>
+                <Button type='submit' disabled={loading}>
                   {loading && (
-                    <ReloadIcon className="mr-2 h-4 w-4 animate-spin" />
+                    <ReloadIcon className='mr-2 h-4 w-4 animate-spin' />
                   )}
                   Submit
                 </Button>

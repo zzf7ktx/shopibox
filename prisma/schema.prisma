@@ -132,8 +132,8 @@ model Shop {
   createdAt DateTime @default(now()) @map(name: "created_at")
   updatedAt DateTime @updatedAt @map(name: "updated_at")
 
-  maskImages        ShopMaskImage[]
   products          ProductsOnShops[]
+  maskImages        ShopMaskImage[]
   job               Job[]
   credential        ShopCredentials   @relation(fields: [shopCredentialsId], references: [id])
   shopCredentialsId String            @map("shop_credentials_id")

@@ -2,7 +2,7 @@
 
 import { Collection } from "@prisma/client";
 import { ReactNode, useEffect, useRef, useState } from "react";
-import { addProduct, getCollections } from "@/actions";
+import { addProduct, getCollections } from "@/actions/manage";
 import { useRouter } from "next/navigation";
 import * as z from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -243,23 +243,23 @@ export default function AddManualProductModal({
     <>
       <Dialog open={open} onOpenChange={onOpenChange}>
         {dialogTrigger}
-        <DialogContent className="max-h-[80%] overflow-y-auto">
+        <DialogContent className='max-h-[80%] overflow-y-auto'>
           <DialogHeader>
             <DialogTitle>Add product manually</DialogTitle>
             <DialogDescription asChild>
               <Form {...form}>
                 <form
                   onSubmit={form.handleSubmit(onFinish)}
-                  className="space-y-8"
+                  className='space-y-8'
                 >
                   <FormField
                     control={form.control}
-                    name="name"
+                    name='name'
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>Name</FormLabel>
                         <FormControl>
-                          <Input placeholder="Product A" {...field} />
+                          <Input placeholder='Product A' {...field} />
                         </FormControl>
                         <FormDescription>
                           This is your public product name.
@@ -270,13 +270,13 @@ export default function AddManualProductModal({
                   />
                   <FormField
                     control={form.control}
-                    name="description"
+                    name='description'
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>Description</FormLabel>
                         <FormControl>
                           <Textarea
-                            placeholder="This is product A"
+                            placeholder='This is product A'
                             {...field}
                           />
                         </FormControl>
@@ -289,13 +289,13 @@ export default function AddManualProductModal({
                   />
                   <FormField
                     control={form.control}
-                    name="descriptionHtml"
+                    name='descriptionHtml'
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>Description HTML</FormLabel>
                         <FormControl>
                           <Textarea
-                            placeholder="<h4>This is product A</h4>"
+                            placeholder='<h4>This is product A</h4>'
                             {...field}
                           />
                         </FormControl>
@@ -308,25 +308,25 @@ export default function AddManualProductModal({
                   />
                   <FormField
                     control={form.control}
-                    name="category"
+                    name='category'
                     render={({ field }) => (
-                      <FormItem className="flex flex-col">
+                      <FormItem className='flex flex-col'>
                         <FormLabel>Category</FormLabel>
                         <Popover>
                           <PopoverTrigger asChild>
                             <FormControl>
                               <Button
-                                variant="outline"
-                                role="combobox"
+                                variant='outline'
+                                role='combobox'
                                 className={cn(
                                   "w-full h-auto justify-between",
                                   !field.value && "text-muted-foreground"
                                 )}
                               >
                                 {field.value ? (
-                                  <div className="flex gap-1 w-full flex-wrap">
+                                  <div className='flex gap-1 w-full flex-wrap'>
                                     {field.value.map((item) => (
-                                      <Badge key={item} variant="secondary">
+                                      <Badge key={item} variant='secondary'>
                                         {item}
                                       </Badge>
                                     ))}
@@ -334,20 +334,20 @@ export default function AddManualProductModal({
                                 ) : (
                                   "Select category"
                                 )}
-                                <CaretSortIcon className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                                <CaretSortIcon className='ml-2 h-4 w-4 shrink-0 opacity-50' />
                               </Button>
                             </FormControl>
                           </PopoverTrigger>
-                          <PopoverContent className="mw-[400px] p-0">
+                          <PopoverContent className='mw-[400px] p-0'>
                             <Command>
                               <CommandInput
                                 onValueChange={(e) => setSearchCategory(e)}
-                                placeholder="Search category..."
-                                className="h-9"
+                                placeholder='Search category...'
+                                className='h-9'
                               />
                               <CommandEmpty>No category found.</CommandEmpty>
                               <CommandGroup>
-                                <ScrollArea className="max-h-72">
+                                <ScrollArea className='max-h-72'>
                                   {(searchCategory.length < 3
                                     ? []
                                     : categories.filter((c) =>
@@ -383,23 +383,23 @@ export default function AddManualProductModal({
                   />
                   <FormField
                     control={form.control}
-                    name="collections"
+                    name='collections'
                     render={({ field }) => (
-                      <FormItem className="flex flex-col">
+                      <FormItem className='flex flex-col'>
                         <FormLabel>Collections</FormLabel>
                         <Popover>
                           <PopoverTrigger asChild>
                             <FormControl>
                               <Button
-                                variant="outline"
-                                role="combobox"
+                                variant='outline'
+                                role='combobox'
                                 className={cn(
                                   "w-full h-auto justify-between",
                                   !field.value && "text-muted-foreground"
                                 )}
                               >
                                 {field.value ? (
-                                  <div className="flex gap-1 w-full flex-wrap">
+                                  <div className='flex gap-1 w-full flex-wrap'>
                                     {field.value
                                       .map((current) => {
                                         return (
@@ -409,7 +409,7 @@ export default function AddManualProductModal({
                                         );
                                       })
                                       .map((selected, index) => (
-                                        <Badge key={index} variant="secondary">
+                                        <Badge key={index} variant='secondary'>
                                           {selected}
                                         </Badge>
                                       ))}
@@ -417,11 +417,11 @@ export default function AddManualProductModal({
                                 ) : (
                                   "Select collections"
                                 )}
-                                <CaretSortIcon className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                                <CaretSortIcon className='ml-2 h-4 w-4 shrink-0 opacity-50' />
                               </Button>
                             </FormControl>
                           </PopoverTrigger>
-                          <PopoverContent className="mw-[400px] p-0">
+                          <PopoverContent className='mw-[400px] p-0'>
                             <Command>
                               <CommandInput
                                 onValueChange={(e) =>
@@ -434,12 +434,12 @@ export default function AddManualProductModal({
                                     return newData;
                                   })
                                 }
-                                placeholder="Search collections..."
-                                className="h-9"
+                                placeholder='Search collections...'
+                                className='h-9'
                               />
                               <CommandEmpty>No collection found.</CommandEmpty>
                               <CommandGroup>
-                                <ScrollArea className="max-h-72">
+                                <ScrollArea className='max-h-72'>
                                   {[...tempCollections, ...collections].map(
                                     (collection) => (
                                       <span key={collection?.value ?? ""}>
@@ -492,9 +492,9 @@ export default function AddManualProductModal({
                       </FormItem>
                     )}
                   />
-                  <Button type="submit" disabled={loading}>
+                  <Button type='submit' disabled={loading}>
                     {loading && (
-                      <ReloadIcon className="mr-2 h-4 w-4 animate-spin" />
+                      <ReloadIcon className='mr-2 h-4 w-4 animate-spin' />
                     )}
                     Submit
                   </Button>
@@ -508,7 +508,7 @@ export default function AddManualProductModal({
         productKey={addedProductId}
         dialogTrigger={
           <DialogTrigger
-            className="hidden"
+            className='hidden'
             ref={uploadImageModalRef}
           ></DialogTrigger>
         }

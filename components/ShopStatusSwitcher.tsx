@@ -8,7 +8,7 @@ import {
 } from "@radix-ui/react-icons";
 import { useParams } from "next/navigation";
 import { Prisma, ShopStatus } from "@prisma/client";
-import { getShop, updateShopGeneral } from "@/actions";
+import { getShop, updateShopGeneral } from "@/actions/manage";
 import {
   DropdownMenu,
   DropdownMenuContent,

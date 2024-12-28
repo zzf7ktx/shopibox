@@ -1,7 +1,7 @@
 "use server";
 
 import getShopifyClient from "@/lib/shopify";
-import axios from "axios";
+import axios, { all } from "axios";
 import FormData from "form-data";
 import { randomUUID } from "crypto";
 import { Prisma, ShopStatus } from "@prisma/client";
@@ -9,8 +9,7 @@ import prisma from "@/lib/prisma";
 import sharp from "sharp";
 import storage from "@/lib/storage";
 import { cartesian, groupByKey } from "@/utils";
-import { syncImageWithMainProvider } from ".";
-import { rewriteProductTitles } from "./rewriteProductTitle";
+import { syncImageWithMainProvider } from "..";
 
 type ProductDto = Prisma.ProductGetPayload<{
   include: {
@@ -35,6 +34,7 @@ const buildBulkCreateProductJsonl = async (
   }>
 ) => {
   let stringJsonl = "";
+
   for (let product of products) {
     let media: any[] = [];
     const shopMaskImage = shopInfo.maskImages[0];
@@ -50,7 +50,6 @@ const buildBulkCreateProductJsonl = async (
             responseType: "arraybuffer",
           })
         ).data as Buffer;
-
         const maskImageInput = (
           await axios({ url: shopMaskImage.src, responseType: "arraybuffer" })
         ).data as Buffer;
@@ -96,12 +95,8 @@ const buildBulkCreateProductJsonl = async (
       media = [];
       for (let img of product.images) {
         if (!img.cloudLink) {
-          try {
-            const res = await syncImageWithMainProvider(img.id, "default");
-            img.cloudLink = res.url ?? "";
-          } catch (error) {
-            img.cloudLink = img.sourceLink ?? "";
-          }
+          const res = await syncImageWithMainProvider(img.id, "default");
+          img.cloudLink = res.url ?? "";
         }
 
         media.push({
@@ -117,24 +112,21 @@ const buildBulkCreateProductJsonl = async (
       names.add(variant.key);
     }
 
-    let variants =
-      !product?.variants || product?.variants.length === 0
-        ? []
-        : cartesian(
-            ...groupByKey(product.variants ?? []).map((v) => v.values)
-          ).map((v) => ({
-            options: v,
-            price: product.price ?? 0,
-            inventoryItem: {
-              tracked: true,
-            },
-            inventoryPolicy: "CONTINUE",
-            inventoryQuantities: locationIds.map((l) => ({
-              availableQuantity: 10000000,
-              locationId: l.id ?? 0,
-            })),
-            taxable: false,
-          }));
+    let variants = cartesian(
+      ...groupByKey(product.variants ?? []).map((v) => v.values)
+    ).map((v) => ({
+      options: v,
+      price: product.price ?? 0,
+      inventoryItem: {
+        tracked: true,
+      },
+      inventoryPolicy: "CONTINUE",
+      inventoryQuantities: locationIds.map((l) => ({
+        availableQuantity: 10000000,
+        locationId: l.id ?? 0,
+      })),
+      taxable: false,
+    }));
 
     const input = {
       title: product.name,
@@ -142,7 +134,7 @@ const buildBulkCreateProductJsonl = async (
       productType: product.category,
       options: Array.from(names),
       variants: variants,
-      collectionsToJoin: (product?.collections ?? []).map(
+      collectionsToJoin: product.collections.map(
         (collection) => collectionMap[collection.collection.name]
       ),
     };
@@ -153,10 +145,9 @@ const buildBulkCreateProductJsonl = async (
   return stringJsonl;
 };
 
-export const publishProducts = async (
+export const publishCollectionProducts = async (
   shopId: string,
-  productIds: string[],
-  autoRewriteTitle: boolean = false
+  collectionId: string
 ) => {
   const shop = await prisma.shop.findFirst({
     where: {
@@ -168,8 +159,12 @@ export const publishProducts = async (
       products: {
         where: {
           status: "NotPublished",
-          productId: {
-            in: productIds,
+          product: {
+            collections: {
+              some: {
+                collectionId: collectionId,
+              },
+            },
           },
         },
         include: {
@@ -201,21 +196,6 @@ export const publishProducts = async (
     return { success: false, data: "Shop is not active" };
   }
 
-  // Temp: Rewrite products title including collection name
-  if (autoRewriteTitle) {
-    const rewrote = await rewriteProductTitles(
-      shop.products.map((p) => p.product)
-    );
-    for (let i = 0; i < shop.products.length; i++) {
-      const reProduct = rewrote.find(
-        (r) => r.id == shop.products[i].product.id
-      );
-
-      shop.products[i].product.name =
-        reProduct?.name ?? shop.products[i].product.name;
-    }
-  }
-
   const shopifyClient = getShopifyClient(
     shop.shopDomain,
     shop.credential.apiKey ?? ""
@@ -224,7 +204,7 @@ export const publishProducts = async (
   let allProductCollections: { title: string; description: string | null }[] =
     [];
   for (let product of shop.products) {
-    for (let collection of product.product?.collections ?? []) {
+    for (let collection of product.product.collections) {
       if (
         !allProductCollections.some(
           (c) => c.title === collection.collection.name
@@ -355,6 +335,10 @@ export const publishProducts = async (
     stagedUploadsCreate
   );
 
+  if (!!errors) {
+    throw errors;
+  }
+
   const [{ url, parameters }] = data.stagedUploadsCreate.stagedTargets;
 
   const formData = new FormData();
@@ -400,7 +384,9 @@ export const publishProducts = async (
   const result = await shopifyClient.request(importProducts);
 
   if (result.data?.bulkOperationRunMutation?.userErrors?.length > 0) {
-    return { success: false };
+    throw new Error(
+      JSON.stringify(result.data.bulkOperationRunMutation.userErrors)
+    );
   }
 
   await prisma.productsOnShops.updateMany({
@@ -415,5 +401,5 @@ export const publishProducts = async (
     },
   });
 
-  return { success: true, data: { no: shop.products.length, result: result } };
+  return { success: true };
 };

@@ -43,11 +43,13 @@ import {
 import { ToastAction } from "@/components/ui/Toast";
 import { ScrollArea } from "@/components/ui/ScrollArea";
 import { cn } from "@/lib/utils";
-import { getShops } from "@/actions/getShops";
-import { addCollectionProductsToShop } from "@/actions/addCollectionProductsToShop";
+import {
+  getShops,
+  addCollectionProductsToShop,
+  deleteCollections,
+} from "@/actions/manage";
 import { CaretSortIcon, ReloadIcon } from "@radix-ui/react-icons";
 import Link from "next/link";
-import { deleteCollections } from "@/actions/deleteCollections";
 
 interface Option {
   value: string;
@@ -89,7 +91,7 @@ function AddToShopDialog({
         title: "Success",
         description: `${productsOnShop.count} products are added to shop`,
         action: (
-          <ToastAction altText="ViewShopProduct" asChild>
+          <ToastAction altText='ViewShopProduct' asChild>
             <Link href={`/main/shops/${values.shop}/products`}>Check out</Link>
           </ToastAction>
         ),
@@ -120,56 +122,56 @@ function AddToShopDialog({
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogTrigger asChild>
-        <Button variant="default" className="h-8 px-2 lg:px-3">
+        <Button variant='default' className='h-8 px-2 lg:px-3'>
           Add to shop
         </Button>
       </DialogTrigger>
-      <DialogContent className="max-h-[80%] overflow-y-auto">
+      <DialogContent className='max-h-[80%] overflow-y-auto'>
         <DialogHeader>
           <DialogTitle>Choose shop</DialogTitle>
           <DialogDescription asChild>
             <Form {...form}>
               <form
                 onSubmit={form.handleSubmit(onFinish)}
-                className="space-y-8"
+                className='space-y-8'
               >
                 <FormField
                   control={form.control}
-                  name="shop"
+                  name='shop'
                   render={({ field }) => (
-                    <FormItem className="flex flex-col">
+                    <FormItem className='flex flex-col'>
                       <FormLabel>Shop</FormLabel>
                       <Popover>
                         <PopoverTrigger asChild>
                           <FormControl>
                             <Button
-                              variant="outline"
-                              role="combobox"
+                              variant='outline'
+                              role='combobox'
                               className={cn(
                                 "w-full h-auto justify-between",
                                 !field.value && "text-muted-foreground"
                               )}
                             >
                               {field.value ? (
-                                <div className="flex gap-1 w-full flex-wrap">
+                                <div className='flex gap-1 w-full flex-wrap'>
                                   {field.value}
                                 </div>
                               ) : (
                                 "Select shop"
                               )}
-                              <CaretSortIcon className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                              <CaretSortIcon className='ml-2 h-4 w-4 shrink-0 opacity-50' />
                             </Button>
                           </FormControl>
                         </PopoverTrigger>
-                        <PopoverContent className="mw-[400px] p-0">
+                        <PopoverContent className='mw-[400px] p-0'>
                           <Command>
                             <CommandInput
-                              placeholder="Search shop..."
-                              className="h-9"
+                              placeholder='Search shop...'
+                              className='h-9'
                             />
                             <CommandEmpty>No shop found.</CommandEmpty>
                             <CommandGroup>
-                              <ScrollArea className="max-h-72">
+                              <ScrollArea className='max-h-72'>
                                 {shops.map((shop, index) => (
                                   <CommandItem
                                     key={index}
@@ -193,9 +195,9 @@ function AddToShopDialog({
                     </FormItem>
                   )}
                 />
-                <Button type="submit" disabled={loading}>
+                <Button type='submit' disabled={loading}>
                   {loading && (
-                    <ReloadIcon className="mr-2 h-4 w-4 animate-spin" />
+                    <ReloadIcon className='mr-2 h-4 w-4 animate-spin' />
                   )}
                   Submit
                 </Button>
@@ -257,11 +259,11 @@ function DeleteCollectionDialog<TData>({
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogTrigger asChild>
-        <Button variant="destructive" className="h-8 px-2 lg:px-3">
+        <Button variant='destructive' className='h-8 px-2 lg:px-3'>
           Delete
         </Button>
       </DialogTrigger>
-      <DialogContent className="max-h-[80%] overflow-y-auto">
+      <DialogContent className='max-h-[80%] overflow-y-auto'>
         <DialogHeader>
           <DialogTitle>Delete collection</DialogTitle>
           <DialogDescription>
@@ -273,11 +275,11 @@ function DeleteCollectionDialog<TData>({
           </DialogDescription>
         </DialogHeader>
         <DialogFooter>
-          <Button variant="destructive" onClick={onFinish} disabled={loading}>
-            {loading && <ReloadIcon className="mr-2 h-4 w-4 animate-spin" />}
+          <Button variant='destructive' onClick={onFinish} disabled={loading}>
+            {loading && <ReloadIcon className='mr-2 h-4 w-4 animate-spin' />}
             Delete
           </Button>
-          <Button variant="outline" onClick={() => onOpenChange(false)}>
+          <Button variant='outline' onClick={() => onOpenChange(false)}>
             Cancel
           </Button>
         </DialogFooter>
@@ -313,15 +315,15 @@ export function CollectionTableToolbar<TData>({
   }, []);
 
   return (
-    <div className="flex items-center justify-between mb-3">
-      <div className="flex flex-1 items-center space-x-2">
+    <div className='flex items-center justify-between mb-3'>
+      <div className='flex flex-1 items-center space-x-2'>
         <Input
-          placeholder="Filter Name..."
+          placeholder='Filter Name...'
           value={(table.getColumn("name")?.getFilterValue() as string) ?? ""}
           onChange={(event) =>
             table.getColumn("name")?.setFilterValue(event.target.value)
           }
-          className="h-8 w-[150px] lg:w-[250px]"
+          className='h-8 w-[150px] lg:w-[250px]'
         />
         {selectedRows.rows.length > 0 && (
           <>

@@ -2,7 +2,7 @@
 
 import { ReactNode, useState } from "react";
 import { useRouter } from "next/navigation";
-import { addCollection } from "@/actions";
+import { addCollection } from "@/actions/manage";
 import * as z from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
@@ -26,7 +26,7 @@ import {
 import { Input } from "@/components/ui/Input";
 import { useToast } from "@/components/ui/useToast";
 import { ToastAction } from "@/components/ui/Toast";
-import { PlusCircledIcon, ReloadIcon } from "@radix-ui/react-icons";
+import { ReloadIcon } from "@radix-ui/react-icons";
 import Link from "next/link";
 
 const formSchema = z.object({
@@ -86,8 +86,8 @@ export default function AddManualCollectionModal({
         description:
           "Add collection successfully. Add some product to this collection",
         action: (
-          <ToastAction altText="AddProducts" asChild>
-            <Link href="/main/products">Add products</Link>
+          <ToastAction altText='AddProducts' asChild>
+            <Link href='/main/products'>Add products</Link>
           </ToastAction>
         ),
       });
@@ -124,16 +124,16 @@ export default function AddManualCollectionModal({
             <Form {...form}>
               <form
                 onSubmit={form.handleSubmit(onFinish)}
-                className="space-y-8"
+                className='space-y-8'
               >
                 <FormField
                   control={form.control}
-                  name="name"
+                  name='name'
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Name</FormLabel>
                       <FormControl>
-                        <Input placeholder="name" {...field} />
+                        <Input placeholder='name' {...field} />
                       </FormControl>
                       <FormDescription>
                         This is your collection name which unique.
@@ -144,12 +144,12 @@ export default function AddManualCollectionModal({
                 />
                 <FormField
                   control={form.control}
-                  name="publicName"
+                  name='publicName'
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Public name</FormLabel>
                       <FormControl>
-                        <Input placeholder="public name" {...field} />
+                        <Input placeholder='public name' {...field} />
                       </FormControl>
                       <FormDescription>
                         This is your public collection name. Default will be set
@@ -161,12 +161,12 @@ export default function AddManualCollectionModal({
                 />
                 <FormField
                   control={form.control}
-                  name="description"
+                  name='description'
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Description</FormLabel>
                       <FormControl>
-                        <Input placeholder="something..." {...field} />
+                        <Input placeholder='something...' {...field} />
                       </FormControl>
                       <FormDescription>
                         This is your collection description.
@@ -175,9 +175,9 @@ export default function AddManualCollectionModal({
                     </FormItem>
                   )}
                 />
-                <Button type="submit" disabled={loading}>
+                <Button type='submit' disabled={loading}>
                   {loading && (
-                    <ReloadIcon className="mr-2 h-4 w-4 animate-spin" />
+                    <ReloadIcon className='mr-2 h-4 w-4 animate-spin' />
                   )}
                   Submit
                 </Button>

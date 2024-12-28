@@ -16,7 +16,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/Dialog";
-import { importProducts } from "@/actions";
+import { importProducts } from "@/actions/manage";
 import { parseCurrency } from "@/utils";
 import { useToast } from "@/components/ui/useToast";
 import {
@@ -182,26 +182,26 @@ export default function ImportProductModal({
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       {dialogTrigger}
-      <DialogContent className="w-full max-w-[80%] max-h-[80%] overflow-auto">
+      <DialogContent className='w-full max-w-[80%] max-h-[80%] overflow-auto'>
         <DialogHeader>
           <DialogTitle>Import products</DialogTitle>
           <DialogDescription asChild>
             <Form {...form}>
               <form
                 onSubmit={form.handleSubmit(onFinish)}
-                className="space-y-8"
+                className='space-y-8'
               >
                 <FormField
                   control={form.control}
-                  name="file"
+                  name='file'
                   render={({ field: { onChange, value, ...rest } }) => (
                     <FormItem>
                       <FormLabel>File</FormLabel>
                       <FormControl>
                         <Input
-                          type="file"
-                          accept=".csv"
-                          placeholder="abc.csv"
+                          type='file'
+                          accept='.csv'
+                          placeholder='abc.csv'
                           {...rest}
                           onChange={(event) => {
                             onFileChange(event);
@@ -209,7 +209,7 @@ export default function ImportProductModal({
                           }}
                         />
                       </FormControl>
-                      <FormDescription className="flex gap-1">
+                      <FormDescription className='flex gap-1'>
                         Choose file csv.
                       </FormDescription>
                       <FormMessage />
@@ -219,16 +219,16 @@ export default function ImportProductModal({
                 />
                 <FormField
                   control={form.control}
-                  name="autoSyncImages"
+                  name='autoSyncImages'
                   render={({ field }) => (
-                    <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4 shadow">
+                    <FormItem className='flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4 shadow'>
                       <FormControl>
                         <Checkbox
                           checked={field.value}
                           onCheckedChange={field.onChange}
                         />
                       </FormControl>
-                      <div className="space-y-1 leading-none">
+                      <div className='space-y-1 leading-none'>
                         <FormLabel>Auto sync images</FormLabel>
                         <FormDescription>
                           The product images will be upload to cloud provider
@@ -238,9 +238,9 @@ export default function ImportProductModal({
                     </FormItem>
                   )}
                 />
-                <Button type="submit" disabled={loading}>
+                <Button type='submit' disabled={loading}>
                   {loading && (
-                    <ReloadIcon className="mr-2 h-4 w-4 animate-spin" />
+                    <ReloadIcon className='mr-2 h-4 w-4 animate-spin' />
                   )}
                   Submit
                 </Button>
