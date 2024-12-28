@@ -5,18 +5,35 @@ import urlUtil from "url";
 import path from "path";
 
 const connectionString = process.env.AZURE_BLOB_CONNECTION_STRING ?? "";
+const containerName = process.env.AZURE_BLOB_CONTAINER_NAME ?? "";
+
 const blobServiceClient = connectionString
   ? BlobServiceClient.fromConnectionString(connectionString)
   : new BlobServiceClient("http://localhost:3000");
-const containerClient = blobServiceClient.getContainerClient("shopibox");
+
+const getOrCreateContainer = async () => {
+  const containerClient = blobServiceClient.getContainerClient(containerName);
+  const exists = await containerClient.exists();
+  if (!exists) {
+    await containerClient.create();
+    console.log(`Container "${containerName}" created.`);
+  } else {
+    console.log(`Container "${containerName}" already exists.`);
+  }
+  return containerClient;
+};
 
 const upload = async (
   url: string,
   options: UploadOptions
 ): Promise<UploadResult> => {
+  const containerClient = await getOrCreateContainer();
   const parsedUrl = new urlUtil.URL(url);
   const extension = path.extname(parsedUrl.pathname);
-  const blobName = options.overwrite ? options.publicId : uuidv1() + extension;
+  const blobName =
+    options.overwrite && options.publicId
+      ? options.publicId
+      : [options.folder, uuidv1() + extension].join("/");
   const blockBlobClient = containerClient.getBlockBlobClient(blobName);
   const result = await blockBlobClient.syncUploadFromURL(url);
 
@@ -30,11 +47,15 @@ const uploadFile = async (
   file: File,
   options: UploadOptions
 ): Promise<UploadResult> => {
-  const parsedUrl = new urlUtil.URL(file.name);
-  const extension = path.extname(parsedUrl.pathname);
-  const blobName = options.overwrite ? options.publicId : uuidv1() + extension;
+  const containerClient = await getOrCreateContainer();
+  const extension = path.extname(file.name);
+  const blobName =
+    options.overwrite && options.publicId
+      ? options.publicId
+      : [options.folder, uuidv1() + extension].join("/");
   const blockBlobClient = containerClient.getBlockBlobClient(blobName);
-  const result = await blockBlobClient.uploadData(file);
+  const array = await file.arrayBuffer();
+  const result = await blockBlobClient.uploadData(array);
 
   return {
     publicId: blobName,
@@ -43,11 +64,13 @@ const uploadFile = async (
 };
 
 const remove = async (id: string) => {
+  const containerClient = await getOrCreateContainer();
   const blockBlobClient = containerClient.getBlockBlobClient(id);
   const result = await blockBlobClient.delete();
 };
 
 const get = async (id: string): Promise<GetResult> => {
+  const containerClient = await getOrCreateContainer();
   const blockBlobClient = containerClient.getBlockBlobClient(id);
   const properties = await blockBlobClient.getProperties();
   return {
