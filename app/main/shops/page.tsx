@@ -19,6 +19,7 @@ export default async function Shops() {
       id: true,
       name: true,
       syncStatus: true,
+      status: true,
       provider: true,
       maskImages: true,
       createdAt: true,
@@ -28,13 +29,13 @@ export default async function Shops() {
   return (
     <>
       <PageHeader
-        title="Shops"
+        title='Shops'
         action={
           <AddShopModal
             dialogTrigger={
               <DialogTrigger asChild>
                 <Button>
-                  <PlusCircledIcon className="mr-2 h-4 w-4" /> Upload
+                  <PlusCircledIcon className='mr-2 h-4 w-4' /> Upload
                 </Button>
               </DialogTrigger>
             }

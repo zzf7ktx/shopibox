@@ -3,11 +3,12 @@
 import { Table } from "@tanstack/react-table";
 import { Input } from "@/components/ui/Input";
 import { DataTableViewOptions } from "@/components/ui/DataTableViewOptions";
-import { ShopSyncStatus } from "@prisma/client";
+import { ShopStatus, ShopSyncStatus } from "@prisma/client";
 import {
   CheckCircledIcon,
   Cross2Icon,
   CrossCircledIcon,
+  ReaderIcon,
   StopwatchIcon,
 } from "@radix-ui/react-icons";
 import { DataTableFacetedFilter } from "@/components/ui/DataTableFacetedFilter";
@@ -19,7 +20,7 @@ interface ShopTableToolbar<TData> {
 
 export function ShopTableToolbar<TData>({ table }: ShopTableToolbar<TData>) {
   const isFiltered = table.getState().columnFilters.length > 0;
-  const statuses = Object.entries(ShopSyncStatus).map(([key, value]) => ({
+  const pushStatuses = Object.entries(ShopSyncStatus).map(([key, value]) => ({
     label: key,
     value: value,
     icon:
@@ -29,6 +30,18 @@ export function ShopTableToolbar<TData>({ table }: ShopTableToolbar<TData>) {
         ? CrossCircledIcon
         : StopwatchIcon,
   }));
+
+  const statuses = Object.entries(ShopStatus).map(([key, value]) => ({
+    label: key,
+    value: value,
+    icon:
+      value === ShopStatus.Active
+        ? CheckCircledIcon
+        : value === ShopStatus.Closed
+        ? CrossCircledIcon
+        : ReaderIcon,
+  }));
+
   return (
     <div className="flex items-center justify-between mb-3">
       <div className="flex flex-1 items-center space-x-2">
@@ -40,11 +53,18 @@ export function ShopTableToolbar<TData>({ table }: ShopTableToolbar<TData>) {
           }
           className="h-8 w-[150px] lg:w-[250px]"
         />
+        {table.getColumn("status") && (
+          <DataTableFacetedFilter
+            column={table.getColumn("status")}
+            title="Status"
+            options={statuses}
+          />
+        )}
         {table.getColumn("syncStatus") && (
           <DataTableFacetedFilter
             column={table.getColumn("syncStatus")}
             title="Publish status"
-            options={statuses}
+            options={pushStatuses}
           />
         )}
         {isFiltered && (

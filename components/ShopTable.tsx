@@ -1,5 +1,5 @@
 "use client";
-import { Prisma, ShopSyncStatus } from "@prisma/client";
+import { Prisma, ShopStatus, ShopSyncStatus } from "@prisma/client";
 import { ColumnDef } from "@tanstack/react-table";
 import { DataTable } from "@/components/ui/DataTable";
 import {
@@ -16,6 +16,7 @@ import {
   CheckCircledIcon,
   CrossCircledIcon,
   DotsHorizontalIcon,
+  ReaderIcon,
   StopwatchIcon,
 } from "@radix-ui/react-icons";
 import { ShopTableToolbar } from "./ShopTableToolbar";
@@ -26,6 +27,7 @@ type ShopDto = Prisma.ShopGetPayload<{
     id: true;
     name: true;
     syncStatus: true;
+    status: true;
     provider: true;
     maskImages: true;
     createdAt: true;
@@ -37,13 +39,44 @@ const columns: ColumnDef<ShopDto>[] = [
   {
     accessorKey: "name",
     header: ({ column }) => (
-      <DataTableColumnHeader column={column} title="Name" />
+      <DataTableColumnHeader column={column} title='Name' />
     ),
+  },
+  {
+    accessorKey: "status",
+    header: ({ column }) => (
+      <DataTableColumnHeader column={column} title='Status' />
+    ),
+    cell: ({ row }) => {
+      const status = Object.keys(ShopStatus).find(
+        (status) => status === row.getValue("status")
+      );
+
+      if (!status) {
+        return null;
+      }
+
+      return (
+        <div className='flex w-[150px] items-center'>
+          {status === ShopStatus.Active ? (
+            <CheckCircledIcon className='mr-2 h-4 w-4 text-muted-foreground' />
+          ) : status === ShopStatus.Closed ? (
+            <CrossCircledIcon className='mr-2 h-4 w-4 text-muted-foreground' />
+          ) : (
+            <ReaderIcon className='mr-2 h-4 w-4 text-muted-foreground' />
+          )}
+          <span>{status}</span>
+        </div>
+      );
+    },
+    filterFn: (row, id, value) => {
+      return value.includes(row.getValue(id));
+    },
   },
   {
     accessorKey: "syncStatus",
     header: ({ column }) => (
-      <DataTableColumnHeader column={column} title="Publish status" />
+      <DataTableColumnHeader column={column} title='Publish status' />
     ),
     cell: ({ row }) => {
       const status = Object.keys(ShopSyncStatus).find(
@@ -55,13 +88,13 @@ const columns: ColumnDef<ShopDto>[] = [
       }
 
       return (
-        <div className="flex w-[150px] items-center">
+        <div className='flex w-[150px] items-center'>
           {status === ShopSyncStatus.PushedAll ? (
-            <CheckCircledIcon className="mr-2 h-4 w-4 text-muted-foreground" />
+            <CheckCircledIcon className='mr-2 h-4 w-4 text-muted-foreground' />
           ) : status === ShopSyncStatus.NotPublished ? (
-            <CrossCircledIcon className="mr-2 h-4 w-4 text-muted-foreground" />
+            <CrossCircledIcon className='mr-2 h-4 w-4 text-muted-foreground' />
           ) : (
-            <StopwatchIcon className="mr-2 h-4 w-4 text-muted-foreground" />
+            <StopwatchIcon className='mr-2 h-4 w-4 text-muted-foreground' />
           )}
           <span>{status}</span>
         </div>
@@ -78,12 +111,12 @@ const columns: ColumnDef<ShopDto>[] = [
       return (
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="ghost" className="h-8 w-8 p-0">
-              <span className="sr-only">Open menu</span>
-              <DotsHorizontalIcon className="h-4 w-4" />
+            <Button variant='ghost' className='h-8 w-8 p-0'>
+              <span className='sr-only'>Open menu</span>
+              <DotsHorizontalIcon className='h-4 w-4' />
             </Button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
+          <DropdownMenuContent align='end'>
             <DropdownMenuLabel>Actions</DropdownMenuLabel>
             <DropdownMenuItem
               onClick={() => navigator.clipboard.writeText(shop.id)}
