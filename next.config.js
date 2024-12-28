@@ -14,6 +14,10 @@ const nextConfig = {
         protocol: "http",
         hostname: "res.cloudinary.com",
       },
+      {
+        protocol: "https",
+        hostname: "**.blob.core.windows.net",
+      },
     ],
   },
   experimental: {

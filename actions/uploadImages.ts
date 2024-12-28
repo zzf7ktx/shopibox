@@ -23,15 +23,7 @@ export const uploadImages = async (productId: string, data: FormData) => {
       },
     });
 
-    let byteArrayBuffer = await new Response(file).arrayBuffer();
-    const buffer = Buffer.from(byteArrayBuffer);
-
-    const mime = file.type;
-    const encoding = "base64";
-    const base64Data = buffer.toString("base64");
-    const fileUri = "data:" + mime + ";" + encoding + "," + base64Data;
-
-    const uploadResult = await storage.upload(fileUri, {
+    const uploadResult = await storage.uploadFile(file, {
       overwrite: true,
       publicId: image?.providerRef ?? "",
       folder: "shopify",

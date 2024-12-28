@@ -59,6 +59,7 @@ import {
 } from "@radix-ui/react-icons";
 import { getShops } from "@/actions/getShops";
 import Link from "next/link";
+import { Checkbox } from "./ui/Checkbox";
 
 interface Option {
   value: string;
@@ -142,38 +143,38 @@ function AddToCollectionDialog<TData>({
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogTrigger asChild>
-        <Button variant="default" className="h-8 px-2 lg:px-3">
+        <Button variant='default' className='h-8 px-2 lg:px-3'>
           Add to collection
         </Button>
       </DialogTrigger>
-      <DialogContent className="max-h-[80%] overflow-y-auto">
+      <DialogContent className='max-h-[80%] overflow-y-auto'>
         <DialogHeader>
           <DialogTitle>Choose collections</DialogTitle>
           <DialogDescription asChild>
             <Form {...form}>
               <form
                 onSubmit={form.handleSubmit(onFinish)}
-                className="space-y-8"
+                className='space-y-8'
               >
                 <FormField
                   control={form.control}
-                  name="collections"
+                  name='collections'
                   render={({ field }) => (
-                    <FormItem className="flex flex-col">
+                    <FormItem className='flex flex-col'>
                       <FormLabel>Collections</FormLabel>
                       <Popover>
                         <PopoverTrigger asChild>
                           <FormControl>
                             <Button
-                              variant="outline"
-                              role="combobox"
+                              variant='outline'
+                              role='combobox'
                               className={cn(
                                 "w-full h-auto justify-between",
                                 !field.value && "text-muted-foreground"
                               )}
                             >
                               {field.value ? (
-                                <div className="flex gap-1 w-full flex-wrap">
+                                <div className='flex gap-1 w-full flex-wrap'>
                                   {field.value
                                     .map((current) => {
                                       return (
@@ -183,7 +184,7 @@ function AddToCollectionDialog<TData>({
                                       );
                                     })
                                     .map((selected, index) => (
-                                      <Badge key={index} variant="secondary">
+                                      <Badge key={index} variant='secondary'>
                                         {selected}
                                       </Badge>
                                     ))}
@@ -191,11 +192,11 @@ function AddToCollectionDialog<TData>({
                               ) : (
                                 "Select collections"
                               )}
-                              <CaretSortIcon className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                              <CaretSortIcon className='ml-2 h-4 w-4 shrink-0 opacity-50' />
                             </Button>
                           </FormControl>
                         </PopoverTrigger>
-                        <PopoverContent className="mw-[400px] p-0">
+                        <PopoverContent className='mw-[400px] p-0'>
                           <Command>
                             <CommandInput
                               onValueChange={(e) =>
@@ -208,12 +209,12 @@ function AddToCollectionDialog<TData>({
                                   return newData;
                                 })
                               }
-                              placeholder="Search collections..."
-                              className="h-9"
+                              placeholder='Search collections...'
+                              className='h-9'
                             />
                             <CommandEmpty>No collection found.</CommandEmpty>
                             <CommandGroup>
-                              <ScrollArea className="max-h-72">
+                              <ScrollArea className='max-h-72'>
                                 {[...tempCollections, ...collections].map(
                                   (collection) => (
                                     <span key={collection?.value ?? ""}>
@@ -266,9 +267,9 @@ function AddToCollectionDialog<TData>({
                     </FormItem>
                   )}
                 />
-                <Button type="submit" disabled={loading}>
+                <Button type='submit' disabled={loading}>
                   {loading && (
-                    <ReloadIcon className="mr-2 h-4 w-4 animate-spin" />
+                    <ReloadIcon className='mr-2 h-4 w-4 animate-spin' />
                   )}
                   Submit
                 </Button>
@@ -313,7 +314,7 @@ function AddToShopDialog<TData>({
         title: "Success",
         description: `${productsOnShop.count} products are added to shop`,
         action: (
-          <ToastAction altText="ViewShopProduct" asChild>
+          <ToastAction altText='ViewShopProduct' asChild>
             <Link href={`/main/shops/${values.shop}/products`}>Check out</Link>
           </ToastAction>
         ),
@@ -345,56 +346,56 @@ function AddToShopDialog<TData>({
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogTrigger asChild>
-        <Button variant="default" className="h-8 px-2 lg:px-3">
+        <Button variant='default' className='h-8 px-2 lg:px-3'>
           Add to shop
         </Button>
       </DialogTrigger>
-      <DialogContent className="max-h-[80%] overflow-y-auto">
+      <DialogContent className='max-h-[80%] overflow-y-auto'>
         <DialogHeader>
           <DialogTitle>Choose shop</DialogTitle>
           <DialogDescription asChild>
             <Form {...form}>
               <form
                 onSubmit={form.handleSubmit(onFinish)}
-                className="space-y-8"
+                className='space-y-8'
               >
                 <FormField
                   control={form.control}
-                  name="shop"
+                  name='shop'
                   render={({ field }) => (
-                    <FormItem className="flex flex-col">
+                    <FormItem className='flex flex-col'>
                       <FormLabel>Shop</FormLabel>
                       <Popover>
                         <PopoverTrigger asChild>
                           <FormControl>
                             <Button
-                              variant="outline"
-                              role="combobox"
+                              variant='outline'
+                              role='combobox'
                               className={cn(
                                 "w-full h-auto justify-between",
                                 !field.value && "text-muted-foreground"
                               )}
                             >
                               {field.value ? (
-                                <div className="flex gap-1 w-full flex-wrap">
+                                <div className='flex gap-1 w-full flex-wrap'>
                                   {field.value}
                                 </div>
                               ) : (
                                 "Select shop"
                               )}
-                              <CaretSortIcon className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                              <CaretSortIcon className='ml-2 h-4 w-4 shrink-0 opacity-50' />
                             </Button>
                           </FormControl>
                         </PopoverTrigger>
-                        <PopoverContent className="mw-[400px] p-0">
+                        <PopoverContent className='mw-[400px] p-0'>
                           <Command>
                             <CommandInput
-                              placeholder="Search shop..."
-                              className="h-9"
+                              placeholder='Search shop...'
+                              className='h-9'
                             />
                             <CommandEmpty>No shop found.</CommandEmpty>
                             <CommandGroup>
-                              <ScrollArea className="max-h-72">
+                              <ScrollArea className='max-h-72'>
                                 {shops.map((shop, index) => (
                                   <CommandItem
                                     key={index}
@@ -418,9 +419,9 @@ function AddToShopDialog<TData>({
                     </FormItem>
                   )}
                 />
-                <Button type="submit" disabled={loading}>
+                <Button type='submit' disabled={loading}>
                   {loading && (
-                    <ReloadIcon className="mr-2 h-4 w-4 animate-spin" />
+                    <ReloadIcon className='mr-2 h-4 w-4 animate-spin' />
                   )}
                   Submit
                 </Button>
@@ -432,6 +433,12 @@ function AddToShopDialog<TData>({
     </Dialog>
   );
 }
+
+const formSchema = z.object({
+  alsoDeleteImages: z.boolean().optional(),
+  file: z.any(),
+});
+
 function DeleteProductDialog<TData>({
   selectedProducts,
   table,
@@ -444,11 +451,18 @@ function DeleteProductDialog<TData>({
   const { toast } = useToast();
   const router = useRouter();
 
-  const onFinish = async () => {
+  const form = useForm<z.infer<typeof formSchema>>({
+    resolver: zodResolver(formSchema),
+    defaultValues: {
+      alsoDeleteImages: false,
+    },
+  });
+
+  const onFinish = async ({ alsoDeleteImages }: z.infer<typeof formSchema>) => {
     try {
       setLoading(true);
 
-      await deleteProducts(selectedProducts);
+      await deleteProducts(selectedProducts, alsoDeleteImages);
 
       toast({
         title: "Success",
@@ -481,27 +495,56 @@ function DeleteProductDialog<TData>({
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogTrigger asChild>
-        <Button variant="destructive" className="h-8 px-2 lg:px-3">
+        <Button variant='destructive' className='h-8 px-2 lg:px-3'>
           Delete
         </Button>
       </DialogTrigger>
-      <DialogContent className="max-h-[80%] overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle>Delete product</DialogTitle>
-          <DialogDescription>
-            Do you want to delete permanently{" "}
-            {selectedProducts.length > 1 ? "these products" : "this product"}?
-          </DialogDescription>
-        </DialogHeader>
-        <DialogFooter>
-          <Button variant="destructive" onClick={onFinish} disabled={loading}>
-            {loading && <ReloadIcon className="mr-2 h-4 w-4 animate-spin" />}
-            Delete
-          </Button>
-          <Button variant="outline" onClick={() => onOpenChange(false)}>
-            Cancel
-          </Button>
-        </DialogFooter>
+      <DialogContent className='max-h-[80%] overflow-y-auto'>
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(onFinish)} className='space-y-8'>
+            <DialogHeader>
+              <DialogTitle>Delete product</DialogTitle>
+              <DialogDescription className='flex flex-col gap-2'>
+                Do you want to delete permanently{" "}
+                {selectedProducts.length > 1
+                  ? "these products"
+                  : "this product"}
+                ?
+                <FormField
+                  control={form.control}
+                  name='alsoDeleteImages'
+                  render={({ field }) => (
+                    <FormItem className='flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4 shadow'>
+                      <FormControl>
+                        <Checkbox
+                          checked={field.value}
+                          onCheckedChange={field.onChange}
+                        />
+                      </FormControl>
+                      <div className='space-y-1 leading-none'>
+                        <FormLabel>Also delete images</FormLabel>
+                        <FormDescription>
+                          The product images linked to product will be deleted
+                        </FormDescription>
+                      </div>
+                    </FormItem>
+                  )}
+                />
+              </DialogDescription>
+            </DialogHeader>
+            <DialogFooter>
+              <Button variant='destructive' type='submit' disabled={loading}>
+                {loading && (
+                  <ReloadIcon className='mr-2 h-4 w-4 animate-spin' />
+                )}
+                Delete
+              </Button>
+              <Button variant='outline' onClick={() => onOpenChange(false)}>
+                Cancel
+              </Button>
+            </DialogFooter>
+          </form>
+        </Form>
       </DialogContent>
     </Dialog>
   );
@@ -557,38 +600,38 @@ export function ProductTableToolbar<TData>({
   };
 
   return (
-    <div className="flex items-center justify-between mb-3">
-      <div className="flex flex-1 items-center space-x-2">
+    <div className='flex items-center justify-between mb-3'>
+      <div className='flex flex-1 items-center space-x-2'>
         <Input
-          placeholder="Filter Name..."
+          placeholder='Filter Name...'
           value={(table.getColumn("name")?.getFilterValue() as string) ?? ""}
           onChange={(event) =>
             table.getColumn("name")?.setFilterValue(event.target.value)
           }
-          className="h-8 w-[150px] lg:w-[250px]"
+          className='h-8 w-[150px] lg:w-[250px]'
         />
         {table.getColumn("collections") && (
           <DataTableFacetedFilter
             column={table.getColumn("collections")}
-            title="Collections"
+            title='Collections'
             options={collections}
           />
         )}
         {table.getColumn("shops") && (
           <DataTableFacetedFilter
             column={table.getColumn("shops")}
-            title="Shops"
+            title='Shops'
             options={shops}
           />
         )}
         {isFiltered && (
           <Button
-            variant="ghost"
+            variant='ghost'
             onClick={() => table.resetColumnFilters()}
-            className="h-8 px-2 lg:px-3"
+            className='h-8 px-2 lg:px-3'
           >
             Reset
-            <Cross2Icon className="ml-2 h-4 w-4" />
+            <Cross2Icon className='ml-2 h-4 w-4' />
           </Button>
         )}
         {selectedRows.rows.length > 0 && (
