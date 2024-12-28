@@ -163,6 +163,7 @@ export const publishProducts = async (
       id: shopId,
     },
     include: {
+      credential: true,
       maskImages: true,
       products: {
         where: {
@@ -215,7 +216,10 @@ export const publishProducts = async (
     }
   }
 
-  const shopifyClient = getShopifyClient(shop.shopDomain, shop.apiKey ?? "");
+  const shopifyClient = getShopifyClient(
+    shop.shopDomain,
+    shop.credential.apiKey ?? ""
+  );
 
   let allProductCollections: { title: string; description: string | null }[] =
     [];

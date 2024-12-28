@@ -18,6 +18,7 @@ export const publishSingleProduct = async (
       id: shopId,
     },
     include: {
+      credential: true,
       maskImages: true,
       products: {
         where: {
@@ -56,7 +57,10 @@ export const publishSingleProduct = async (
     return { success: false, data: "Product is not published yet" };
   }
 
-  const shopifyClient = getShopifyClient(shop.shopDomain, shop.apiKey ?? "");
+  const shopifyClient = getShopifyClient(
+    shop.shopDomain,
+    shop.credential.apiKey ?? ""
+  );
 
   const getCollectionResponse = await shopifyClient.fetch(`
     query {

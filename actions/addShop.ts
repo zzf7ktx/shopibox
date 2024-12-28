@@ -18,8 +18,13 @@ export const addShop = async (data: AddShopFormFields, formData: FormData) => {
   const shop = await prisma.shop.create({
     data: {
       name: data.name,
-      apiKey: data.apiKey,
       shopDomain: data.shopDomain,
+      credential: {
+        create: {
+          shopDomain: data.shopDomain,
+          apiKey: data.apiKey,
+        },
+      },
       maskImages: {
         create: {
           positionX: data.maskObjectX,
