@@ -1,8 +1,9 @@
 "use server";
+
 import prisma from "@/lib/prisma";
 import { ShopStatus } from "@prisma/client";
 
-export const publishShopProducts = async (
+export const schedulePublishingProducts = async (
   shopId: string,
   batchSize: number = 20
 ) => {

@@ -26,5 +26,5 @@ export { addProductsToShop } from "./addProductsToShop";
 
 export { deleteImages } from "./deleteImages";
 export { uploadImages } from "./uploadImages";
-export { syncImageWithMainProvider } from "./syncImageWithMainProvider";
-export { syncManyImagesWithMainProvider } from "./syncManyImagesWithMainProvider";
+export { syncImage } from "./syncImage";
+export { syncManyImages } from "./syncManyImages";

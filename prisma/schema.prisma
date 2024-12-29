@@ -17,7 +17,7 @@ enum ImageSource {
 
 enum ImageSyncStatus {
   Synced
-  NotSync
+  NotSynced
 }
 
 enum ProductSyncStatus {
@@ -35,13 +35,15 @@ model Image {
   backupLink         String?           @map(name: "backup_link")
   provider           String?
   providerRef        String?           @map(name: "provider_ref")
-  syncStatus         ImageSyncStatus   @default(NotSync) @map(name: "sync_status")
+  syncStatus         ImageSyncStatus   @default(NotSynced) @map(name: "sync_status")
   product            Product?          @relation(fields: [productId], references: [id], onDelete: Cascade)
   productId          String?           @map(name: "product_id")
   createdAt          DateTime          @default(now()) @map(name: "created_at")
   updatedAt          DateTime          @updatedAt @map(name: "updated_at")
   productVariation   ProductVariation? @relation(fields: [productVariationId], references: [id], onDelete: SetNull)
-  productVariationId String?
+  productVariationId String?           @map("product_variation_id")
+  Shop               Shop?             @relation(fields: [shopId], references: [id])
+  shopId             String?           @map("shop_id")
 
   @@map(name: "images")
 }
@@ -77,7 +79,7 @@ model ProductVariation {
 
   images    Image[]
   Product   Product? @relation(fields: [productId], references: [id])
-  productId String?
+  productId String?  @map("product_id")
 
   @@map(name: "product_variations")
 }
@@ -85,8 +87,8 @@ model ProductVariation {
 model Collection {
   id          String  @id @default(cuid())
   name        String  @unique
-  publicName  String?
-  description String?
+  publicName  String? @map("public_name")
+  description String? @map("description")
 
   createdAt DateTime @default(now()) @map(name: "created_at")
   updatedAt DateTime @updatedAt @map(name: "updated_at")
@@ -101,7 +103,7 @@ model ProductsOnCollections {
   productId    String     @map(name: "product_id")
   collection   Collection @relation(fields: [collectionId], references: [id], onDelete: Cascade)
   collectionId String     @map(name: "collection_id")
-  priority     Int?
+  priority     Int?       @map("priority")
   assignedAt   DateTime   @default(now()) @map(name: "assigned_at")
 
   @@id([productId, collectionId])
@@ -132,20 +134,22 @@ model Shop {
   createdAt DateTime @default(now()) @map(name: "created_at")
   updatedAt DateTime @updatedAt @map(name: "updated_at")
 
-  products          ProductsOnShops[]
-  maskImages        ShopMaskImage[]
-  job               Job[]
-  credential        ShopCredentials   @relation(fields: [shopCredentialsId], references: [id])
-  shopCredentialsId String            @map("shop_credentials_id")
+  products    ProductsOnShops[]
+  job         Job[]
+  images      Image[]
+  credentials ShopCredentials[]
 
   @@map(name: "shops")
 }
 
 model ShopCredentials {
-  id         String  @id @default(cuid())
-  shopDomain String  @default("") @map("shop_domain")
-  apiKey     String? @map(name: "api_key")
-  Shop       Shop[]
+  id          String  @id @default(cuid())
+  shopDomain  String  @default("") @map("shop_domain")
+  apiKey      String? @map(name: "api_key")
+  apiSerect   String? @map(name: "api_serect")
+  accessToken String? @map(name: "access_token")
+  Shop        Shop    @relation(fields: [shopId], references: [id], onDelete: Cascade)
+  shopId      String  @map(name: "shop_id")
 
   @@map(name: "shop_credentials")
 }
@@ -155,27 +159,12 @@ model ProductsOnShops {
   shopId     String            @map(name: "shop_id")
   product    Product           @relation(fields: [productId], references: [id], onDelete: Cascade)
   productId  String            @map(name: "product_id")
-  priority   Int?
+  priority   Int?              @map("priority")
   status     ProductSyncStatus @default(NotPublished)
   assignedAt DateTime          @default(now()) @map(name: "assigned_at")
 
   @@id([shopId, productId])
   @@map(name: "products_on_shops")
-}
-
-model ShopMaskImage {
-  id        String   @id @default(cuid())
-  src       String
-  positionX Int      @map(name: "position_x")
-  positionY Int      @map(name: "position_y")
-  scale     Int
-  createdAt DateTime @default(now()) @map(name: "created_at")
-  updatedAt DateTime @updatedAt @map(name: "updated_at")
-
-  shop   Shop?   @relation(fields: [shopId], references: [id], onDelete: Cascade)
-  shopId String? @map(name: "shop_id")
-
-  @@map(name: "shop_mask_images")
 }
 
 enum JobStatus {
@@ -194,8 +183,9 @@ model Job {
   shop   Shop?  @relation(fields: [shopId], references: [id], onDelete: Cascade)
   shopId String @map(name: "shop_id")
 
-  createdAt DateTime @default(now()) @map(name: "created_at")
-  updatedAt DateTime @updatedAt @map(name: "updated_at")
+  createdAt   DateTime @default(now()) @map(name: "created_at")
+  updatedAt   DateTime @updatedAt @map(name: "updated_at")
+  lastRunTime DateTime @updatedAt @map(name: "last_run_time")
 
   @@map(name: "jobs")
 }

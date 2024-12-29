@@ -4,10 +4,7 @@ import storage from "@/lib/storage";
 import prisma from "@/lib/prisma";
 
 export interface UpdateShopLogoFormFields {
-  maskImageId: string;
-  maskObjectX: number;
-  maskObjectY: number;
-  maskObjectScale: number;
+  imageId: string;
 }
 
 export const updateShopLogo = async (
@@ -19,50 +16,47 @@ export const updateShopLogo = async (
   const shop = await prisma.shop.findFirst({
     where: { id: shopId },
     include: {
-      maskImages: true,
+      images: true,
     },
   });
 
   if (!shop) {
-    return;
+    return { success: false, data: "Shop is not exist" };
   }
 
   let imageSrc: string | undefined = undefined;
-  if (String(file) !== "undefined") {
-    let byteArrayBuffer = await new Response(file).arrayBuffer();
-    const buffer = Buffer.from(byteArrayBuffer);
+  if (!file || typeof file !== "object") {
+    return { success: false, data: "File is not valid" };
+  }
 
-    const mime = "image/jpg";
-    const encoding = "base64";
-    const base64Data = buffer.toString("base64");
-    const fileUri = "data:" + mime + ";" + encoding + "," + base64Data;
-
-    const uploadResult = await storage.upload(fileUri, {
+  try {
+    const uploadResult = await storage.uploadFile(file, {
       overwrite: true,
-      publicId: shop.maskImages?.[0]?.id ?? shop.id,
+      publicId: shop.images?.[0]?.providerRef ?? "",
       folder: `shopify/${shopId}`,
     });
 
     imageSrc = uploadResult?.secureUrl;
+
+    await prisma.image.upsert({
+      where: {
+        id: shop.images.find((i) => !i.productId)?.id ?? "",
+      },
+      create: {
+        cloudLink: imageSrc,
+        name: "Logo",
+        source: "Manual",
+        syncStatus: "Synced",
+        shopId: shopId,
+        providerRef: uploadResult.publicId,
+      },
+      update: {
+        cloudLink: imageSrc,
+      },
+    });
+  } catch (error) {
+    return { success: false, data: "Failed in uploading image" };
   }
 
-  const updateShop = await prisma.shopMaskImage.upsert({
-    where: {
-      id: data.maskImageId,
-    },
-    update: {
-      positionX: data.maskObjectX,
-      positionY: data.maskObjectY,
-      scale: data.maskObjectScale,
-      ...(typeof imageSrc === "undefined" ? {} : { src: imageSrc }),
-    },
-    create: {
-      positionX: data.maskObjectX,
-      positionY: data.maskObjectY,
-      scale: data.maskObjectScale,
-      src: imageSrc ?? "",
-      shopId: shopId,
-    },
-  });
-  return updateShop;
+  return { success: true };
 };

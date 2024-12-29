@@ -6,7 +6,7 @@ import {
   Prisma,
 } from "@prisma/client";
 import { useRouter } from "next/navigation";
-import { syncImageWithMainProvider } from "@/actions";
+import { syncImage } from "@/actions/manage";
 import {
   CheckCircledIcon,
   CrossCircledIcon,
@@ -60,7 +60,7 @@ const columns: ColumnDef<ImageWithProduct>[] = [
         onCheckedChange={(value: boolean) =>
           table.toggleAllPageRowsSelected(!!value)
         }
-        aria-label="Select all"
+        aria-label='Select all'
       />
     ),
     cell: ({ row, table }) => {
@@ -78,7 +78,7 @@ const columns: ColumnDef<ImageWithProduct>[] = [
             lastSelectedId = row.index;
           }}
           onCheckedChange={(value: boolean) => row.toggleSelected(!!value)}
-          aria-label="Select row"
+          aria-label='Select row'
         />
       );
     },
@@ -88,7 +88,7 @@ const columns: ColumnDef<ImageWithProduct>[] = [
   {
     accessorKey: "name",
     header: ({ column }) => (
-      <DataTableColumnHeader column={column} title="Name" />
+      <DataTableColumnHeader column={column} title='Name' />
     ),
     cell: ({ row }) => {
       return (
@@ -97,7 +97,7 @@ const columns: ColumnDef<ImageWithProduct>[] = [
             <Image
               width={150}
               height={90}
-              className="h-36"
+              className='h-36'
               src={
                 row.original.cloudLink ??
                 row.original.backupLink ??
@@ -106,7 +106,7 @@ const columns: ColumnDef<ImageWithProduct>[] = [
               alt={row.original.name}
             ></Image>
           </PopoverTrigger>
-          <PopoverContent className="w-80">
+          <PopoverContent className='w-80'>
             <Image
               width={320}
               height={192}
@@ -125,7 +125,7 @@ const columns: ColumnDef<ImageWithProduct>[] = [
   {
     accessorKey: "source",
     header: ({ column }) => (
-      <DataTableColumnHeader column={column} title="Source" />
+      <DataTableColumnHeader column={column} title='Source' />
     ),
     cell: ({ row }) => {
       const source = Object.keys(ImageSource).find(
@@ -137,11 +137,11 @@ const columns: ColumnDef<ImageWithProduct>[] = [
       }
 
       return (
-        <div className="flex w-[100px] items-center">
+        <div className='flex w-[100px] items-center'>
           {source === ImageSource.Manual ? (
-            <HandIcon className="mr-2 h-4 w-4 text-muted-foreground" />
+            <HandIcon className='mr-2 h-4 w-4 text-muted-foreground' />
           ) : (
-            <RocketIcon className="mr-2 h-4 w-4 text-muted-foreground" />
+            <RocketIcon className='mr-2 h-4 w-4 text-muted-foreground' />
           )}
           <span>{source}</span>
         </div>
@@ -154,7 +154,7 @@ const columns: ColumnDef<ImageWithProduct>[] = [
   {
     accessorKey: "product",
     header: ({ column }) => (
-      <DataTableColumnHeader column={column} title="Product" />
+      <DataTableColumnHeader column={column} title='Product' />
     ),
     cell: ({ row }) => (
       <Link href={`/products/${row.original.product?.id ?? ""}`}>
@@ -166,7 +166,7 @@ const columns: ColumnDef<ImageWithProduct>[] = [
   {
     accessorKey: "syncStatus",
     header: ({ column }) => (
-      <DataTableColumnHeader column={column} title="Cloud status" />
+      <DataTableColumnHeader column={column} title='Cloud status' />
     ),
     cell: ({ row }) => {
       const status = Object.keys(ImageSyncStatus).find(
@@ -178,11 +178,11 @@ const columns: ColumnDef<ImageWithProduct>[] = [
       }
 
       return (
-        <div className="flex w-[100px] items-center">
+        <div className='flex w-[100px] items-center'>
           {status === ImageSyncStatus.Synced ? (
-            <CheckCircledIcon className="mr-2 h-4 w-4 text-green-700" />
+            <CheckCircledIcon className='mr-2 h-4 w-4 text-green-700' />
           ) : (
-            <CrossCircledIcon className="mr-2 h-4 w-4 text-red-700" />
+            <CrossCircledIcon className='mr-2 h-4 w-4 text-red-700' />
           )}
           <span>{status}</span>
         </div>
@@ -203,7 +203,7 @@ function CloudSyncCell({ image }: { image: ImageInfo }) {
   const router = useRouter();
 
   const handleSync = async () => {
-    await syncImageWithMainProvider(image.id, "default");
+    await syncImage(image.id, "default");
     router.refresh();
   };
 
@@ -214,12 +214,12 @@ function CloudSyncCell({ image }: { image: ImageInfo }) {
       dialogTrigger={
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="ghost" className="h-8 w-8 p-0">
-              <span className="sr-only">Open menu</span>
-              <DotsHorizontalIcon className="h-4 w-4" />
+            <Button variant='ghost' className='h-8 w-8 p-0'>
+              <span className='sr-only'>Open menu</span>
+              <DotsHorizontalIcon className='h-4 w-4' />
             </Button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
+          <DropdownMenuContent align='end'>
             <DropdownMenuLabel>Actions</DropdownMenuLabel>
             <DropdownMenuItem
               onClick={() => navigator.clipboard.writeText(image.id)}

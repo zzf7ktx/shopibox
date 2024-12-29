@@ -33,8 +33,29 @@ const formSchema = z.object({
     .min(2, {
       message: "Shop domain must be at least 2 characters.",
     })
-    .max(50),
-  apiKey: z.optional(z.string()),
+    .max(50)
+    .optional(),
+  apiKey: z
+    .string()
+    .min(2, {
+      message: "Api key must be at least 2 characters.",
+    })
+    .max(50)
+    .optional(),
+  apiSerect: z
+    .string()
+    .min(2, {
+      message: "Api serect must be at least 2 characters.",
+    })
+    .max(50)
+    .optional(),
+  accessToken: z
+    .string()
+    .min(2, {
+      message: "Access token must be at least 2 characters.",
+    })
+    .max(50)
+    .optional(),
 });
 
 export interface ShopGeneralSettingsProps {
@@ -45,7 +66,7 @@ export interface ShopGeneralSettingsProps {
       shopDomain: true;
       syncStatus: true;
       provider: true;
-      maskImages: true;
+      images: true;
       createdAt: true;
       updatedAt: true;
     };
@@ -67,6 +88,8 @@ export default function ShopGeneralSettings({
         name: shopInfo.name,
         shopDomain: shopInfo.shopDomain,
         apiKey: "",
+        apiSerect: "",
+        accessToken: "",
       }),
       [shopInfo]
     ),
@@ -77,9 +100,11 @@ export default function ShopGeneralSettings({
       setLoading(true);
 
       const newShop = await updateShopGeneral(shopInfo.id, {
-        apiKey: values.apiKey,
         name: values.name,
         shopDomain: values.shopDomain,
+        apiKey: values.apiKey,
+        apiSerect: values.apiSerect,
+        accessToken: values.accessToken,
       });
 
       toast({
@@ -146,9 +171,37 @@ export default function ShopGeneralSettings({
             <FormItem>
               <FormLabel>Api key</FormLabel>
               <FormControl>
-                <Input placeholder='' {...field} type='password' />
+                <Input placeholder='' {...field} />
               </FormControl>
               <FormDescription>The api key for this shop.</FormDescription>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
+          name='apiSerect'
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Api serect</FormLabel>
+              <FormControl>
+                <Input placeholder='' {...field} type='password' />
+              </FormControl>
+              <FormDescription>The api serect for this shop.</FormDescription>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
+          name='accessToken'
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Access token</FormLabel>
+              <FormControl>
+                <Input placeholder='' {...field} type='password' />
+              </FormControl>
+              <FormDescription>The access token for this shop.</FormDescription>
               <FormMessage />
             </FormItem>
           )}

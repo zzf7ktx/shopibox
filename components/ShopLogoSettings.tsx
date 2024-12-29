@@ -23,12 +23,10 @@ import { ToastAction } from "@/components/ui/Toast";
 import { ReloadIcon } from "@radix-ui/react-icons";
 import { Prisma } from "@prisma/client";
 import { updateShopLogo } from "@/actions/manage";
+import Image from "next/image";
 
 const formSchema = z.object({
-  maskObjectSrc: z.any(),
-  maskObjectX: z.coerce.number().min(0).max(500),
-  maskObjectY: z.coerce.number().min(0).max(700),
-  maskObjectScale: z.coerce.number().min(0).max(100),
+  logoSrc: z.any(),
 });
 
 function getImageData(event: ChangeEvent<HTMLInputElement>) {
@@ -53,7 +51,7 @@ export interface ShopLogoSettingsProps {
       shopDomain: true;
       syncStatus: true;
       provider: true;
-      maskImages: true;
+      images: true;
       createdAt: true;
       updatedAt: true;
     };
@@ -63,9 +61,6 @@ export interface ShopLogoSettingsProps {
 export default function ShopLogoSettings({ shopInfo }: ShopLogoSettingsProps) {
   const [loading, setLoading] = useState<boolean>(false);
   const [imagePreview, setImagePreview] = useState<string>();
-  const [backgroundImage, setBackgroundImage] = useState<string>(
-    "https://picsum.photos/500"
-  );
 
   const router = useRouter();
   const { toast } = useToast();
@@ -73,44 +68,35 @@ export default function ShopLogoSettings({ shopInfo }: ShopLogoSettingsProps) {
     resolver: zodResolver(formSchema),
     defaultValues: useMemo(
       () => ({
-        maskObjectScale: shopInfo.maskImages?.[0]?.scale ?? 100,
-        maskObjectX: shopInfo.maskImages?.[0]?.positionX ?? 0,
-        maskObjectY: shopInfo.maskImages?.[0]?.positionY ?? 0,
-        maskObjectSrc: "",
+        logoSrc: shopInfo.images.find((i) => !i.productId)?.cloudLink,
       }),
       [shopInfo]
     ),
   });
 
+  console.log(shopInfo);
+
   const onFinish = async (values: z.infer<typeof formSchema>) => {
     try {
       setLoading(true);
-
       let formData: FormData = new FormData();
-      values.maskObjectSrc?.[0] !== "" &&
-        formData.append("file", values.maskObjectSrc?.[0]);
+      values.logoSrc?.[0] !== "" &&
+        formData.append("file", values.logoSrc?.[0]);
       const mask = await updateShopLogo(
         shopInfo.id,
         {
-          maskObjectScale: values.maskObjectScale,
-          maskObjectX: values.maskObjectX,
-          maskObjectY: values.maskObjectY,
-          maskImageId: shopInfo.maskImages?.[0]?.id ?? "",
+          imageId: shopInfo.images?.[0]?.id ?? "",
         },
         formData
       );
 
       toast({
         title: "Success",
-        description: "Add shop successfully. Add some product to this shop",
-        action: <ToastAction altText='AddProducts'>Add products</ToastAction>,
+        description: "Update shop logo successfully",
       });
 
       form.reset({
-        maskObjectScale: mask?.scale ?? 100,
-        maskObjectX: mask?.positionX ?? 0,
-        maskObjectY: mask?.positionY ?? 0,
-        maskObjectSrc: "",
+        logoSrc: "",
       });
       router.refresh();
     } catch (error) {
@@ -140,57 +126,30 @@ export default function ShopLogoSettings({ shopInfo }: ShopLogoSettingsProps) {
               <Card className='w-[500px] h-[500px] p-0'>
                 <CardContent className='p-0'>
                   <div className='w-[500px] h-[500px] relative'>
-                    <img
-                      src={backgroundImage}
-                      alt='background'
-                      width={500}
-                      height={500}
-                    />
-                    {(imagePreview || shopInfo.maskImages?.[0]?.src) && (
-                      <img
+                    <Card style={{ width: 500, height: 500 }} />
+                    {(imagePreview || shopInfo.images?.[0]?.cloudLink) && (
+                      <Image
                         className='absolute'
                         src={
-                          imagePreview ?? shopInfo.maskImages?.[0]?.src ?? ""
+                          imagePreview ?? shopInfo.images?.[0]?.cloudLink ?? ""
                         }
+                        style={{ top: 0, right: 0, height: 500 }}
+                        width={500}
+                        height={500}
                         alt='image'
-                        style={{
-                          width: (form.watch().maskObjectScale * 500) / 100,
-                          height: (form.watch().maskObjectScale * 500) / 100,
-                          top:
-                            form.watch().maskObjectY %
-                            (form.watch().maskObjectScale === 100
-                              ? 500
-                              : 500 -
-                                (form.watch().maskObjectScale * 500) / 100),
-                          left:
-                            form.watch().maskObjectX %
-                            (form.watch().maskObjectScale === 100
-                              ? 500
-                              : 500 -
-                                (form.watch().maskObjectScale * 500) / 100),
-                        }}
                       />
                     )}
                   </div>
                 </CardContent>
               </Card>
-              <Input
-                className='mb-2'
-                placeholder='Choose the image for preview'
-                type='file'
-                onChange={(event) => {
-                  const { displayUrls } = getImageData(event);
-                  setBackgroundImage(displayUrls[0]);
-                }}
-              />
             </div>
             <div className='flex md:flex-col gap-2'>
               <FormField
                 control={form.control}
-                name='maskObjectSrc'
+                name='logoSrc'
                 render={({ field: { onChange, value, ...rest } }) => (
                   <FormItem>
-                    <FormLabel>Logo - Src</FormLabel>
+                    <FormLabel>Logo Src</FormLabel>
                     <FormControl>
                       <Input
                         type='file'
@@ -206,48 +165,6 @@ export default function ShopLogoSettings({ shopInfo }: ShopLogoSettingsProps) {
                     <FormDescription className='flex gap-1'>
                       Choose mask object image.
                     </FormDescription>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name='maskObjectX'
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Logo - X</FormLabel>
-                    <FormControl>
-                      <Input placeholder='X' {...field} type='number' />
-                    </FormControl>
-                    <FormDescription>Logo X position</FormDescription>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name='maskObjectY'
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Logo - Y</FormLabel>
-                    <FormControl>
-                      <Input placeholder='Y' {...field} type='number' />
-                    </FormControl>
-                    <FormDescription>Logo Y position</FormDescription>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name='maskObjectScale'
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Logo - Scale</FormLabel>
-                    <FormControl>
-                      <Input placeholder='Scale' {...field} type='number' />
-                    </FormControl>
-                    <FormDescription>Logo scale</FormDescription>
                     <FormMessage />
                   </FormItem>
                 )}

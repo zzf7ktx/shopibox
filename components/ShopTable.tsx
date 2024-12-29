@@ -29,7 +29,7 @@ type ShopDto = Prisma.ShopGetPayload<{
     syncStatus: true;
     status: true;
     provider: true;
-    maskImages: true;
+    images: true;
     createdAt: true;
     updatedAt: true;
   };

@@ -1,4 +1,4 @@
-import { StorageProvider } from "@/types/StorageProvider";
+import { StorageProvider } from "@/types/storageProvider";
 import cloudinaryService from "./cloudinary";
 import azureBlobService from "./azureBlob";
 

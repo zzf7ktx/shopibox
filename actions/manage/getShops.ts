@@ -9,7 +9,7 @@ export const getShops = async () => {
       name: true,
       syncStatus: true,
       provider: true,
-      maskImages: true,
+      images: true,
       createdAt: true,
       updatedAt: true,
     },

@@ -13,10 +13,12 @@ export const getShop = async (id: string) => {
       status: true,
       syncStatus: true,
       provider: true,
-      maskImages: true,
       createdAt: true,
       updatedAt: true,
+      images: true,
+      shopDomain: true,
     },
   });
+
   return shop;
 };

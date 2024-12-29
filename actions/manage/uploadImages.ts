@@ -2,9 +2,13 @@
 
 import storage from "@/lib/storage";
 import prisma from "@/lib/prisma";
-import { StorageProvider } from "@/types/StorageProvider";
+import { StorageProvider } from "@/types/storageProvider";
 
-export const uploadImages = async (productId: string, data: FormData) => {
+export const uploadImages = async (
+  productId: string,
+  data: FormData,
+  provider: StorageProvider = StorageProvider.Azure
+) => {
   const files: File[] = data.getAll("files") as unknown as File[];
 
   if (!files || files.length === 0) {
@@ -36,7 +40,7 @@ export const uploadImages = async (productId: string, data: FormData) => {
     await prisma.image.update({
       data: {
         cloudLink: uploadResult.secureUrl,
-        provider: StorageProvider.Cloudinary,
+        provider: provider,
         providerRef: uploadResult.publicId,
         syncStatus: "Synced",
       },

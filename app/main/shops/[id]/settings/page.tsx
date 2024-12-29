@@ -18,32 +18,32 @@ export default async function ShopSettingPage({
       shopDomain: true,
       syncStatus: true,
       provider: true,
-      maskImages: true,
+      images: true,
       createdAt: true,
       updatedAt: true,
     },
   });
 
   return (
-    <div className="flex-1 space-y-4 py-6">
-      <div className="flex items-center justify-between space-y-2">
-        <h2 className="text-3xl font-bold tracking-tight">Settings</h2>
+    <div className='flex-1 space-y-4 py-6'>
+      <div className='flex items-center justify-between space-y-2'>
+        <h2 className='text-3xl font-bold tracking-tight'>Settings</h2>
       </div>
-      <Tabs defaultValue="general" className="space-y-4">
+      <Tabs defaultValue='general' className='space-y-4'>
         <TabsList>
-          <TabsTrigger value="general">General</TabsTrigger>
-          <TabsTrigger value="logo">Logo</TabsTrigger>
-          <TabsTrigger value="images" disabled>
+          <TabsTrigger value='general'>General</TabsTrigger>
+          <TabsTrigger value='logo'>Logo</TabsTrigger>
+          <TabsTrigger value='images' disabled>
             Images
           </TabsTrigger>
         </TabsList>
-        <TabsContent value="general" className="space-y-4">
+        <TabsContent value='general' className='space-y-4'>
           <ShopGeneralSettings shopInfo={shop!} />
         </TabsContent>
-        <TabsContent value="logo" className="space-y-4">
+        <TabsContent value='logo' className='space-y-4'>
           <ShopLogoSettings shopInfo={shop!} />
         </TabsContent>
-        <TabsContent value="images" className="space-y-4"></TabsContent>
+        <TabsContent value='images' className='space-y-4'></TabsContent>
       </Tabs>
     </div>
   );

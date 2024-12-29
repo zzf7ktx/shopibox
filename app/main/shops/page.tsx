@@ -21,7 +21,7 @@ export default async function Shops() {
       syncStatus: true,
       status: true,
       provider: true,
-      maskImages: true,
+      images: true,
       createdAt: true,
       updatedAt: true,
     },

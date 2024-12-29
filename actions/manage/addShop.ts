@@ -2,14 +2,15 @@
 
 import storage from "@/lib/storage";
 import prisma from "@/lib/prisma";
+import { ShopProvider } from "@/types/shopProvider";
 
 export interface AddShopFormFields {
   name: string;
   shopDomain: string;
   apiKey: string;
-  maskObjectX: number;
-  maskObjectY: number;
-  maskObjectScale: number;
+  apiSerect: string;
+  accessToken: string;
+  provider: ShopProvider;
 }
 
 export const addShop = async (data: AddShopFormFields, formData: FormData) => {
@@ -19,39 +20,28 @@ export const addShop = async (data: AddShopFormFields, formData: FormData) => {
     data: {
       name: data.name,
       shopDomain: data.shopDomain,
-      credential: {
+      provider: data.provider,
+      credentials: {
         create: {
           shopDomain: data.shopDomain,
           apiKey: data.apiKey,
-        },
-      },
-      maskImages: {
-        create: {
-          positionX: data.maskObjectX,
-          positionY: data.maskObjectY,
-          scale: data.maskObjectScale,
-          src: "",
+          apiSerect: data.apiSerect,
+          accessToken: data.accessToken,
         },
       },
     },
     include: {
-      maskImages: true,
+      images: {
+        take: 1,
+      },
     },
   });
 
   let uploadResult;
   if (!!file && typeof file === "object") {
-    let byteArrayBuffer = await new Response(file).arrayBuffer();
-    const buffer = Buffer.from(byteArrayBuffer);
-
-    const mime = file.type;
-    const encoding = "base64";
-    const base64Data = buffer.toString("base64");
-    const fileUri = "data:" + mime + ";" + encoding + "," + base64Data;
-
-    uploadResult = await storage.upload(fileUri, {
+    uploadResult = await storage.uploadFile(file, {
       overwrite: true,
-      publicId: shop.maskImages?.[0]?.id ?? shop.id,
+      publicId: shop.images.find((i) => !i.productId)?.providerRef ?? "",
       folder: `shopify/${shop.id}`,
     });
   }
@@ -61,19 +51,18 @@ export const addShop = async (data: AddShopFormFields, formData: FormData) => {
       id: shop.id,
     },
     data: {
-      maskImages: {
-        update: {
-          where: {
-            id: shop.maskImages?.[0]?.id,
-          },
-          data: {
-            src: uploadResult?.secureUrl ?? "",
-          },
+      images: {
+        create: {
+          cloudLink: uploadResult?.secureUrl ?? "",
+          name: "logo",
+          source: "Manual",
+          syncStatus: "Synced",
+          providerRef: uploadResult?.publicId,
         },
       },
     },
     include: {
-      maskImages: true,
+      images: true,
     },
   });
 
