@@ -11,7 +11,7 @@ import { useToast } from "@/components/ui/useToast";
 import { getCollections } from "@/actions/manage";
 import {
   publishProducts,
-  publishShopProducts,
+  schedulePublishingProducts,
   setProductsToUnpublished,
 } from "@/actions/publish";
 import { useParams, useRouter } from "next/navigation";
@@ -94,7 +94,7 @@ export function ShopProductTableToolbar<TData>({
       const shopId = typeof id === "string" ? id : id[0];
       setLoading(true);
 
-      const result = await publishShopProducts(shopId);
+      const result = await schedulePublishingProducts(shopId);
 
       toast({
         title: "Success",

@@ -26,7 +26,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "./ui/Dialog";
-import { syncManyImagesWithMainProvider } from "@/actions";
+import { syncManyImages } from "@/actions/manage";
 import { deleteImages } from "@/actions/manage";
 
 function DeleteImageDialog<TData>({
@@ -120,7 +120,7 @@ function SyncImageDialog<TData>({
     try {
       setLoading(true);
 
-      await syncManyImagesWithMainProvider(selectedImages, "default");
+      await syncManyImages(selectedImages, "default");
 
       toast({
         title: "Success",

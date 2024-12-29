@@ -1,6 +1,6 @@
 "use client";
 
-import { ChangeEvent, ReactNode, useState } from "react";
+import { ReactNode, useState } from "react";
 import { useRouter } from "next/navigation";
 import { addShop } from "@/actions/manage";
 import * as z from "zod";
@@ -26,8 +26,18 @@ import {
 import { Input } from "@/components/ui/Input";
 import { useToast } from "@/components/ui/useToast";
 import { ToastAction } from "@/components/ui/Toast";
-import { ReloadIcon } from "@radix-ui/react-icons";
-import { Card, CardContent } from "./ui/Card";
+import { CaretSortIcon, ReloadIcon } from "@radix-ui/react-icons";
+import { Popover, PopoverContent, PopoverTrigger } from "./ui/Popover";
+import { cn } from "@/lib/utils";
+import { ShopProvider } from "@/types/shopProvider";
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+} from "./ui/Command";
+import { ScrollArea } from "./ui/ScrollArea";
 
 const formSchema = z.object({
   name: z
@@ -36,37 +46,12 @@ const formSchema = z.object({
       message: "Name must be at least 2 characters.",
     })
     .max(50),
-  shopDomain: z
-    .string()
-    .min(2, {
-      message: "Shop domain must be at least 2 characters.",
-    })
-    .max(50),
-  apiKey: z
-    .string()
-    .min(2, {
-      message: "Api key must be at least 2 characters.",
-    })
-    .max(50),
-  maskObjectSrc: z.any(),
-  maskObjectX: z.coerce.number().min(0).max(500),
-  maskObjectY: z.coerce.number().min(0).max(700),
-  maskObjectScale: z.coerce.number().min(0).max(100),
+  provider: z.string().min(1, "Provider must include."),
+  shopDomain: z.optional(z.string()),
+  apiKey: z.optional(z.string()),
+  apiSerect: z.optional(z.string()),
+  accessToken: z.optional(z.string()),
 });
-
-function getImageData(event: ChangeEvent<HTMLInputElement>) {
-  const dataTransfer = new DataTransfer();
-  const displayUrls: string[] = [];
-
-  for (let image of Array.from(event.target.files!)) {
-    dataTransfer.items.add(image);
-    displayUrls.push(URL.createObjectURL(image));
-  }
-
-  const files = dataTransfer.files;
-
-  return { files, displayUrls };
-}
 
 export interface AddShopModalProps {
   dialogTrigger: ReactNode;
@@ -75,17 +60,6 @@ export interface AddShopModalProps {
 export default function AddShopModal({ dialogTrigger }: AddShopModalProps) {
   const [loading, setLoading] = useState<boolean>(false);
   const [open, setOpen] = useState(false);
-  const [imagePreview, setImagePreview] = useState<string>();
-  const [backgroundImage, setBackgroundImage] = useState<string>(
-    "https://picsum.photos/500"
-  );
-  const [maskImageSize, setMaskImageSize] = useState<{
-    width: number;
-    height: number;
-  }>({
-    width: 400,
-    height: 400,
-  });
   const router = useRouter();
   const { toast } = useToast();
 
@@ -93,30 +67,41 @@ export default function AddShopModal({ dialogTrigger }: AddShopModalProps) {
     resolver: zodResolver(formSchema),
     defaultValues: {
       name: "",
+      provider: "",
       shopDomain: "",
       apiKey: "",
-      maskObjectScale: 100,
-      maskObjectX: 0,
-      maskObjectY: 0,
-      maskObjectSrc: "",
+      apiSerect: "",
+      accessToken: "",
     },
   });
+
+  const shopProviderOptions = Object.entries(ShopProvider).map(
+    ([key, value]) => ({
+      label: key,
+      value: value,
+      // icon:
+      //   value === ShopStatus.Active
+      //     ? CheckCircledIcon
+      //     : value === ShopStatus.Closed
+      //     ? CrossCircledIcon
+      //     : ReaderIcon,
+    })
+  );
 
   const onFinish = async (values: z.infer<typeof formSchema>) => {
     try {
       setLoading(true);
 
       let formData: FormData = new FormData();
-      formData.append("file", values.maskObjectSrc?.[0]);
 
       const newShop = await addShop(
         {
-          apiKey: values.apiKey,
+          apiKey: values.apiKey ?? "",
+          apiSerect: values.apiSerect ?? "",
+          accessToken: values.accessToken ?? "",
           name: values.name,
-          shopDomain: values.shopDomain,
-          maskObjectScale: values.maskObjectScale,
-          maskObjectX: values.maskObjectX,
-          maskObjectY: values.maskObjectY,
+          shopDomain: values.shopDomain ?? "",
+          provider: values.provider as ShopProvider,
         },
         formData
       );
@@ -179,6 +164,64 @@ export default function AddShopModal({ dialogTrigger }: AddShopModalProps) {
                 />
                 <FormField
                   control={form.control}
+                  name='provider'
+                  render={({ field }) => (
+                    <FormItem className='flex flex-col'>
+                      <FormLabel>Provider</FormLabel>
+                      <Popover>
+                        <PopoverTrigger asChild>
+                          <FormControl>
+                            <Button
+                              variant='outline'
+                              role='combobox'
+                              className={cn(
+                                "w-full h-auto justify-between",
+                                !field.value && "text-muted-foreground"
+                              )}
+                            >
+                              {field.value ? (
+                                <div className='flex gap-1 w-full flex-wrap'>
+                                  {field.value}
+                                </div>
+                              ) : (
+                                "Select product"
+                              )}
+                              <CaretSortIcon className='ml-2 h-4 w-4 shrink-0 opacity-50' />
+                            </Button>
+                          </FormControl>
+                        </PopoverTrigger>
+                        <PopoverContent className='mw-[400px] p-0'>
+                          <Command>
+                            <CommandInput
+                              placeholder='Search providers...'
+                              className='h-9'
+                            />
+                            <CommandEmpty>No providers found.</CommandEmpty>
+                            <CommandGroup>
+                              <ScrollArea className='max-h-72'>
+                                {shopProviderOptions.map((opt, index) => (
+                                  <CommandItem
+                                    key={index}
+                                    value={opt.value}
+                                    onSelect={(value) => {
+                                      form.setValue("provider", value);
+                                    }}
+                                  >
+                                    {opt.label}
+                                  </CommandItem>
+                                ))}
+                              </ScrollArea>
+                            </CommandGroup>
+                          </Command>
+                        </PopoverContent>
+                      </Popover>
+                      <FormDescription>Choose shop provider</FormDescription>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
                   name='shopDomain'
                   render={({ field }) => (
                     <FormItem>
@@ -203,6 +246,40 @@ export default function AddShopModal({ dialogTrigger }: AddShopModalProps) {
                     <FormItem>
                       <FormLabel>Api key</FormLabel>
                       <FormControl>
+                        <Input placeholder='' {...field} />
+                      </FormControl>
+                      <FormDescription>
+                        The api key for this shop.
+                      </FormDescription>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name='apiSerect'
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Api serect</FormLabel>
+                      <FormControl>
+                        <Input placeholder='' {...field} type='password' />
+                      </FormControl>
+                      <FormDescription>
+                        The api serect for this shop.
+                      </FormDescription>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name='accessToken'
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Access token</FormLabel>
+                      <FormControl>
                         <Input placeholder='' {...field} type='password' />
                       </FormControl>
                       <FormDescription>
@@ -212,140 +289,6 @@ export default function AddShopModal({ dialogTrigger }: AddShopModalProps) {
                     </FormItem>
                   )}
                 />
-                <div>
-                  <FormLabel>Logo in images {`(500x500)`}</FormLabel>
-                  <FormDescription>
-                    This image will be used as mask image over the images which
-                    pushed to this shop
-                  </FormDescription>
-
-                  <div className='flex md:flex-column gap-4'>
-                    <div className='flex flex-col gap-1'>
-                      <Card className='w-[500px] h-[500px] p-0'>
-                        <CardContent className='p-0'>
-                          <div className='w-[500px] h-[500px] relative'>
-                            <img
-                              src={backgroundImage}
-                              alt='background'
-                              width={500}
-                              height={500}
-                            />
-                            {imagePreview && (
-                              <img
-                                className='absolute'
-                                src={imagePreview ?? ""}
-                                alt='image'
-                                style={{
-                                  width:
-                                    (form.watch().maskObjectScale * 500) / 100,
-                                  height:
-                                    (form.watch().maskObjectScale * 500) / 100,
-                                  top:
-                                    form.watch().maskObjectY %
-                                    (form.watch().maskObjectScale === 100
-                                      ? 500
-                                      : 500 -
-                                        (form.watch().maskObjectScale * 500) /
-                                          100),
-                                  left:
-                                    form.watch().maskObjectX %
-                                    (form.watch().maskObjectScale === 100
-                                      ? 500
-                                      : 500 -
-                                        (form.watch().maskObjectScale * 500) /
-                                          100),
-                                }}
-                              />
-                            )}
-                          </div>
-                        </CardContent>
-                      </Card>
-                      <Input
-                        className='mb-2'
-                        placeholder='Choose the image for preview'
-                        type='file'
-                        onChange={(event) => {
-                          const { displayUrls } = getImageData(event);
-                          setBackgroundImage(displayUrls[0]);
-                        }}
-                      />
-                    </div>
-                    <div className='flex md:flex-col gap-2'>
-                      <FormField
-                        control={form.control}
-                        name='maskObjectSrc'
-                        render={({ field: { onChange, value, ...rest } }) => (
-                          <FormItem>
-                            <FormLabel>Logo - Src</FormLabel>
-                            <FormControl>
-                              <Input
-                                type='file'
-                                placeholder='abc.jpg'
-                                {...rest}
-                                onChange={(event) => {
-                                  const { files, displayUrls } =
-                                    getImageData(event);
-                                  setImagePreview(displayUrls[0]);
-                                  onChange(files);
-                                }}
-                              />
-                            </FormControl>
-                            <FormDescription className='flex gap-1'>
-                              Choose mask object image.
-                            </FormDescription>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                      <FormField
-                        control={form.control}
-                        name='maskObjectX'
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Logo - X</FormLabel>
-                            <FormControl>
-                              <Input placeholder='X' {...field} type='number' />
-                            </FormControl>
-                            <FormDescription>Logo X position</FormDescription>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                      <FormField
-                        control={form.control}
-                        name='maskObjectY'
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Logo - Y</FormLabel>
-                            <FormControl>
-                              <Input placeholder='Y' {...field} type='number' />
-                            </FormControl>
-                            <FormDescription>Logo Y position</FormDescription>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                      <FormField
-                        control={form.control}
-                        name='maskObjectScale'
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Logo - Scale</FormLabel>
-                            <FormControl>
-                              <Input
-                                placeholder='Scale'
-                                {...field}
-                                type='number'
-                              />
-                            </FormControl>
-                            <FormDescription>Logo scale</FormDescription>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                    </div>
-                  </div>
-                </div>
 
                 <Button type='submit' disabled={loading}>
                   {loading && (

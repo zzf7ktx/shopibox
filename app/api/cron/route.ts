@@ -14,6 +14,7 @@ export async function GET() {
   const results = [];
 
   for (const job of jobs) {
+    job.lastRunTime = new Date();
     const batchProduct = job.productIds.slice(
       job.uploadedProducts,
       job.uploadedProducts + job.batchSize

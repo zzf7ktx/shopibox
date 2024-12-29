@@ -2,11 +2,13 @@
 
 import storage from "@/lib/storage";
 import prisma from "@/lib/prisma";
-import { ImageSourceType } from "@/types/ImageSourceType";
+import { ImageSourceType } from "@/types/imageSourceType";
+import { StorageProvider } from "@/types/storageProvider";
 
-export const syncImageWithMainProvider = async (
+export const syncImage = async (
   imageId: string,
-  sourceType: ImageSourceType
+  sourceType: ImageSourceType,
+  provider: StorageProvider = StorageProvider.Azure
 ) => {
   const image = await prisma.image.findFirst({
     where: {
@@ -33,11 +35,15 @@ export const syncImageWithMainProvider = async (
       break;
   }
 
-  const uploadResult = await storage.upload(sourceLink, {
-    overwrite: true,
-    publicId: image?.providerRef ?? "",
-    folder: "shopify",
-  });
+  const uploadResult = await storage.upload(
+    sourceLink,
+    {
+      overwrite: true,
+      publicId: image?.providerRef ?? "",
+      folder: "shopify",
+    },
+    provider
+  );
 
   await prisma.image.update({
     data: {

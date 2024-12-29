@@ -5,10 +5,7 @@ import prisma from "@/lib/prisma";
 import { parseCurrency } from "@/utils";
 import { ImageSource } from "@prisma/client";
 import { Readable } from "stream";
-import {
-  addOrUpdateProductVariants,
-  syncImageWithMainProvider,
-} from "@/actions/manage";
+import { addOrUpdateProductVariants, syncImage } from "@/actions/manage";
 
 export const importProducts = async (
   data: FormData,
@@ -99,7 +96,7 @@ export const importProducts = async (
 
     if (autoSyncImages) {
       for (let image of product.images) {
-        await syncImageWithMainProvider(image.id, "default");
+        await syncImage(image.id, "default");
       }
     }
 

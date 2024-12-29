@@ -3,6 +3,7 @@ import { GetResult, UploadOptions, UploadResult } from ".";
 import { v1 as uuidv1 } from "uuid";
 import urlUtil from "url";
 import path from "path";
+import mime from "../mime";
 
 const connectionString = process.env.AZURE_BLOB_CONNECTION_STRING ?? "";
 const containerName = process.env.AZURE_BLOB_CONTAINER_NAME ?? "";
@@ -35,7 +36,11 @@ const upload = async (
       ? options.publicId
       : [options.folder, uuidv1() + extension].join("/");
   const blockBlobClient = containerClient.getBlockBlobClient(blobName);
-  const result = await blockBlobClient.syncUploadFromURL(url);
+  const result = await blockBlobClient.syncUploadFromURL(url, {
+    blobHTTPHeaders: {
+      blobContentType: mime.getMime(url) ?? "application/octet-stream",
+    },
+  });
 
   return {
     publicId: blobName,
@@ -55,7 +60,11 @@ const uploadFile = async (
       : [options.folder, uuidv1() + extension].join("/");
   const blockBlobClient = containerClient.getBlockBlobClient(blobName);
   const array = await file.arrayBuffer();
-  const result = await blockBlobClient.uploadData(array);
+  const result = await blockBlobClient.uploadData(array, {
+    blobHTTPHeaders: {
+      blobContentType: mime.getMime(file.name) ?? "application/octet-stream",
+    },
+  });
 
   return {
     publicId: blobName,

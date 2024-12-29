@@ -15,11 +15,7 @@ export const deleteImages = async (ids: string[]) => {
   let count = 0;
 
   for (const image of images) {
-    if (!image.providerRef) {
-      continue;
-    }
-
-    await storage.remove(image.providerRef);
+    image.providerRef && (await storage.remove(image.providerRef));
     const result = await prisma.image.deleteMany({
       where: {
         id: image.id,
