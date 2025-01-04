@@ -2,7 +2,7 @@
 
 import prisma from "@/lib/prisma";
 import { ShopStatus } from "@prisma/client";
-import { rewriteProductTitles } from "../ml";
+import { run } from "@/lib/workflow/workflow";
 
 export const publishProducts = async (
   shopId: string,
@@ -14,6 +14,7 @@ export const publishProducts = async (
       id: shopId,
     },
     include: {
+      workflow: true,
       credentials: true,
       products: {
         where: {
@@ -51,32 +52,10 @@ export const publishProducts = async (
     return { success: false, data: "Shop is not active" };
   }
 
-  // Temp: Rewrite products title including collection name
-  if (autoRewriteTitle) {
-    const rewrote = await rewriteProductTitles(
-      shop.products.map((p) => p.product)
-    );
-    for (let i = 0; i < shop.products.length; i++) {
-      const reProduct = rewrote.find(
-        (r) => r.id == shop.products[i].product.id
-      );
-
-      shop.products[i].product.name =
-        reProduct?.name ?? shop.products[i].product.name;
-    }
-  }
-
-  await prisma.productsOnShops.updateMany({
-    where: {
-      shopId: shopId,
-      productId: {
-        in: shop.products.map((p) => p.productId),
-      },
-    },
-    data: {
-      status: "Published",
-    },
-  });
+  await run(
+    shop.products.map((p) => p.product),
+    shop.workflowId!
+  );
 
   return { success: true, data: { no: shop.products.length } };
 };

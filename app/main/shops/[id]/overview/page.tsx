@@ -13,11 +13,10 @@ import prisma from "@/lib/prisma";
 import Link from "next/link";
 import { LuActivity, LuFolder, LuImage, LuShoppingBag } from "react-icons/lu";
 
-export default async function ShopOverviewPage({
-  params,
-}: {
-  params: { id: string };
+export default async function ShopOverviewPage(props: {
+  params: Promise<{ id: string }>;
 }) {
+  const params = await props.params;
   const shop = await prisma.shop.findFirst({
     where: {
       id: params.id,

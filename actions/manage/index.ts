@@ -28,3 +28,8 @@ export { deleteImages } from "./deleteImages";
 export { uploadImages } from "./uploadImages";
 export { syncImage } from "./syncImage";
 export { syncManyImages } from "./syncManyImages";
+
+export { getWorkflowComponents } from "./getWorkflowComponents";
+export { addWorkflowStep } from "./addWorkflowStep";
+export { deleteWorkflowSteps } from "./deleteWorkflowSteps";
+export { updateWorkflowStep } from "./updateWorkflowStep";

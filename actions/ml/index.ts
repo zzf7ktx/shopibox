@@ -1,1 +1,1 @@
-export { rewriteProductTitles } from "./rewriteProductTitles";
+export { rewriteProductTitleIncludeCollectionName } from "./rewriteProductTitleIncludeCollectionName";
