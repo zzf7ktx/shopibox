@@ -1,4 +1,4 @@
 export enum WorkflowComponentType {
   Transform = "Transform",
-  EmitEvent = "Event Event",
+  EmitEvent = "Emit Event",
 }
