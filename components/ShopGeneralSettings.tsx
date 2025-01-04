@@ -28,34 +28,10 @@ const formSchema = z.object({
       message: "Name must be at least 2 characters.",
     })
     .max(50),
-  shopDomain: z
-    .string()
-    .min(2, {
-      message: "Shop domain must be at least 2 characters.",
-    })
-    .max(50)
-    .optional(),
-  apiKey: z
-    .string()
-    .min(2, {
-      message: "Api key must be at least 2 characters.",
-    })
-    .max(50)
-    .optional(),
-  apiSerect: z
-    .string()
-    .min(2, {
-      message: "Api serect must be at least 2 characters.",
-    })
-    .max(50)
-    .optional(),
-  accessToken: z
-    .string()
-    .min(2, {
-      message: "Access token must be at least 2 characters.",
-    })
-    .max(50)
-    .optional(),
+  shopDomain: z.optional(z.string()),
+  apiKey: z.optional(z.string()),
+  apiSerect: z.optional(z.string()),
+  accessToken: z.optional(z.string()),
 });
 
 export interface ShopGeneralSettingsProps {
