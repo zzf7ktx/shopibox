@@ -1,9 +1,8 @@
 "use server";
 
-import { ShopProvider } from "@/types/shopProvider";
 import prisma from "@/lib/prisma";
 import { ShopStatus } from "@prisma/client";
-import shopProvider from "@/lib/shopProvider";
+import { run } from "@/lib/workflow/workflow";
 
 export const publishSingleProduct = async (
   shopId: string,
@@ -14,6 +13,7 @@ export const publishSingleProduct = async (
       id: shopId,
     },
     include: {
+      workflow: true,
       credentials: true,
       products: {
         where: {
@@ -52,23 +52,10 @@ export const publishSingleProduct = async (
     return { success: false, data: "Product is not published yet" };
   }
 
-  await shopProvider.uploadProduct(
-    shop.products[0].product,
-    shop.credentials[0],
-    shop.provider as ShopProvider
+  await run(
+    shop.products.map((p) => p.product),
+    shop.workflowId!
   );
-
-  await prisma.productsOnShops.update({
-    where: {
-      shopId_productId: {
-        shopId,
-        productId,
-      },
-    },
-    data: {
-      status: "Published",
-    },
-  });
 
   return { success: true };
 };

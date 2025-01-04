@@ -1,23 +1,9 @@
-import { GetChatMPhi } from "@/lib/ml";
-import { Prisma } from "@prisma/client";
+import { GetChatMPhi } from "../../../ml";
+import { ProductDto } from "../../types/productDto";
+import { Input } from "../../types/input";
+import { code } from "./register";
 
-type ProductWithCollections = Prisma.ProductGetPayload<{
-  include: {
-    collections: {
-      include: {
-        collection: {
-          select: {
-            name: true;
-          };
-        };
-      };
-    };
-  };
-}>;
-
-export const rewriteProductTitles = async (
-  products: ProductWithCollections[]
-) => {
+const run = async (products: ProductDto[], inputs: Input[]) => {
   if (products.length === 0) {
     return [];
   }
@@ -46,7 +32,7 @@ export const rewriteProductTitles = async (
     },
     {
       role: "user",
-      content: `[${listProductsString}]`,
+      content: `[${listProductsString}]. The response should only content the array`,
     },
   ]);
 
@@ -70,3 +56,10 @@ export const rewriteProductTitles = async (
 
   return newProducts;
 };
+
+const component = {
+  run,
+  code,
+};
+
+export default component;

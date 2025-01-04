@@ -42,7 +42,7 @@ model Image {
   updatedAt          DateTime          @updatedAt @map(name: "updated_at")
   productVariation   ProductVariation? @relation(fields: [productVariationId], references: [id], onDelete: SetNull)
   productVariationId String?           @map("product_variation_id")
-  Shop               Shop?             @relation(fields: [shopId], references: [id])
+  shop               Shop?             @relation(fields: [shopId], references: [id])
   shopId             String?           @map("shop_id")
 
   @@map(name: "images")
@@ -78,7 +78,7 @@ model ProductVariation {
   updatedAt DateTime @updatedAt @map(name: "updated_at")
 
   images    Image[]
-  Product   Product? @relation(fields: [productId], references: [id])
+  product   Product? @relation(fields: [productId], references: [id])
   productId String?  @map("product_id")
 
   @@map(name: "product_variations")
@@ -131,13 +131,16 @@ model Shop {
   provider   String @default("self")
   shopDomain String @default("") @map("shop_domain")
 
-  createdAt DateTime @default(now()) @map(name: "created_at")
-  updatedAt DateTime @updatedAt @map(name: "updated_at")
+  workflow   Workflow? @relation(fields: [workflowId], references: [id])
+  workflowId String?   @map("workflow_id")
 
   products    ProductsOnShops[]
   job         Job[]
   images      Image[]
   credentials ShopCredentials[]
+
+  createdAt DateTime @default(now()) @map(name: "created_at")
+  updatedAt DateTime @updatedAt @map(name: "updated_at")
 
   @@map(name: "shops")
 }
@@ -188,4 +191,62 @@ model Job {
   lastRunTime DateTime @updatedAt @map(name: "last_run_time")
 
   @@map(name: "jobs")
+}
+
+model WorkflowTemplate {
+  id     String                 @id @default(cuid())
+  name   String
+  code   String                 @unique()
+  target String
+  steps  WorkflowTemplateStep[]
+
+  @@map(name: "workflow_templates")
+}
+
+model WorkflowTemplateStep {
+  id                 String            @id @default(cuid())
+  order              Int
+  componentCode      String            @map("component_code")
+  component          WorkflowComponent @relation(fields: [componentCode], references: [code])
+  defaultInputValues String            @map("default_input_values")
+  template           WorkflowTemplate? @relation(fields: [templateId], references: [id], onDelete: Cascade)
+  templateId         String?           @map("template_id")
+
+  @@map(name: "workflow_template_steps")
+}
+
+model WorkflowComponent {
+  id         String @id @default(cuid())
+  name       String
+  code       String @unique()
+  moduleName String @map("module_name")
+  type       String
+  parameters String
+  limit      Int?
+
+  workflowTemplateStep WorkflowTemplateStep[]
+  workflowStep         WorkflowStep[]
+
+  @@map(name: "workflow_components")
+}
+
+model Workflow {
+  id    String         @id @default(cuid())
+  steps WorkflowStep[]
+
+  shop Shop[]
+
+  @@map(name: "workflows")
+}
+
+model WorkflowStep {
+  id            String            @id @default(cuid())
+  inputValues   String            @map("input_values")
+  order         Int
+  workflow      Workflow          @relation(fields: [workflowId], references: [id], onDelete: Cascade)
+  workflowId    String            @map("workflow_id")
+  component     WorkflowComponent @relation(fields: [componentCode], references: [code])
+  componentCode String            @map("component_code")
+
+  @@map(name: "workflow_steps")
 }

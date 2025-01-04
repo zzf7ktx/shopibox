@@ -3,6 +3,8 @@
 import storage from "@/lib/storage";
 import prisma from "@/lib/prisma";
 import { ShopProvider } from "@/types/shopProvider";
+import pushToShopDefault from "@/lib/workflow/templates/pushToShopDefault";
+import { setInputValues } from "@/lib/workflow/utils/setInputValues";
 
 export interface AddShopFormFields {
   name: string;
@@ -15,6 +17,19 @@ export interface AddShopFormFields {
 
 export const addShop = async (data: AddShopFormFields, formData: FormData) => {
   const file: File = formData.get("file") as unknown as File;
+
+  const workflowTemplate = await prisma.workflowTemplate.findFirst({
+    where: {
+      code: pushToShopDefault.code,
+    },
+    include: {
+      steps: {
+        include: {
+          component: true,
+        },
+      },
+    },
+  });
 
   const shop = await prisma.shop.create({
     data: {
@@ -46,11 +61,31 @@ export const addShop = async (data: AddShopFormFields, formData: FormData) => {
     });
   }
 
+  const workflow = await prisma.workflow.create({
+    data: {
+      steps: {
+        createMany: {
+          data: (workflowTemplate?.steps ?? []).map((s) => ({
+            componentCode: s.componentCode,
+            inputValues: setInputValues(
+              s.component.parameters,
+              s.defaultInputValues,
+              "shop",
+              shop.id
+            ),
+            order: s.order,
+          })),
+        },
+      },
+    },
+  });
+
   const updatedShop = prisma.shop.update({
     where: {
       id: shop.id,
     },
     data: {
+      workflowId: workflow.id,
       images: {
         create: {
           cloudLink: uploadResult?.secureUrl ?? "",
