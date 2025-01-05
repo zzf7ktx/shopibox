@@ -55,6 +55,7 @@ model Product {
   description     String?
   descriptionHtml String? @map(name: "description_html")
   category        String?
+  guideHtml       String? @map(name: "guide_html")
 
   createdAt DateTime @default(now()) @map(name: "created_at")
   updatedAt DateTime @updatedAt @map(name: "updated_at")
