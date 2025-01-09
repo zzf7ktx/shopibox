@@ -2,16 +2,9 @@
 
 import storage from "@/lib/storage";
 import prisma from "@/lib/prisma";
+import { StorageProvider } from "@/types/storageProvider";
 
-export interface UpdateShopLogoFormFields {
-  imageId: string;
-}
-
-export const updateShopLogo = async (
-  shopId: string,
-  data: UpdateShopLogoFormFields,
-  formData: FormData
-) => {
+export const updateShopLogo = async (shopId: string, formData: FormData) => {
   const file: File = formData.get("file") as unknown as File;
   const shop = await prisma.shop.findFirst({
     where: { id: shopId },
@@ -40,13 +33,14 @@ export const updateShopLogo = async (
 
     await prisma.image.upsert({
       where: {
-        id: shop.images.find((i) => !i.productId)?.id ?? "",
+        id: shop.logoImageId ?? "",
       },
       create: {
         cloudLink: imageSrc,
         name: "Logo",
         source: "Manual",
         syncStatus: "Synced",
+        provider: StorageProvider.Azure,
         shopId: shopId,
         providerRef: uploadResult.publicId,
       },

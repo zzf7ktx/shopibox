@@ -90,12 +90,14 @@ export default function AddWorkflowStepModal({
 
   useEffect(() => {
     if (!!defaultValues) {
-      for (let input of defaultValues) {
-        if (!!input.value) {
-          form.setValue(input.key, input.value);
-        }
-      }
+      const values = defaultValues.reduce(
+        (acc, cur) => ({ ...acc, [cur.key]: cur.value }),
+        {} as { [key: string]: string }
+      );
+
+      form.reset(values);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [defaultValues]);
 
   return (

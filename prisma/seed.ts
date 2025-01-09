@@ -27,6 +27,7 @@ const main = async () => {
         moduleName: component.moduleName,
         limit: component.limit,
         parameters: JSON.stringify(component.parameters),
+        requireCode: component.requireCode,
       },
       update: {
         code: component.code,
@@ -35,6 +36,7 @@ const main = async () => {
         moduleName: component.moduleName,
         limit: component.limit,
         parameters: JSON.stringify(component.parameters),
+        requireCode: component.requireCode,
       },
     });
     console.log(`Added component: ${component.code}`);

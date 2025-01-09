@@ -22,6 +22,7 @@ export default async function ShopSettingPage(props: {
       shopDomain: true,
       syncStatus: true,
       provider: true,
+      logoImageId: true,
       workflow: {
         select: {
           id: true,

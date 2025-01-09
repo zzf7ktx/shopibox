@@ -1,5 +1,5 @@
-import { blobToFile } from "@/utils/blobToFile";
 import puppeteer from "puppeteer";
+import sharp from "sharp";
 
 export const htmlToImage = async (htmlString: string) => {
   if (!htmlString) {
@@ -18,9 +18,8 @@ export const htmlToImage = async (htmlString: string) => {
   }
 
   const buffer = await body.screenshot({ encoding: "binary" });
-  const blob = new Blob([buffer], { type: "image/png" });
-  const newFile = blobToFile(blob, "guide.png");
 
   await browser.close();
-  return newFile;
+
+  return await sharp(buffer).toFormat("jpeg").toBuffer();
 };

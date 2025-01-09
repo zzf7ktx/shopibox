@@ -37,9 +37,15 @@ export default async function Home() {
   return (
     <div className='fixed flex items-center justify-center top-0 right-0 bg-black h-screen w-screen bg-opacity-40 z-50'>
       <Card className='flex flex-col gap-8 items-center justify-center h-[70%] w-[70%]'>
-        <h1 className='text-center font-semiold text-4xl text-black'>
-          Choose shop
-        </h1>
+        {data.length === 0 ? (
+          <Link href={`./main/shops`}>
+            <h2 className='text-center font-semibold'>Go to list shops</h2>
+          </Link>
+        ) : (
+          <h1 className='text-center font-semibold text-4xl text-black'>
+            Choose shop
+          </h1>
+        )}
         <div className='flex gap-4'>
           {data.map((value) => (
             <Link key={value.name} href={`./main/shops/${value.id}/overview`}>

@@ -9,6 +9,7 @@ import storage from "@/lib/storage";
 import { getInput } from "../../utils/getInput";
 import { blobToFile } from "@/utils/blobToFile";
 import { StorageProvider } from "@/types/storageProvider";
+import { bufferToDataUri, isBase64Uri, uriToBuffer } from "@/lib/utils";
 
 const run = async (products: ProductDto[], inputs: Input[]) => {
   const shopId = getInput(register.parameters[0], inputs[0]) as string;
@@ -47,12 +48,17 @@ const run = async (products: ProductDto[], inputs: Input[]) => {
         img.cloudLink = res.url ?? "";
       }
 
-      const imageBuffer = (
-        await axios({
-          url: img.cloudLink ?? img.backupLink,
-          responseType: "arraybuffer",
-        })
-      ).data as Buffer;
+      let imageBuffer: Buffer;
+      if ((img.cloudLink as any) instanceof Buffer) {
+        imageBuffer = img.cloudLink as unknown as Buffer;
+      } else {
+        imageBuffer = (
+          await axios({
+            url: img.cloudLink ?? img.backupLink,
+            responseType: "arraybuffer",
+          })
+        ).data as Buffer;
+      }
 
       const image = sharp(imageBuffer);
       const imageMeta = await image.metadata();
@@ -75,29 +81,8 @@ const run = async (products: ProductDto[], inputs: Input[]) => {
       ]);
 
       const newImageBuffer = await image.toBuffer();
-      const blob = new Blob([newImageBuffer], { type: "image/jpg" });
 
-      const newFile = blobToFile(blob, "product-image-logo.jpg");
-
-      const uploadResult = await storage.uploadFile(newFile, {
-        overwrite: true,
-        publicId: "",
-        folder: `shopify/${shop.id}`,
-      });
-
-      img.cloudLink = uploadResult.secureUrl;
-      await prisma.image.create({
-        data: {
-          shopId,
-          productId: product.id,
-          cloudLink: uploadResult.secureUrl,
-          providerRef: uploadResult.publicId,
-          name: img.name,
-          source: "Auto",
-          syncStatus: "Synced",
-          provider: StorageProvider.Azure,
-        },
-      });
+      img.cloudLink = newImageBuffer as any;
     }
   }
 

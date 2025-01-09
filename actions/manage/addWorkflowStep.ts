@@ -16,6 +16,7 @@ export const addWorkflowStep = async (
   const maxOrder = await prisma.workflowStep.aggregate({
     _max: { order: true },
   });
+
   const workflowStep = await prisma.workflowStep.create({
     data: {
       inputValues: JSON.stringify(data.inputValues),
@@ -23,7 +24,55 @@ export const addWorkflowStep = async (
       componentCode: data.componentCode,
       workflowId: workflowId,
     },
+    include: {
+      component: true,
+    },
   });
 
-  return { success: true, data: workflowStep };
+  const workflowSteps = [workflowStep];
+
+  if (!!workflowStep.component.requireCode) {
+    const maxOrderRef = await prisma.workflowStep.aggregate({
+      where: {
+        component: {
+          requireCode: workflowStep.component.requireCode,
+        },
+      },
+      _max: { order: true },
+    });
+
+    const requireStep = await prisma.workflowStep.findFirst({
+      where: {
+        componentCode: workflowStep.component.requireCode,
+      },
+    });
+
+    if (!requireStep) {
+      const shopInputValue = data.inputValues.find((i) => i.key === "shop");
+      const workflowStep2 = await prisma.workflowStep.create({
+        data: {
+          inputValues: JSON.stringify(!shopInputValue ? [] : [shopInputValue]),
+          order: (maxOrderRef._max.order ?? data.order ?? 0) + 1,
+          componentCode: workflowStep.component.requireCode,
+          workflowId: workflowId,
+        },
+        include: {
+          component: true,
+        },
+      });
+
+      workflowSteps.push(workflowStep2);
+    } else {
+      const workflowStep2 = await prisma.workflowStep.update({
+        where: {
+          id: requireStep.id,
+        },
+        data: {
+          order: (maxOrderRef._max.order ?? data.order ?? 0) + 1,
+        },
+      });
+    }
+  }
+
+  return { success: true, data: workflowSteps };
 };

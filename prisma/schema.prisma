@@ -34,7 +34,7 @@ model Image {
   cloudLink          String            @map(name: "cloud_link")
   backupLink         String?           @map(name: "backup_link")
   provider           String?
-  providerRef        String?           @map(name: "provider_ref")
+  providerRef        String?           @unique() @map(name: "provider_ref")
   syncStatus         ImageSyncStatus   @default(NotSynced) @map(name: "sync_status")
   product            Product?          @relation(fields: [productId], references: [id], onDelete: Cascade)
   productId          String?           @map(name: "product_id")
@@ -138,6 +138,7 @@ model Shop {
   products    ProductsOnShops[]
   job         Job[]
   images      Image[]
+  logoImageId String?           @map("logo_image_id")
   credentials ShopCredentials[]
 
   createdAt DateTime @default(now()) @map(name: "created_at")
@@ -217,13 +218,14 @@ model WorkflowTemplateStep {
 }
 
 model WorkflowComponent {
-  id         String @id @default(cuid())
-  name       String
-  code       String @unique()
-  moduleName String @map("module_name")
-  type       String
-  parameters String
-  limit      Int?
+  id          String  @id @default(cuid())
+  name        String
+  code        String  @unique()
+  moduleName  String  @map("module_name")
+  type        String
+  parameters  String
+  limit       Int?
+  requireCode String?
 
   workflowTemplateStep WorkflowTemplateStep[]
   workflowStep         WorkflowStep[]
