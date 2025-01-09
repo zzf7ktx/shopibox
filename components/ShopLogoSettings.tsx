@@ -19,7 +19,6 @@ import {
 } from "@/components/ui/Form";
 import { Input } from "@/components/ui/Input";
 import { useToast } from "@/components/ui/useToast";
-import { ToastAction } from "@/components/ui/Toast";
 import { ReloadIcon } from "@radix-ui/react-icons";
 import { Prisma } from "@prisma/client";
 import { updateShopLogo } from "@/actions/manage";
@@ -52,6 +51,7 @@ export interface ShopLogoSettingsProps {
       syncStatus: true;
       provider: true;
       images: true;
+      logoImageId: true;
       createdAt: true;
       updatedAt: true;
     };
@@ -61,6 +61,7 @@ export interface ShopLogoSettingsProps {
 export default function ShopLogoSettings({ shopInfo }: ShopLogoSettingsProps) {
   const [loading, setLoading] = useState<boolean>(false);
   const [imagePreview, setImagePreview] = useState<string>();
+  const shopLogo = shopInfo.images.find((i) => i.id === shopInfo.logoImageId);
 
   const router = useRouter();
   const { toast } = useToast();
@@ -68,13 +69,11 @@ export default function ShopLogoSettings({ shopInfo }: ShopLogoSettingsProps) {
     resolver: zodResolver(formSchema),
     defaultValues: useMemo(
       () => ({
-        logoSrc: shopInfo.images.find((i) => !i.productId)?.cloudLink,
+        logoSrc: shopLogo?.cloudLink,
       }),
-      [shopInfo]
+      [shopLogo]
     ),
   });
-
-  console.log(shopInfo);
 
   const onFinish = async (values: z.infer<typeof formSchema>) => {
     try {
@@ -82,13 +81,8 @@ export default function ShopLogoSettings({ shopInfo }: ShopLogoSettingsProps) {
       let formData: FormData = new FormData();
       values.logoSrc?.[0] !== "" &&
         formData.append("file", values.logoSrc?.[0]);
-      const mask = await updateShopLogo(
-        shopInfo.id,
-        {
-          imageId: shopInfo.images?.[0]?.id ?? "",
-        },
-        formData
-      );
+
+      const logo = await updateShopLogo(shopInfo.id, formData);
 
       toast({
         title: "Success",
@@ -123,16 +117,14 @@ export default function ShopLogoSettings({ shopInfo }: ShopLogoSettingsProps) {
 
           <div className='flex md:flex-column gap-4'>
             <div className='flex flex-col gap-1'>
-              <Card className='w-[500px] h-[500px] p-0'>
-                <CardContent className='p-0'>
+              <Card className='w-[500px] h-[500px] p-0 overflow-hidden'>
+                <CardContent className='p-0 overflow-hidden'>
                   <div className='w-[500px] h-[500px] relative'>
                     <Card style={{ width: 500, height: 500 }} />
-                    {(imagePreview || shopInfo.images?.[0]?.cloudLink) && (
+                    {(imagePreview || shopLogo?.cloudLink) && (
                       <Image
                         className='absolute'
-                        src={
-                          imagePreview ?? shopInfo.images?.[0]?.cloudLink ?? ""
-                        }
+                        src={imagePreview ?? shopLogo?.cloudLink ?? ""}
                         style={{ top: 0, right: 0, height: 500 }}
                         width={500}
                         height={500}
@@ -163,20 +155,21 @@ export default function ShopLogoSettings({ shopInfo }: ShopLogoSettingsProps) {
                       />
                     </FormControl>
                     <FormDescription className='flex gap-1'>
-                      Choose mask object image.
+                      Choose logo image.
                     </FormDescription>
                     <FormMessage />
                   </FormItem>
                 )}
               />
+              <Button type='submit' disabled={loading}>
+                {loading && (
+                  <ReloadIcon className='mr-2 h-4 w-4 animate-spin' />
+                )}
+                Update
+              </Button>
             </div>
           </div>
         </div>
-
-        <Button type='submit' disabled={loading}>
-          {loading && <ReloadIcon className='mr-2 h-4 w-4 animate-spin' />}
-          Update
-        </Button>
       </form>
     </Form>
   );

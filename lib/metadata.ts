@@ -1,4 +1,78 @@
+import axios from "axios";
+
 const pi = require("piexifjs");
+
+const initRawMetadata = {
+  "0th": {
+    // ImageDescription -> Title
+    "270": "",
+    "271": "",
+    "272": "",
+    "274": 0,
+    "282": [] as Array<number>,
+    "283": [] as Array<number>,
+    "296": 0,
+    "306": "",
+    // Artis
+    "315": "",
+    // ExifTag
+    "34665": 0,
+    "34853": 0,
+    // XPTitle -> Subject
+    "40091": [] as Array<number>,
+    // XPKeywords -> Tags
+    "40094": [] as Array<number>,
+    // XPSubject -> Subject
+    "40095": [] as Array<number>,
+  },
+  Exif: {
+    "33434": [] as Array<number>,
+    "33437": [] as Array<number>,
+    "34850": 0,
+    "34855": 0,
+    "36864": "",
+    "36867": "",
+    "36868": "",
+    // binary ""
+    "37121": "",
+    "37377": [] as Array<number>,
+    "37378": [] as Array<number>,
+    "37379": [] as Array<number>,
+    "37380": [] as Array<number>,
+    "37381": [] as Array<number>,
+    "37383": 0,
+    "37384": 0,
+    "37385": 0,
+    "37386": [] as Array<number>,
+    "37520": "",
+    "37521": "",
+    "37522": "",
+    "40960": "",
+    "40961": 0,
+    "40962": 0,
+    "40963": 0,
+    "41495": 0,
+    "41986": 0,
+    "41987": 0,
+    "41988": [] as Array<number>,
+    "41989": 0,
+    "41990": 0,
+  },
+  GPS: {
+    "1": "",
+    "2": [[] as any, [] as any, [] as any],
+    "3": "",
+    "4": [[] as any, [] as any, [] as any],
+    "5": 0,
+    "6": [] as Array<number>,
+    "29": "",
+  },
+  Interop: "",
+  "1st": {
+    "513": "",
+  },
+  thumbnail: [],
+};
 
 const debugExif = (exif: RawMetadata) => {
   for (const ifd in exif) {
@@ -41,7 +115,11 @@ const stringToDecimalArray = (stringValue: string): Array<number> => {
 };
 
 const load = (base64String: string): RawMetadata => {
-  return pi.load(base64String);
+  try {
+    return pi.load(base64String);
+  } catch (error) {
+    return initRawMetadata as RawMetadata;
+  }
 };
 
 const dump = (rawMetadata: RawMetadata): any => {
@@ -70,23 +148,22 @@ const setMetaByTag = (
     case MetaTags.XPSubject:
       rawMetadata["0th"][40095] = stringToDecimalArray(value);
       break;
-    case MetaTags.Artis:
+    case MetaTags.Artist:
       rawMetadata["0th"][315] = value;
       break;
   }
   return rawMetadata;
 };
 
-const getBase64Image = async (imageUrl: string): Promise<string> => {
-  let result = await fetch(imageUrl);
-  const imageBytes = await result.arrayBuffer();
-  var binary = "";
-  var bytes = new Uint8Array(imageBytes);
-  var len = bytes.byteLength;
-  for (var i = 0; i < len; i++) {
-    binary += String.fromCharCode(bytes[i]);
-  }
-  return binary;
+const getBinaryStringImage = async (imageUrl: string): Promise<string> => {
+  const imageBuffer = (
+    await axios({
+      url: imageUrl,
+      responseType: "arraybuffer",
+    })
+  ).data as Buffer;
+
+  return imageBuffer.toString("binary");
 };
 
 export enum MetaTags {
@@ -94,7 +171,7 @@ export enum MetaTags {
   XPKeywords = "40094",
   XPSubject = "40095",
   ImageDescription = "270",
-  Artis = "315",
+  Artist = "315",
 }
 
 export interface RawMetadata extends Partial<{ [key: string]: any }> {
@@ -170,15 +247,15 @@ export interface RawMetadata extends Partial<{ [key: string]: any }> {
 const getMetaByTag = (rawMetadata: RawMetadata, tag: MetaTags): any => {
   switch (tag) {
     case MetaTags.XPTitle:
-      return rawMetadata["0th"][40091];
+      return rawMetadata?.["0th"]?.[40091] ?? [];
     case MetaTags.ImageDescription:
-      return rawMetadata["0th"][270];
+      return rawMetadata?.["0th"]?.[270] ?? "";
     case MetaTags.XPKeywords:
-      return rawMetadata["0th"][40094];
+      return rawMetadata?.["0th"]?.[40094] ?? [];
     case MetaTags.XPSubject:
-      return rawMetadata["0th"][40095];
-    case MetaTags.Artis:
-      return rawMetadata["0th"][315];
+      return rawMetadata?.["0th"]?.[40095] ?? [];
+    case MetaTags.Artist:
+      return rawMetadata?.["0th"]?.[315] ?? "";
   }
 };
 
@@ -187,7 +264,7 @@ const metadata = {
   dump,
   insert,
   debugExif,
-  getBase64Image,
+  getBinaryStringImage,
   getMetaByTag,
   setMetaByTag,
   decimalArrayToString,

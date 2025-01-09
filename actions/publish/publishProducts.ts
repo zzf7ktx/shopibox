@@ -26,7 +26,13 @@ export const publishProducts = async (
         include: {
           product: {
             include: {
-              images: true,
+              images: {
+                where: {
+                  shopId: {
+                    equals: null,
+                  },
+                },
+              },
               variants: true,
               collections: {
                 include: {

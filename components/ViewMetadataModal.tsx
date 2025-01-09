@@ -85,7 +85,7 @@ export default function ViewMetadataModal({
         return;
       }
 
-      let base64: string = await metadata.getBase64Image(imageSrc);
+      let base64: string = await metadata.getBinaryStringImage(imageSrc);
       setImageData(base64);
       let originalMeta: RawMetadata = metadata.load(base64);
       setMeta(originalMeta);

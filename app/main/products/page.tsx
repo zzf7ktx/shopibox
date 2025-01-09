@@ -7,7 +7,13 @@ export const maxDuration = 60;
 export default async function Products() {
   let data = await prisma.product.findMany({
     include: {
-      images: true,
+      images: {
+        where: {
+          shopId: {
+            equals: null,
+          },
+        },
+      },
       collections: {
         include: {
           collection: true,

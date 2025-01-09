@@ -4,7 +4,7 @@ import { Parameter, ParameterType } from "../../types/parameter";
 export const moduleName = "addLogoToImages";
 export const name = "Add Logo To Images";
 export const code = "ADD_LOGO_TO_IMAGES";
-export const type = WorkflowComponentType.Transform;
+export const type = WorkflowComponentType.ProcessImage;
 export const limit = 1;
 export const parameters: Parameter[] = [
   {
@@ -25,6 +25,8 @@ export const parameters: Parameter[] = [
     type: ParameterType.Number,
   },
 ];
+
+export const requireCode = "PROCESS_BASE64_IMAGES";
 
 const register = {
   code,

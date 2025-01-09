@@ -248,7 +248,7 @@ export default function ShopWorkflowSettings({
           defaultValues={[{ key: "shop", value: shopInfo.id }]}
         />
       </div>
-      <div className='flex items-center overflow-x-auto'>
+      <div className='flex items-center overflow-x-auto flex-wrap gap-y-4'>
         {(shopInfo?.workflow?.steps ?? []).map((s, index) => (
           <Fragment key={s.id}>
             <Card className='w-60 overflow-hidden'>
