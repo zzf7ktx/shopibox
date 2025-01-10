@@ -6,7 +6,7 @@
     "seed": "ts-node --compiler-options {\"module\":\"CommonJS\"} prisma/seed.ts"
   },
   "scripts": {
-    "dev": "next dev",
+    "dev": "next dev --turbopack",
     "build": "prisma generate && next build",
     "start": "next start",
     "lint": "next lint"
@@ -39,6 +39,7 @@
     "@vercel/postgres": "^0.5.1",
     "@woocommerce/woocommerce-rest-api": "^1.0.1",
     "axios": "^1.6.7",
+    "bcrypt": "^5.1.1",
     "class-variance-authority": "^0.7.0",
     "classnames": "^2.5.1",
     "cloudinary": "^1.41.1",
@@ -46,14 +47,15 @@
     "cmdk": "^0.2.0",
     "file-type": "^19.6.0",
     "form-data": "^4.0.0",
+    "jose": "^5.9.6",
     "mime": "^4.0.6",
-    "next": "14.0.4",
+    "next": "15.1.4",
     "papaparse": "^5.4.1",
     "piexifjs": "^1.0.6",
     "prisma": "^5.7.1",
     "puppeteer": "^23.11.1",
-    "react": "^18",
-    "react-dom": "^18",
+    "react": "19.0.0",
+    "react-dom": "19.0.0",
     "react-hook-form": "^7.49.3",
     "react-icons": "^5.0.1",
     "react-resizable-panels": "^1.0.9",
@@ -64,16 +66,23 @@
     "zod": "^3.22.4"
   },
   "devDependencies": {
+    "@types/bcrypt": "^5.0.2",
     "@types/node": "^20",
-    "@types/react": "^18",
-    "@types/react-dom": "^18",
+    "@types/react": "19.0.4",
+    "@types/react-dom": "19.0.2",
     "@types/woocommerce__woocommerce-rest-api": "^1.0.5",
     "autoprefixer": "^10.0.1",
     "eslint": "^8",
-    "eslint-config-next": "14.0.4",
+    "eslint-config-next": "15.1.4",
     "postcss": "^8",
     "tailwindcss": "^3.3.0",
     "ts-node": "^10.9.2",
     "typescript": "^5"
+  },
+  "pnpm": {
+    "overrides": {
+      "@types/react": "19.0.4",
+      "@types/react-dom": "19.0.2"
+    }
   }
 }
