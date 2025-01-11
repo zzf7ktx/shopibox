@@ -6,7 +6,7 @@ import { Toaster } from "@/components/ui/Toaster";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "Shopify tool",
+  title: "Shopibox",
   description: "Manage and monitor shop",
 };
 
@@ -16,7 +16,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en">
+    <html lang='en'>
       <body className={inter.className}>
         {children}
         <Toaster />
