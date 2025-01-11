@@ -4,7 +4,7 @@ import { usePathname } from "next/navigation";
 import { ReactNode } from "react";
 import Link from "next/link";
 import {
-  LuAlertTriangle,
+  LuTriangleAlert,
   LuFolder,
   LuGlobe,
   LuImage,
@@ -62,17 +62,17 @@ export function Sidebar({ className }: SidebarProps) {
 
   return (
     <div className={cn("pb-12", className)}>
-      <div className="space-y-4 py-6">
-        <div className="px-3 pb-2">
-          <h2 className="mb-2 px-4 text-lg font-semibold tracking-tight">
+      <div className='space-y-4 py-6'>
+        <div className='px-3 pb-2'>
+          <h2 className='mb-2 px-4 text-lg font-semibold tracking-tight'>
             Manage
           </h2>
-          <div className="space-y-1">
+          <div className='space-y-1'>
             {generalItems.map((item) => (
               <Button
                 key={item.href}
                 variant={pathname === item.href ? "secondary" : "ghost"}
-                className="w-full justify-start gap-2"
+                className='w-full justify-start gap-2'
                 asChild
               >
                 <Link href={item.href}>
@@ -83,16 +83,16 @@ export function Sidebar({ className }: SidebarProps) {
             ))}
           </div>
         </div>
-        <div className="px-3 py-2">
-          <h2 className="mb-2 px-4 text-lg font-semibold tracking-tight">
+        <div className='px-3 py-2'>
+          <h2 className='mb-2 px-4 text-lg font-semibold tracking-tight'>
             Publish
           </h2>
-          <div className="space-y-1">
+          <div className='space-y-1'>
             {publishItems.map((item) => (
               <Button
                 key={item.href}
                 variant={pathname === item.href ? "secondary" : "ghost"}
-                className="w-full justify-start gap-2"
+                className='w-full justify-start gap-2'
                 asChild
               >
                 <Link href={item.href}>
@@ -103,13 +103,13 @@ export function Sidebar({ className }: SidebarProps) {
             ))}
           </div>
         </div>
-        <div className="px-3 py-2">
-          <h2 className="mb-2 px-4 text-lg font-semibold tracking-tight">
+        <div className='px-3 py-2'>
+          <h2 className='mb-2 px-4 text-lg font-semibold tracking-tight'>
             Analyze
           </h2>
-          <div className="space-y-1">
-            <Button variant="ghost" className="w-full justify-start gap-2">
-              <LuAlertTriangle />
+          <div className='space-y-1'>
+            <Button variant='ghost' className='w-full justify-start gap-2'>
+              <LuTriangleAlert />
               Soon
             </Button>
           </div>
