@@ -213,27 +213,29 @@ export default function UpdateProductModalVariants({
     const getVariants = async () => {
       setLoadingProductVariants(true);
       let variants = await getProductVariants(productId);
-      let output: { [key: string]: string[] } = {};
-      for (let variant of variants) {
-        let name = variant.key;
-        let value = variant.value;
 
-        if (!output[name]) {
-          output[name] = [];
+      if (variants.success && typeof variants.data !== "string") {
+        let output: { [key: string]: string[] } = {};
+        for (let variant of variants.data) {
+          let name = variant.key;
+          let value = variant.value;
+
+          if (!output[name]) {
+            output[name] = [];
+          }
+
+          output[name].push(value);
         }
 
-        output[name].push(value);
+        form.reset();
+
+        for (let [key, values] of Object.entries(output)) {
+          append({
+            name: key,
+            values: values,
+          });
+        }
       }
-
-      form.reset();
-
-      for (let [key, values] of Object.entries(output)) {
-        append({
-          name: key,
-          values: values,
-        });
-      }
-
       setLoadingProductVariants(false);
     };
     productId && open && getVariants();

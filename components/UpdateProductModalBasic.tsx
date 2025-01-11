@@ -175,7 +175,10 @@ export default function UpdateProductModalBasic({
     const getCollectionOptions = async () => {
       setLoadingCollection(true);
       const collections = await getCollections();
-      setCollections(collections.map((p) => renderItem(p)));
+
+      if (collections.success && typeof collections.data !== "string") {
+        setCollections(collections.data.map((p) => renderItem(p)));
+      }
       setLoadingCollection(false);
     };
     getCollectionOptions();
@@ -193,22 +196,20 @@ export default function UpdateProductModalBasic({
     const getProductInfo = async () => {
       setLoadingProduct(true);
       const product = await getProduct(productId);
-      if (!product) {
-        setLoadingProduct(false);
-        return;
+      if (product.success && typeof product.data !== "string") {
+        form.reset({
+          name: product?.data?.name ?? "",
+          description: product?.data?.description ?? "",
+          descriptionHtml: product?.data?.descriptionHtml ?? "",
+          price: product?.data?.price ?? 0,
+          category:
+            !product?.data?.category || product.data.category === ""
+              ? []
+              : product?.data?.category?.split(" > "),
+          collections: product?.data?.collections.map((c) => c.collectionId),
+        });
       }
 
-      form.reset({
-        name: product?.name ?? "",
-        description: product?.description ?? "",
-        descriptionHtml: product?.descriptionHtml ?? "",
-        price: product?.price ?? 0,
-        category:
-          !product?.category || product.category === ""
-            ? []
-            : product?.category?.split(" > "),
-        collections: product?.collections.map((c) => c.collectionId),
-      });
       setLoadingProduct(false);
     };
     productId && open && getProductInfo();

@@ -4,11 +4,27 @@ import prisma from "@/lib/prisma";
 import ShopLogoSettings from "@/components/ShopLogoSettings";
 import ShopWorkflowSettings from "@/components/ShopWorkflowSettings";
 import Link from "next/link";
+import { haveAccess, verifySession } from "@/lib/dal";
+import { redirect } from "next/navigation";
+import { SessionUser } from "@/lib/definitions";
+import { Claim } from "@/types/claim";
 
 export default async function ShopSettingPage(props: {
   params: Promise<{ id: string }>;
   searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
 }) {
+  const session = await verifySession();
+
+  if (!session.isAuth) {
+    redirect("/login");
+  }
+
+  const userClaims = (session.user as SessionUser)?.claims ?? [];
+
+  if (!haveAccess([Claim.ReadShop, Claim.UpdateShop], userClaims)) {
+    redirect("/main");
+  }
+
   const searchParams = await props.searchParams;
   const params = await props.params;
   const tab = !searchParams?.tab ? "general" : (searchParams.tab as string);

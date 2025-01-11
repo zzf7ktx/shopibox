@@ -109,10 +109,15 @@ function AddToCollectionDialog<TData>({
         productIds: selectedProducts,
       });
 
+      const count =
+        typeof productsOnCollections.data !== "string"
+          ? productsOnCollections.data
+          : 0;
+
       toast({
         title: "Success",
         description: `${
-          productsOnCollections.count / values.collections.length
+          count / values.collections.length
         } products are added to ${values.collections.length} collections`,
       });
 
@@ -309,10 +314,12 @@ function AddToShopDialog<TData>({
         shopId: values.shop,
         productIds: selectedProducts,
       });
+      const count =
+        typeof productsOnShop.data !== "string" ? productsOnShop.data : 0;
 
       toast({
         title: "Success",
-        description: `${productsOnShop.count} products are added to shop`,
+        description: `${count} products are added to shop`,
         action: (
           <ToastAction altText='ViewShopProduct' asChild>
             <Link href={`/main/shops/${values.shop}/products`}>Check out</Link>
@@ -564,23 +571,29 @@ export function ProductTableToolbar<TData>({
     const getCollectionOptions = async () => {
       setLoadingCollection(true);
       const collections = await getCollections();
-      setCollections(
-        collections.map((c) => ({
-          label: c.name,
-          value: c.id,
-        }))
-      );
+      if (collections.success && typeof collections.data !== "string") {
+        setCollections(
+          collections.data.map((c) => ({
+            label: c.name,
+            value: c.id,
+          }))
+        );
+      }
+
       setLoadingCollection(false);
     };
     const getShopOptions = async () => {
       setLoadingShops(true);
       const shops = await getShops();
-      setShops(
-        shops.map((s) => ({
-          label: s.name,
-          value: s.id,
-        }))
-      );
+      if (shops.success && typeof shops.data !== "string") {
+        setShops(
+          shops.data.map((s) => ({
+            label: s.name,
+            value: s.id,
+          }))
+        );
+      }
+
       setLoadingShops(false);
     };
     getCollectionOptions();
@@ -590,12 +603,14 @@ export function ProductTableToolbar<TData>({
   const onOpenAddCollectionChangeFn = async (open: boolean) => {
     setLoadingCollection(true);
     const collections = await getCollections();
-    setCollections(
-      collections.map((c) => ({
-        label: c.name,
-        value: c.id,
-      }))
-    );
+    if (collections.success && typeof collections.data !== "string") {
+      setCollections(
+        collections.data.map((c) => ({
+          label: c.name,
+          value: c.id,
+        }))
+      );
+    }
     setLoadingCollection(false);
   };
 

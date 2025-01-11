@@ -253,3 +253,13 @@ model WorkflowStep {
 
   @@map(name: "workflow_steps")
 }
+
+model User {
+  id          String   @id @default(cuid())
+  name        String   @unique()
+  displayName String   @map("display_name")
+  password    String
+  claims      String[]
+
+  @@map(name: "users")
+}

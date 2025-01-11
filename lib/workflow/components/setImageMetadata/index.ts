@@ -1,3 +1,4 @@
+import { syncImage } from "@/lib/syncImage";
 import { Input } from "../../types/input";
 import { ProductDto } from "../../types/productDto";
 import { code } from "./register";
@@ -18,6 +19,10 @@ const run = async (products: ProductDto[], inputs: Input[]) => {
       if ((img.cloudLink as any) instanceof Buffer) {
         binary = (img.cloudLink as unknown as Buffer).toString("binary");
       } else {
+        if (!img.cloudLink) {
+          const res = await syncImage(img.id);
+          img.cloudLink = res.url ?? "";
+        }
         binary = await metadata.getBinaryStringImage(
           img.cloudLink ?? img.sourceLink
         );

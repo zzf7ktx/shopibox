@@ -1,7 +1,10 @@
 "use server";
 
+import { haveAccess, verifySession } from "@/lib/dal";
+import { SessionUser } from "@/lib/definitions";
 import prisma from "@/lib/prisma";
 import { Input } from "@/lib/workflow/types/input";
+import { Claim } from "@/types/claim";
 
 export interface AddWorkflowStepData {
   order?: number;
@@ -13,6 +16,12 @@ export const addWorkflowStep = async (
   workflowId: string,
   data: AddWorkflowStepData
 ) => {
+  const session = await verifySession();
+  const userClaims = (session.user as SessionUser)?.claims ?? [];
+
+  if (!haveAccess([Claim.UpdateWorkflow, Claim.ReadWorkflow], userClaims)) {
+    return { success: false, data: "Access denied" };
+  }
   const maxOrder = await prisma.workflowStep.aggregate({
     _max: { order: true },
   });

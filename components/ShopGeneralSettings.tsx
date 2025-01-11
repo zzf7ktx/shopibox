@@ -83,16 +83,25 @@ export default function ShopGeneralSettings({
         accessToken: values.accessToken,
       });
 
-      toast({
-        title: "Success",
-        description: "Update shop successfully",
-      });
+      if (newShop.success && typeof newShop.data !== "string") {
+        toast({
+          title: "Success",
+          description: "Update shop successfully",
+        });
 
-      form.reset({
-        name: newShop.name,
-        shopDomain: newShop.shopDomain,
-      });
-      router.refresh();
+        form.reset({
+          name: newShop.data.name,
+          shopDomain: newShop.data.shopDomain,
+        });
+
+        router.refresh();
+      } else {
+        toast({
+          title: "Error",
+          description: String(newShop.data) ?? "Something wrong",
+          variant: "destructive",
+        });
+      }
     } catch (error) {
       toast({
         title: "Error",

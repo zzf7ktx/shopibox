@@ -1,6 +1,9 @@
 "use server";
 
+import { haveAccess, verifySession } from "@/lib/dal";
+import { SessionUser } from "@/lib/definitions";
 import prisma from "@/lib/prisma";
+import { Claim } from "@/types/claim";
 
 export interface AddCollectionProductsToShopFields {
   shopId: string;
@@ -10,6 +13,23 @@ export interface AddCollectionProductsToShopFields {
 export const addCollectionProductsToShop = async (
   data: AddCollectionProductsToShopFields
 ) => {
+  const session = await verifySession();
+  const userClaims = (session.user as SessionUser)?.claims ?? [];
+
+  if (
+    !haveAccess(
+      [
+        Claim.UpdateShop,
+        Claim.ReadCollection,
+        Claim.UpdateCollection,
+        Claim.UpdateProduct,
+      ],
+      userClaims
+    )
+  ) {
+    return { success: false, data: "Access denied" };
+  }
+
   const products = await prisma.product.findMany({
     where: {
       collections: {
@@ -35,5 +55,5 @@ export const addCollectionProductsToShop = async (
     skipDuplicates: true,
   });
 
-  return productsOnShops;
+  return { success: true, data: productsOnShops.count };
 };

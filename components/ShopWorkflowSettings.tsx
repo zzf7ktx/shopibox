@@ -168,21 +168,24 @@ export default function ShopWorkflowSettings({
           return acc;
         }, {} as { [key: string]: number });
 
-      const components = (await getWorkflowComponents()).filter(
-        (c) => !c.limit || (countComponents[c.code] ?? 0) < c.limit
-      );
+      const components = await getWorkflowComponents();
+      if (components.success && typeof components.data !== "string") {
+        const availableComponents = components.data.filter(
+          (c) => !c.limit || (countComponents[c.code] ?? 0) < c.limit
+        );
 
-      setComponentOptions(
-        components.map((c) => ({
-          label: c.name,
-          value: c,
-        }))
-      );
+        setComponentOptions(
+          availableComponents.map((c) => ({
+            label: c.name,
+            value: c,
+          }))
+        );
 
-      setSelectedComponent({
-        label: components[0]?.name ?? "",
-        value: components[0],
-      });
+        setSelectedComponent({
+          label: availableComponents[0]?.name ?? "",
+          value: availableComponents[0],
+        });
+      }
     };
 
     getComponentOptions();

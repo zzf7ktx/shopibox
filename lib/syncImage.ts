@@ -1,25 +1,12 @@
-"use server";
-
-import storage from "@/lib/storage";
-import prisma from "@/lib/prisma";
 import { ImageSourceType } from "@/types/imageSourceType";
+import prisma from "./prisma";
+import storage from "./storage";
 import { StorageProvider } from "@/types/storageProvider";
-import { haveAccess, verifySession } from "@/lib/dal";
-import { SessionUser } from "@/lib/definitions";
-import { Claim } from "@/types/claim";
 
 export const syncImage = async (
   imageId: string,
-  sourceType: ImageSourceType,
   provider: StorageProvider = StorageProvider.Azure
 ) => {
-  const session = await verifySession();
-  const userClaims = (session.user as SessionUser)?.claims ?? [];
-
-  if (!haveAccess([Claim.UpdateImage, Claim.ReadImage], userClaims)) {
-    return { success: false, data: "Access denied" };
-  }
-
   const image = await prisma.image.findFirst({
     where: {
       id: imageId,
@@ -32,18 +19,6 @@ export const syncImage = async (
 
   let sourceLink: string =
     image?.sourceLink ?? image?.cloudLink ?? image?.backupLink ?? "";
-
-  switch (sourceType) {
-    case "backup":
-      sourceLink = image?.backupLink ?? sourceLink;
-      break;
-    case "original":
-      sourceLink = image?.sourceLink ?? sourceLink;
-      break;
-    case "main":
-      sourceLink = image?.cloudLink ?? sourceLink;
-      break;
-  }
 
   const uploadResult = await storage.upload(
     sourceLink,
@@ -67,5 +42,6 @@ export const syncImage = async (
       id: image?.id,
     },
   });
+
   return { success: true, url: uploadResult.secureUrl };
 };

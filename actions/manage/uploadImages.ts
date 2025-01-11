@@ -3,12 +3,27 @@
 import storage from "@/lib/storage";
 import prisma from "@/lib/prisma";
 import { StorageProvider } from "@/types/storageProvider";
+import { haveAccess, verifySession } from "@/lib/dal";
+import { Claim } from "@/types/claim";
+import { SessionUser } from "@/lib/definitions";
 
 export const uploadImages = async (
   productId: string,
   data: FormData,
   provider: StorageProvider = StorageProvider.Azure
 ) => {
+  const session = await verifySession();
+  const userClaims = (session.user as SessionUser)?.claims ?? [];
+
+  if (
+    !haveAccess(
+      [Claim.AddImage, Claim.ReadProduct, Claim.UpdateProduct],
+      userClaims
+    )
+  ) {
+    return { success: false, data: "Access denied" };
+  }
+
   const files: File[] = data.getAll("files") as unknown as File[];
 
   if (!files || files.length === 0) {

@@ -1,7 +1,10 @@
 "use server";
 
+import { haveAccess, verifySession } from "@/lib/dal";
+import { SessionUser } from "@/lib/definitions";
 import prisma from "@/lib/prisma";
 import shopProvider from "@/lib/shopProvider";
+import { Claim } from "@/types/claim";
 import { ShopProvider } from "@/types/shopProvider";
 import { ShopStatus } from "@prisma/client";
 
@@ -9,6 +12,13 @@ export const publishCollectionProducts = async (
   shopId: string,
   collectionId: string
 ) => {
+  const session = await verifySession();
+  const userClaims = (session.user as SessionUser)?.claims ?? [];
+
+  if (!haveAccess([Claim.PushToShop], userClaims)) {
+    return { success: false, data: "Access denied" };
+  }
+
   const shop = await prisma.shop.findFirst({
     where: {
       id: shopId,

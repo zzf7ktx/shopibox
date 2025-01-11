@@ -188,7 +188,9 @@ export default function AddManualProductModal({
     const getCollectionOptions = async () => {
       setLoadingCollection(true);
       const collections = await getCollections();
-      setCollections(collections.map((p) => renderItem(p)));
+      if (collections.success && typeof collections.data !== "string") {
+        setCollections(collections.data.map((p) => renderItem(p)));
+      }
       setLoadingCollection(false);
     };
     getCollectionOptions();
@@ -206,16 +208,24 @@ export default function AddManualProductModal({
     try {
       setLoading(true);
       const newProduct = await addProduct(values);
-      setAddedProductId(newProduct?.id ?? "");
-      if (uploadImageModalRef?.current) {
-        uploadImageModalRef.current.click();
-      }
 
-      toast({
-        title: "Success",
-        description:
-          "Add product successfully. Upload some images for this product",
-      });
+      if (newProduct.success && typeof newProduct.data !== "string") {
+        setAddedProductId(newProduct?.data.id ?? "");
+        if (uploadImageModalRef?.current) {
+          uploadImageModalRef.current.click();
+        }
+        toast({
+          title: "Success",
+          description:
+            "Add product successfully. Upload some images for this product",
+        });
+      } else {
+        toast({
+          title: "Error",
+          description: String(newProduct.data) ?? "Something error",
+          variant: "destructive",
+        });
+      }
 
       setOpen(false);
       form.reset();

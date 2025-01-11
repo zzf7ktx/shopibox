@@ -9,13 +9,29 @@ import {
   CardDescription,
 } from "@/components/ui/Card";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/Tabs";
+import { haveAccess, verifySession } from "@/lib/dal";
+import { SessionUser } from "@/lib/definitions";
 import prisma from "@/lib/prisma";
+import { Claim } from "@/types/claim";
 import Link from "next/link";
+import { redirect } from "next/navigation";
 import { LuActivity, LuFolder, LuImage, LuShoppingBag } from "react-icons/lu";
 
 export default async function ShopOverviewPage(props: {
   params: Promise<{ id: string }>;
 }) {
+  const session = await verifySession();
+
+  if (!session.isAuth) {
+    redirect("/login");
+  }
+
+  const userClaims = (session.user as SessionUser)?.claims ?? [];
+
+  if (!haveAccess([Claim.ReadShop], userClaims)) {
+    redirect("/main");
+  }
+
   const params = await props.params;
   const shop = await prisma.shop.findFirst({
     where: {

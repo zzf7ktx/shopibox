@@ -6,11 +6,34 @@ import { parseCurrency } from "@/utils";
 import { ImageSource } from "@prisma/client";
 import { Readable } from "stream";
 import { addOrUpdateProductVariants, syncImage } from "@/actions/manage";
+import { haveAccess, verifySession } from "@/lib/dal";
+import { SessionUser } from "@/lib/definitions";
+import { Claim } from "@/types/claim";
 
 export const importProducts = async (
   data: FormData,
   autoSyncImages: boolean = false
 ) => {
+  const session = await verifySession();
+  const userClaims = (session.user as SessionUser)?.claims ?? [];
+
+  if (
+    !haveAccess(
+      [
+        Claim.ReadProduct,
+        Claim.AddProduct,
+        Claim.AddImage,
+        Claim.ReadImage,
+        Claim.ReadCollection,
+        Claim.AddCollection,
+        Claim.UpdateCollection,
+      ],
+      userClaims
+    )
+  ) {
+    return { success: false, data: "Access denied" };
+  }
+
   const file: File = data.get("file") as unknown as File;
   if (!file) {
     throw new Error("No file uploaded");
@@ -103,5 +126,5 @@ export const importProducts = async (
     products.push(product);
   }
 
-  return products;
+  return { success: true, data: products };
 };

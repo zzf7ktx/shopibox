@@ -83,10 +83,12 @@ export default function UpdateCollectionModalBasic({
         setLoadingCollection(true);
         const collection = await getCollection(collectionId);
 
-        form.reset({
-          name: collection?.name ?? "",
-          description: collection?.description ?? "",
-        });
+        if (collection.success && typeof collection.data !== "string") {
+          form.reset({
+            name: collection?.data?.name ?? "",
+            description: collection?.data?.description ?? "",
+          });
+        }
       } catch (error) {
         console.log(error);
       } finally {

@@ -62,10 +62,14 @@ export default function ShopStatusSwitcher({
         return;
       }
       const shop = await getShop(id as string);
-      setSelected(
-        (prev) => statuses.find((s) => s.value == shop?.status) ?? prev
-      );
-      setShopDomain(shop?.shopDomain ?? "#");
+      if (shop.success && typeof shop.data !== "string") {
+        const shopStatus = shop.data?.status;
+        setSelected(
+          (prev) => statuses.find((s) => s.value === shopStatus) ?? prev
+        );
+        setShopDomain(shop?.data?.shopDomain ?? "#");
+      }
+
       setLoading(false);
     };
 
@@ -76,14 +80,24 @@ export default function ShopStatusSwitcher({
     try {
       setLoading(true);
       const updatedShop = await updateShopGeneral(id as string, { status });
-      setSelected(
-        (prev) => statuses.find((s) => s.value === updatedShop.status) ?? prev
-      );
 
-      toast({
-        title: "Success",
-        description: `Updated shop status to ${updatedShop.status}.`,
-      });
+      if (updatedShop.success && typeof updatedShop.data !== "string") {
+        const updatedShopStatus = updatedShop.data.status;
+        setSelected(
+          (prev) => statuses.find((s) => s.value === updatedShopStatus) ?? prev
+        );
+
+        toast({
+          title: "Success",
+          description: `Updated shop status to ${updatedShopStatus}.`,
+        });
+      } else {
+        toast({
+          title: "Error",
+          description: String(updatedShop.data) ?? "Something wrong",
+          variant: "destructive",
+        });
+      }
     } catch (error) {
       toast({
         title: "Error",

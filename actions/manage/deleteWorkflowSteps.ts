@@ -1,8 +1,18 @@
 "use server";
 
+import { haveAccess, verifySession } from "@/lib/dal";
+import { SessionUser } from "@/lib/definitions";
 import prisma from "@/lib/prisma";
+import { Claim } from "@/types/claim";
 
 export const deleteWorkflowSteps = async (ids: string[]) => {
+  const session = await verifySession();
+  const userClaims = (session.user as SessionUser)?.claims ?? [];
+
+  if (!haveAccess([Claim.UpdateWorkflow], userClaims)) {
+    return { success: false, data: "Access denied" };
+  }
+
   const deleteIds = [...ids];
   const recordsToDelete = await prisma.workflowStep.findMany({
     where: { id: { in: ids } },

@@ -1,9 +1,34 @@
+import * as hasher from "../lib/hasher";
+import { Claim } from "../types/claim";
 import { PrismaClient } from "@prisma/client";
 const prisma = new PrismaClient();
 import * as fs from "fs/promises";
 import path from "path";
 
+const defaultPassword = process.env.DEFAULT_PASSWORD ?? "admin";
+const defaultUser = process.env.DEFAULT_USER ?? "admin";
+const claims = Object.values(Claim);
+
 const main = async () => {
+  // Seed admin account
+  const hashedPassword = await hasher.hash(defaultPassword);
+  await prisma.user.upsert({
+    where: {
+      name: defaultUser,
+    },
+    create: {
+      name: defaultUser,
+      displayName: "Administrator",
+      password: hashedPassword,
+      claims: claims,
+    },
+    update: {
+      name: defaultUser,
+      displayName: "Administrator",
+      claims: claims,
+    },
+  });
+
   // Seed components
   const componentDir = await fs.readdir("lib/workflow/components");
 

@@ -113,9 +113,11 @@ export default function ImportCollectionModal({
       const formData = new FormData();
       formData.append("file", importFile);
       const result = await importCollections(formData);
+      const count = typeof result.data !== "string" ? result.data : 0;
+
       toast({
         title: "Success",
-        description: `${result?.count ?? 0} collections added.`,
+        description: `${count} collections added.`,
       });
 
       form.reset();

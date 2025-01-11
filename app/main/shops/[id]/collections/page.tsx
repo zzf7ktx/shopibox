@@ -1,11 +1,27 @@
 import ShopCollectionTable from "@/components/ShopCollectionTable";
+import { haveAccess, verifySession } from "@/lib/dal";
+import { SessionUser } from "@/lib/definitions";
 import prisma from "@/lib/prisma";
+import { Claim } from "@/types/claim";
+import { redirect } from "next/navigation";
 
 export const revalidate = 0;
 
 export default async function ShopCollectionsPage(props: {
   params: Promise<{ id: string }>;
 }) {
+  const session = await verifySession();
+
+  if (!session.isAuth) {
+    redirect("/login");
+  }
+
+  const userClaims = (session.user as SessionUser)?.claims ?? [];
+
+  if (!haveAccess([Claim.ReadShop, Claim.ReadCollection], userClaims)) {
+    redirect("/main");
+  }
+
   const params = await props.params;
   let data = params.id
     ? await prisma.collection.findMany({

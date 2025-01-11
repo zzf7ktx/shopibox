@@ -1,15 +1,11 @@
 import axios from "axios";
-import { syncImage } from "@/actions/manage";
 import sharp from "sharp";
 import register, { code } from "./register";
 import { Input } from "../../types/input";
 import { ProductDto } from "../../types/productDto";
 import prisma from "@/lib/prisma";
-import storage from "@/lib/storage";
 import { getInput } from "../../utils/getInput";
-import { blobToFile } from "@/utils/blobToFile";
-import { StorageProvider } from "@/types/storageProvider";
-import { bufferToDataUri, isBase64Uri, uriToBuffer } from "@/lib/utils";
+import { syncImage } from "@/lib/syncImage";
 
 const run = async (products: ProductDto[], inputs: Input[]) => {
   const shopId = getInput(register.parameters[0], inputs[0]) as string;
@@ -43,15 +39,15 @@ const run = async (products: ProductDto[], inputs: Input[]) => {
 
   for (const product of products) {
     for (let img of product.images) {
-      if (!img.cloudLink) {
-        const res = await syncImage(img.id, "default");
-        img.cloudLink = res.url ?? "";
-      }
-
       let imageBuffer: Buffer;
       if ((img.cloudLink as any) instanceof Buffer) {
         imageBuffer = img.cloudLink as unknown as Buffer;
       } else {
+        if (!img.cloudLink) {
+          const res = await syncImage(img.id);
+          img.cloudLink = res.url ?? "";
+        }
+
         imageBuffer = (
           await axios({
             url: img.cloudLink ?? img.backupLink,
