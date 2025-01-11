@@ -1,14 +1,11 @@
 "use client";
 
 import { ReactNode, useEffect, useMemo, useState } from "react";
-import metadata, { MetaTags, RawMetadata } from "@/lib/metadata";
-import { updateMetadata } from "@/actions";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import {
   Dialog,
   DialogContent,
-  DialogDescription,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/Dialog";

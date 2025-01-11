@@ -1,5 +1,8 @@
 "use server";
+import { haveAccess, verifySession } from "@/lib/dal";
+import { SessionUser } from "@/lib/definitions";
 import prisma from "@/lib/prisma";
+import { Claim } from "@/types/claim";
 
 export interface AddOrUpdateProductVariantsFields {
   variants: {
@@ -12,6 +15,13 @@ export const addOrUpdateProductVariants = async (
   productId: string,
   data: AddOrUpdateProductVariantsFields
 ) => {
+  const session = await verifySession();
+  const userClaims = (session.user as SessionUser)?.claims ?? [];
+
+  if (!haveAccess([Claim.UpdateProduct], userClaims)) {
+    return { success: false, data: "Access denied" };
+  }
+
   await prisma.productVariation.deleteMany({
     where: {
       productId,

@@ -1,10 +1,17 @@
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/Avatar";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
+import { verifySession } from "@/lib/dal";
 import prisma from "@/lib/prisma";
 import { redirect } from "next/navigation";
 
 export default async function Home() {
-  redirect("/main");
+  const session = await verifySession();
+
+  if (session.isAuth) {
+    redirect("/main");
+  }
+
+  redirect("/login");
   let data = await prisma.shop.findMany({
     orderBy: [
       {

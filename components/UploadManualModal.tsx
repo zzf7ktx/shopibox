@@ -133,7 +133,11 @@ export default function UploadManualModal({
     const getProductOptions = async () => {
       setLoadingProducts(true);
       const products = await getProducts();
-      setProductOptions(products.map((p) => renderItem(p)));
+
+      if (products.success && typeof products.data !== "string") {
+        setProductOptions(products.data.map((p) => renderItem(p)));
+      }
+
       setLoadingProducts(false);
     };
     getProductOptions();

@@ -86,10 +86,12 @@ function AddToShopDialog({
         shopId: values.shop,
         collectionIds: selectedCollections,
       });
+      const count =
+        typeof productsOnShop.data !== "string" ? productsOnShop.data : 0;
 
       toast({
         title: "Success",
-        description: `${productsOnShop.count} products are added to shop`,
+        description: `${count} products are added to shop`,
         action: (
           <ToastAction altText='ViewShopProduct' asChild>
             <Link href={`/main/shops/${values.shop}/products`}>Check out</Link>
@@ -303,12 +305,14 @@ export function CollectionTableToolbar<TData>({
     const getShopOptions = async () => {
       setLoadingShops(true);
       const shops = await getShops();
-      setShops(
-        shops.map((s) => ({
-          label: s.name,
-          value: s.id,
-        }))
-      );
+      if (shops.success && typeof shops.data !== "string") {
+        setShops(
+          shops.data.map((s) => ({
+            label: s.name,
+            value: s.id,
+          }))
+        );
+      }
       setLoadingShops(false);
     };
     getShopOptions();

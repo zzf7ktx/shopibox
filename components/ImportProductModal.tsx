@@ -150,9 +150,11 @@ export default function ImportProductModal({
       const formData = new FormData();
       formData.append("file", importFile);
       const result = await importProducts(formData, autoSyncImages);
+      const count = typeof result.data !== "string" ? result.data.length : 0;
+
       toast({
         title: "Success",
-        description: `${result?.length ?? 0} products added.`,
+        description: `${count} products added.`,
       });
 
       form.reset();

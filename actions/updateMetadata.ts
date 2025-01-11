@@ -2,8 +2,18 @@
 
 import storage from "@/lib/storage";
 import prisma from "@/lib/prisma";
+import { haveAccess, verifySession } from "@/lib/dal";
+import { SessionUser } from "@/lib/definitions";
+import { Claim } from "@/types/claim";
 
 export const updateMetadata = async (imageId: string, data: FormData) => {
+  const session = await verifySession();
+  const userClaims = (session.user as SessionUser)?.claims ?? [];
+
+  if (!haveAccess([Claim.UpdateImage], userClaims)) {
+    return { success: false, data: "Access denied" };
+  }
+
   const file: File = data.get("file") as unknown as File;
 
   if (!file) {

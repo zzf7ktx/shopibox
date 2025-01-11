@@ -1,6 +1,9 @@
 "use server";
 
+import { haveAccess, verifySession } from "@/lib/dal";
+import { SessionUser } from "@/lib/definitions";
 import prisma from "@/lib/prisma";
+import { Claim } from "@/types/claim";
 
 export interface AddProductsToShopFields {
   shopId: string;
@@ -8,6 +11,23 @@ export interface AddProductsToShopFields {
 }
 
 export const addProductsToShop = async (data: AddProductsToShopFields) => {
+  const session = await verifySession();
+  const userClaims = (session.user as SessionUser)?.claims ?? [];
+
+  if (
+    !haveAccess(
+      [
+        Claim.UpdateProduct,
+        Claim.UpdateShop,
+        Claim.ReadProduct,
+        Claim.ReadShop,
+      ],
+      userClaims
+    )
+  ) {
+    return { success: false, data: "Access denied" };
+  }
+
   const preparedData = [];
   for (const productId of data.productIds) {
     preparedData.push({
@@ -20,5 +40,5 @@ export const addProductsToShop = async (data: AddProductsToShopFields) => {
     skipDuplicates: true,
   });
 
-  return productsOnShops;
+  return { success: true, data: productsOnShops.count };
 };

@@ -1,4 +1,7 @@
+import { haveAccess, verifySession } from "@/lib/dal";
+import { SessionUser } from "@/lib/definitions";
 import { GetChatMPhi } from "@/lib/ml";
+import { Claim } from "@/types/claim";
 import { Prisma } from "@prisma/client";
 
 type ProductWithCollections = Prisma.ProductGetPayload<{
@@ -18,6 +21,18 @@ type ProductWithCollections = Prisma.ProductGetPayload<{
 export const rewriteProductTitleIncludeCollectionName = async (
   products: ProductWithCollections[]
 ) => {
+  const session = await verifySession();
+  const userClaims = (session.user as SessionUser)?.claims ?? [];
+
+  if (
+    !haveAccess(
+      [Claim.UseLanguageModel, Claim.ReadProduct, Claim.ReadCollection],
+      userClaims
+    )
+  ) {
+    return { success: false, data: "Access denied" };
+  }
+
   if (products.length === 0) {
     return [];
   }

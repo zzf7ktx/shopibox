@@ -1,8 +1,18 @@
 "use server";
 
+import { haveAccess, verifySession } from "@/lib/dal";
+import { SessionUser } from "@/lib/definitions";
 import prisma from "@/lib/prisma";
+import { Claim } from "@/types/claim";
 
 export const getShop = async (id: string) => {
+  const session = await verifySession();
+  const userClaims = (session.user as SessionUser)?.claims ?? [];
+
+  if (!haveAccess([Claim.ReadShop], userClaims)) {
+    return { success: false, data: "Access denied" };
+  }
+
   const shop = await prisma.shop.findFirst({
     where: {
       id,
@@ -20,5 +30,5 @@ export const getShop = async (id: string) => {
     },
   });
 
-  return shop;
+  return { success: true, data: shop };
 };

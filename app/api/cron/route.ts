@@ -20,7 +20,7 @@ export async function GET() {
       job.uploadedProducts + job.batchSize
     );
 
-    const result = await publishProducts(job.shopId, batchProduct, true);
+    const result = await publishProducts(job.shopId, batchProduct);
 
     if (result.success) {
       job.uploadedProducts +=

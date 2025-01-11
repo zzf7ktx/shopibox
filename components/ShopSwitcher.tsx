@@ -49,9 +49,7 @@ type Group = {
   shops: ShopOption[];
 };
 
-type PopoverTriggerProps = React.ComponentPropsWithoutRef<
-  typeof PopoverTrigger
->;
+type PopoverTriggerProps = React.ComponentProps<typeof PopoverTrigger>;
 
 type ShopDto = Prisma.ShopGetPayload<{
   select: {
@@ -82,32 +80,35 @@ export default function ShopSwitcher({ className }: ShopSwitcherProps) {
   useEffect(() => {
     const getShopOptions = async () => {
       const shops = await getShops();
-      const currentShop = shops.find((shop) => shop.id === id);
-      const groupByProvider = shops.reduce((result, item) => {
-        const provider = item.provider;
-        if (!result[provider]) {
-          result[provider] = [];
-        }
-        result[provider].push(item);
-        return result;
-      }, {} as { [key: string]: any[] });
 
-      setShopOptions(
-        Object.entries(groupByProvider).map(([key, value]) => ({
-          label: key,
-          shops: value.map((s) => ({
-            label: s.name,
-            value: s.id,
-          })),
-        }))
-      );
+      if (shops.success && typeof shops.data !== "string") {
+        const currentShop = shops.data.find((shop) => shop.id === id);
+        const groupByProvider = shops.data.reduce((result, item) => {
+          const provider = item.provider;
+          if (!result[provider]) {
+            result[provider] = [];
+          }
+          result[provider].push(item);
+          return result;
+        }, {} as { [key: string]: any[] });
 
-      setShops(shops);
+        setShopOptions(
+          Object.entries(groupByProvider).map(([key, value]) => ({
+            label: key,
+            shops: value.map((s) => ({
+              label: s.name,
+              value: s.id,
+            })),
+          }))
+        );
 
-      setSelectedShop({
-        label: currentShop?.name ?? "",
-        value: currentShop?.id ?? "",
-      });
+        setShops(shops.data);
+
+        setSelectedShop({
+          label: currentShop?.name ?? "",
+          value: currentShop?.id ?? "",
+        });
+      }
     };
 
     getShopOptions();

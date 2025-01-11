@@ -1,6 +1,9 @@
 "use server";
 
+import { haveAccess, verifySession } from "@/lib/dal";
+import { SessionUser } from "@/lib/definitions";
 import prisma from "@/lib/prisma";
+import { Claim } from "@/types/claim";
 
 export interface UpdateProductFormFields {
   name?: string;
@@ -15,6 +18,24 @@ export const updateProduct = async (
   productId: string,
   data: UpdateProductFormFields
 ) => {
+  const session = await verifySession();
+  const userClaims = (session.user as SessionUser)?.claims ?? [];
+
+  if (
+    !haveAccess(
+      [
+        Claim.ReadProduct,
+        Claim.UpdateProduct,
+        Claim.ReadCollection,
+        Claim.UpdateCollection,
+        Claim.AddCollection,
+      ],
+      userClaims
+    )
+  ) {
+    return { success: false, data: "Access denied" };
+  }
+
   const [_, product] = await prisma.$transaction([
     prisma.productsOnCollections.deleteMany({
       where: {

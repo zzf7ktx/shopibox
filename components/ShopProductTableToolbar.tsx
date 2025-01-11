@@ -42,12 +42,14 @@ export function ShopProductTableToolbar<TData>({
     const getCollectionOptions = async () => {
       setLoadingCollection(true);
       const collections = await getCollections();
-      setCollections(
-        collections.map((c) => ({
-          label: c.name,
-          value: c.id,
-        }))
-      );
+      if (collections.success && typeof collections.data !== "string") {
+        setCollections(
+          collections.data.map((c) => ({
+            label: c.name,
+            value: c.id,
+          }))
+        );
+      }
       setLoadingCollection(false);
     };
     getCollectionOptions();

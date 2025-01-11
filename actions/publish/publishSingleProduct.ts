@@ -3,11 +3,21 @@
 import prisma from "@/lib/prisma";
 import { ShopStatus } from "@prisma/client";
 import { run } from "@/lib/workflow/workflow";
+import { haveAccess, verifySession } from "@/lib/dal";
+import { SessionUser } from "@/lib/definitions";
+import { Claim } from "@/types/claim";
 
 export const publishSingleProduct = async (
   shopId: string,
   productId: string
 ) => {
+  const session = await verifySession();
+  const userClaims = (session.user as SessionUser)?.claims ?? [];
+
+  if (!haveAccess([Claim.PushToShop], userClaims)) {
+    return { success: false, data: "Access denied" };
+  }
+
   const shop = await prisma.shop.findFirst({
     where: {
       id: shopId,

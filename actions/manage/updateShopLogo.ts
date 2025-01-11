@@ -3,8 +3,23 @@
 import storage from "@/lib/storage";
 import prisma from "@/lib/prisma";
 import { StorageProvider } from "@/types/storageProvider";
+import { haveAccess, verifySession } from "@/lib/dal";
+import { SessionUser } from "@/lib/definitions";
+import { Claim } from "@/types/claim";
 
 export const updateShopLogo = async (shopId: string, formData: FormData) => {
+  const session = await verifySession();
+  const userClaims = (session.user as SessionUser)?.claims ?? [];
+
+  if (
+    !haveAccess(
+      [Claim.ReadShop, Claim.UpdateShop, Claim.AddImage, Claim.UpdateImage],
+      userClaims
+    )
+  ) {
+    return { success: false, data: "Access denied" };
+  }
+
   const file: File = formData.get("file") as unknown as File;
   const shop = await prisma.shop.findFirst({
     where: { id: shopId },

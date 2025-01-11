@@ -1,22 +1,17 @@
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/Avatar";
-import { Button } from "@/components/ui/Button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/Dialog";
-import { Popover } from "@/components/ui/Popover";
-import { TypographyH2 } from "@/components/ui/Typography";
+import { verifySession } from "@/lib/dal";
 import prisma from "@/lib/prisma";
-import Image from "next/image";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 
 export default async function Home() {
+  const session = await verifySession();
+
+  if (!session.isAuth) {
+    redirect("/login");
+  }
+
   let data = await prisma.shop.findMany({
     orderBy: [
       {
@@ -29,6 +24,7 @@ export default async function Home() {
       syncStatus: true,
       status: true,
       provider: true,
+      logoImageId: true,
       images: true,
       createdAt: true,
       updatedAt: true,
@@ -59,7 +55,8 @@ export default async function Home() {
                   <Avatar className='h-full'>
                     <AvatarImage
                       src={
-                        value.images.find((i) => !i.productId)?.cloudLink ??
+                        value.images.find((i) => i.id === value.logoImageId)
+                          ?.cloudLink ??
                         `https://avatar.vercel.sh/${value.name}.png`
                       }
                       alt={"logo"}

@@ -4,10 +4,15 @@ import Link from "next/link";
 import { cn } from "@/lib/utils";
 import { usePathname } from "next/navigation";
 
+export type ShopNavProps = React.HTMLAttributes<HTMLElement> & {
+  show?: string[];
+};
+
 export function ShopNav({
   className,
+  show = ["overview", "collections", "products", "settings"],
   ...props
-}: React.HTMLAttributes<HTMLElement>) {
+}: ShopNavProps) {
   const pathname = usePathname();
   return (
     <nav
@@ -15,7 +20,7 @@ export function ShopNav({
       {...props}
     >
       <Link
-        href="./overview"
+        href='./overview'
         className={cn(
           "text-sm font-medium transition-colors hover:text-primary",
           (!pathname.includes("overview") || !pathname.includes("shops")) &&
@@ -25,7 +30,7 @@ export function ShopNav({
         Overview
       </Link>
       <Link
-        href="./collections"
+        href='./collections'
         className={cn(
           "text-sm font-medium transition-colors hover:text-primary",
           (!pathname.includes("collections") || !pathname.includes("shops")) &&
@@ -35,7 +40,7 @@ export function ShopNav({
         Collections
       </Link>
       <Link
-        href="./products"
+        href='./products'
         className={cn(
           "text-sm font-medium transition-colors hover:text-primary",
           (!pathname.includes("products") || !pathname.includes("shops")) &&
@@ -45,7 +50,7 @@ export function ShopNav({
         Products
       </Link>
       <Link
-        href="./settings"
+        href='./settings'
         className={cn(
           "text-sm font-medium transition-colors hover:text-primary",
           (!pathname.includes("settings") || !pathname.includes("shops")) &&
