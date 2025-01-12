@@ -151,9 +151,7 @@ export default function ShopSwitcher({ className }: ShopSwitcherProps) {
                         onSelect={() => {
                           setSelectedShop(shop);
                           setOpen(false);
-                          router.replace(
-                            `/main/shops/${shop.value}/${currentSub}`
-                          );
+                          router.replace(`/shops/${shop.value}/${currentSub}`);
                         }}
                         className='text-sm'
                       >

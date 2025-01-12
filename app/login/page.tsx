@@ -8,7 +8,7 @@ export default async function Page() {
   const session = await verifySession();
 
   if (session.isAuth) {
-    redirect("/main");
+    redirect("/");
   }
 
   return (

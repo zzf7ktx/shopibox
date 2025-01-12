@@ -1,5 +1,8 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  async rewrites() {
+    return [{ source: "/:slug*", destination: "/main/:slug*" }];
+  },
   images: {
     remotePatterns: [
       {

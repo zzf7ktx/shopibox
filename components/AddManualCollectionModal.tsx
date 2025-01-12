@@ -87,7 +87,7 @@ export default function AddManualCollectionModal({
           "Add collection successfully. Add some product to this collection",
         action: (
           <ToastAction altText='AddProducts' asChild>
-            <Link href='/main/products'>Add products</Link>
+            <Link href='/products'>Add products</Link>
           </ToastAction>
         ),
       });

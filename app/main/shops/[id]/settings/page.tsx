@@ -22,7 +22,7 @@ export default async function ShopSettingPage(props: {
   const userClaims = (session.user as SessionUser)?.claims ?? [];
 
   if (!haveAccess([Claim.ReadShop, Claim.UpdateShop], userClaims)) {
-    redirect("/main");
+    redirect("/");
   }
 
   const searchParams = await props.searchParams;
