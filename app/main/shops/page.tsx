@@ -22,7 +22,7 @@ export default async function Shops() {
   const userClaims = (session.user as SessionUser)?.claims ?? [];
 
   if (!haveAccess([Claim.ReadShop], userClaims)) {
-    redirect("/main");
+    redirect("/");
   }
 
   let data = await prisma.shop.findMany({

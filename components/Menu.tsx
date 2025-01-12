@@ -1,3 +1,4 @@
+import { logout } from "@/actions";
 import {
   Menubar,
   MenubarContent,
@@ -11,18 +12,20 @@ import {
   MenubarTrigger,
 } from "@/components/ui/Menubar";
 import Image from "next/image";
+import ChangePasswordModal from "./ChangePasswordModal";
+import { DialogTrigger } from "./ui/Dialog";
 
 export function Menu() {
   return (
-    <Menubar className="rounded-none border-b border-none px-2 lg:px-4 w-screen">
+    <Menubar className='rounded-none border-b border-none px-2 lg:px-4 w-screen'>
       <MenubarMenu>
-        <MenubarTrigger className="font-bold">
-          <div className="flex items-center">
+        <MenubarTrigger className='font-bold'>
+          <div className='flex items-center'>
             <Image
               width={30}
               height={30}
-              src="/logo.png"
-              alt="logo"
+              src='/logo.png'
+              alt='logo'
               priority
               style={{ minWidth: 30 }}
             />
@@ -38,7 +41,7 @@ export function Menu() {
         </MenubarContent>
       </MenubarMenu>
       <MenubarMenu>
-        <MenubarTrigger className="relative">File</MenubarTrigger>
+        <MenubarTrigger className='relative'>File</MenubarTrigger>
         <MenubarContent>
           <MenubarItem>
             Import... <MenubarShortcut>⌘O</MenubarShortcut>
@@ -51,19 +54,28 @@ export function Menu() {
           <MenubarItem inset>Hide Sidebar</MenubarItem>
         </MenubarContent>
       </MenubarMenu>
-      <MenubarMenu>
-        <MenubarTrigger className="hidden md:block">Account</MenubarTrigger>
-        <MenubarContent forceMount>
-          <MenubarLabel inset>Switch Account</MenubarLabel>
-          <MenubarSeparator />
-          <MenubarRadioGroup value="a">
-            <MenubarRadioItem value="a">A</MenubarRadioItem>
-            <MenubarRadioItem value="b">B</MenubarRadioItem>
-          </MenubarRadioGroup>
-          <MenubarSeparator />
-          <MenubarItem inset>Add Account...</MenubarItem>
-        </MenubarContent>
-      </MenubarMenu>
+
+      <ChangePasswordModal
+        dialogTrigger={
+          <MenubarMenu>
+            <MenubarTrigger className='hidden md:block'>Account</MenubarTrigger>
+            <MenubarContent forceMount>
+              <MenubarLabel inset>Switch Account</MenubarLabel>
+              <MenubarSeparator />
+              <MenubarRadioGroup value='a'>
+                <MenubarRadioItem value='a'>A</MenubarRadioItem>
+              </MenubarRadioGroup>
+              <MenubarSeparator />
+              <DialogTrigger asChild>
+                <MenubarItem inset>Change Password</MenubarItem>
+              </DialogTrigger>
+              <MenubarItem inset onClick={() => logout()}>
+                Logout
+              </MenubarItem>
+            </MenubarContent>
+          </MenubarMenu>
+        }
+      />
     </Menubar>
   );
 }

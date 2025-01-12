@@ -25,17 +25,17 @@ export function Sidebar({ className }: SidebarProps) {
     description?: string;
   }[] = [
     {
-      href: "/main/products",
+      href: "/products",
       icon: <LuShoppingBag />,
       title: "Products",
     },
     {
-      href: "/main/images",
+      href: "/images",
       icon: <LuImage />,
       title: "Images",
     },
     {
-      href: "/main/collections",
+      href: "/collections",
       icon: <LuFolder />,
       title: "Collections",
     },
@@ -49,12 +49,12 @@ export function Sidebar({ className }: SidebarProps) {
     description?: string;
   }[] = [
     {
-      href: "/main/shops",
+      href: "/shops",
       icon: <LuGlobe />,
       title: "Shops",
     },
     {
-      href: "/main/jobs",
+      href: "/jobs",
       icon: <LuRocket />,
       title: "Jobs",
     },

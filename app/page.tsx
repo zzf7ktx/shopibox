@@ -2,16 +2,16 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/Avatar";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
 import { verifySession } from "@/lib/dal";
 import prisma from "@/lib/prisma";
+import Link from "next/link";
 import { redirect } from "next/navigation";
 
 export default async function Home() {
   const session = await verifySession();
 
-  if (session.isAuth) {
-    redirect("/main");
+  if (!session.isAuth) {
+    redirect("/login");
   }
 
-  redirect("/login");
   let data = await prisma.shop.findMany({
     orderBy: [
       {
@@ -34,28 +34,39 @@ export default async function Home() {
       <h1 className='text-center font-bold text-4xl'>Choose shop</h1>
       <div className='flex gap-4'>
         {data.map((value) => (
-          <Card key={value.name} className='h-32 w-32 hover:border-primary'>
-            <CardHeader className='flex flex-row items-center justify-between space-y-0'>
-              <CardTitle className='text-sm font-medium text-center'>
-                {value.name}
-              </CardTitle>
-            </CardHeader>
-            <CardContent className='flex place-content-center'>
-              <Avatar className='h-full'>
-                <AvatarImage
-                  src={
-                    value.images.find((i) => !i.productId)?.cloudLink ??
-                    `https://avatar.vercel.sh/${value.name}.png`
-                  }
-                  alt={"logo"}
-                  className='grayscale'
-                />
-                <AvatarFallback>SA</AvatarFallback>
-              </Avatar>
-            </CardContent>
-          </Card>
+          <Link
+            className='cursor-pointer'
+            key={value.name}
+            href={`./shops/${value.id}/overview`}
+          >
+            <Card className='h-32 w-32 hover:border-primary'>
+              <CardHeader className='flex flex-row items-center justify-between space-y-0'>
+                <CardTitle className='text-sm font-medium text-center'>
+                  {value.name}
+                </CardTitle>
+              </CardHeader>
+              <CardContent className='flex place-content-center'>
+                <Avatar className='h-full'>
+                  <AvatarImage
+                    src={
+                      value.images.find((i) => !i.productId)?.cloudLink ??
+                      `https://avatar.vercel.sh/${value.name}.png`
+                    }
+                    alt={"logo"}
+                    className='grayscale'
+                  />
+                  <AvatarFallback>SA</AvatarFallback>
+                </Avatar>
+              </CardContent>
+            </Card>
+          </Link>
         ))}
       </div>
+      <Link className='cursor-pointer' href={`./shops`}>
+        <h2 className='text-center font-semibold'>
+          {"--> Go to list shops <-- "}
+        </h2>
+      </Link>
     </div>
   );
 }

@@ -18,7 +18,7 @@ export default async function Products() {
   const userClaims = (session.user as SessionUser)?.claims ?? [];
 
   if (!haveAccess([Claim.ReadProduct], userClaims)) {
-    redirect("/main");
+    redirect("/");
   }
 
   let data = await prisma.product.findMany({

@@ -29,7 +29,7 @@ export default async function ShopOverviewPage(props: {
   const userClaims = (session.user as SessionUser)?.claims ?? [];
 
   if (!haveAccess([Claim.ReadShop], userClaims)) {
-    redirect("/main");
+    redirect("/");
   }
 
   const params = await props.params;

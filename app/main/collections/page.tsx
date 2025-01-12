@@ -17,7 +17,7 @@ export default async function Collections() {
   const userClaims = (session.user as SessionUser)?.claims ?? [];
 
   if (!haveAccess([Claim.ReadCollection], userClaims)) {
-    redirect("/main");
+    redirect("/");
   }
 
   let data = await prisma.collection.findMany({

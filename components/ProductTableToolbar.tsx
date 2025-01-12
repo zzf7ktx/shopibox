@@ -322,7 +322,7 @@ function AddToShopDialog<TData>({
         description: `${count} products are added to shop`,
         action: (
           <ToastAction altText='ViewShopProduct' asChild>
-            <Link href={`/main/shops/${values.shop}/products`}>Check out</Link>
+            <Link href={`/shops/${values.shop}/products`}>Check out</Link>
           </ToastAction>
         ),
       });

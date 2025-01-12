@@ -126,7 +126,7 @@ const columns: ColumnDef<ShopDto>[] = [
             <DropdownMenuSeparator />
             <DropdownMenuItem>View products</DropdownMenuItem>
             <DropdownMenuItem asChild>
-              <Link href={`/main/shops/${shop.id}/overview`}>Go to page</Link>
+              <Link href={`/shops/${shop.id}/overview`}>Go to page</Link>
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>

@@ -34,7 +34,7 @@ export default async function Home() {
     <div className='fixed flex items-center justify-center top-0 right-0 bg-black h-screen w-screen bg-opacity-40 z-50'>
       <Card className='flex flex-col gap-8 items-center justify-center h-[70%] w-[70%]'>
         {data.length === 0 ? (
-          <Link href={`./main/shops`}>
+          <Link href={`./shops`}>
             <h2 className='text-center font-semibold'>Go to list shops</h2>
           </Link>
         ) : (
@@ -44,7 +44,7 @@ export default async function Home() {
         )}
         <div className='flex gap-4'>
           {data.map((value) => (
-            <Link key={value.name} href={`./main/shops/${value.id}/overview`}>
+            <Link key={value.name} href={`./shops/${value.id}/overview`}>
               <Card className='h-32 w-32 hover:border-primary p-3 flex flex-col justify-evenly items-center'>
                 <CardHeader className='p-0 flex flex-row items-center justify-between space-y-0'>
                   <CardTitle className='text-sm font-medium text-center'>

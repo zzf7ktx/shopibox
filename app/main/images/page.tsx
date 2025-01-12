@@ -17,7 +17,7 @@ export default async function Images() {
   const userClaims = (session.user as SessionUser)?.claims ?? [];
 
   if (!haveAccess([Claim.ReadImage], userClaims)) {
-    redirect("/main");
+    redirect("/");
   }
 
   let data = await prisma.image.findMany({
