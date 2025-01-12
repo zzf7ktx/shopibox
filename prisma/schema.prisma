@@ -263,3 +263,10 @@ model User {
 
   @@map(name: "users")
 }
+
+model Event {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now()) @map(name: "created_at")
+
+  @@map(name: "events")
+}
