@@ -79,7 +79,7 @@ function ProductVariantValueCombobox({
   form,
 }: {
   field: ControllerRenderProps<FieldValues, `variants.${number}.values`>;
-  form: UseFormReturn<FieldValues, any, undefined>;
+  form: UseFormReturn<FieldValues, any, FieldValues>;
 }) {
   const [values, setValues] = useState<Option[]>([]);
   return (

@@ -8,7 +8,8 @@ export const cn = (...inputs: ClassValue[]) => {
 };
 
 export const bufferToDataUri = async (buffer: Buffer) => {
-  const blob = new Blob([buffer]);
+  const uint8Array = new Uint8Array(buffer);
+  const blob = new Blob([uint8Array]);
   const newFile = blob as File;
   let byteArrayBuffer = await new Response(newFile).arrayBuffer();
   const encoding = "base64";
