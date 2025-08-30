@@ -25,6 +25,7 @@ const nextConfig = {
   },
   experimental: {
     serverActions: {
+      bodySizeLimit: '50mb',
       allowedOrigins: [
         "special-space-succotash-w96475645j63jqg-3000.app.github.dev/",
         "localhost:3000",
