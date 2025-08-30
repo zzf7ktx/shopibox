@@ -55,7 +55,7 @@ const uploadProduct = async (product: ProductDto, credentials: Credentials) => {
     }
 
     const images = product.images.map((i) => ({
-      src: i.cloudLink ?? i.sourceLink,
+      src: i.cloudLink || i.sourceLink,
     }));
 
     const attributes: any[] = [];

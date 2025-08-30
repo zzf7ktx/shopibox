@@ -13,15 +13,15 @@ export const parameters: Parameter[] = [
     isConstant: true,
   },
   {
-    name: "x",
+    name: "x (0-500)",
     type: ParameterType.Number,
   },
   {
-    name: "y",
+    name: "y (0-500)",
     type: ParameterType.Number,
   },
   {
-    name: "scale",
+    name: "scale (0-100)",
     type: ParameterType.Number,
   },
 ];
