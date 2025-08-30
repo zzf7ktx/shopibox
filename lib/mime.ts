@@ -4,7 +4,8 @@ import * as fileType from "file-type";
 const getExtension = (type: string) => mimeLib.getExtension(type);
 const getMime = (url: string) => mimeLib.getType(url);
 const getMimeFromBuffer = async (buffer: Buffer) => {
-  const type = await fileType.fileTypeFromBlob(new Blob([buffer]));
+  const uint8Array = new Uint8Array(buffer);
+  const type = await fileType.fileTypeFromBlob(new Blob([uint8Array]));
   return { mime: type?.mime.toString() ?? "", ext: type?.ext.toString() ?? "" };
 };
 
