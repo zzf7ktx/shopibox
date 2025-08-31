@@ -62,6 +62,18 @@ export const publishProducts = async (shopId: string, productIds: string[]) => {
     return { success: false, data: "Shop is not active" };
   }
 
+  await prisma.productsOnShops.updateMany({
+    where: {
+      shopId: shopId,
+      productId: {
+        in: productIds,
+      },
+    },
+    data: {
+      status: "Processing",
+    },
+  });
+
   await run(
     shop.products.map((p) => p.product),
     shop.workflowId!
@@ -80,18 +92,6 @@ export const publishProductsInngest = async (
   if (!haveAccess([Claim.PushToShop], userClaims)) {
     return { success: false, data: "Access denied" };
   }
-
-  await prisma.productsOnShops.updateMany({
-    where: {
-      shopId: shopId,
-      productId: {
-        in: productIds,
-      },
-    },
-    data: {
-      status: "Processing",
-    },
-  });
 
   const batches = [];
   for (let i = 0; i < productIds.length; i += Number(maxBatch)) {

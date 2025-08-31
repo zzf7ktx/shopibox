@@ -20,9 +20,21 @@ export async function GET() {
       job.uploadedProducts + job.batchSize
     );
 
-    await publishProductsInngest(job.shopId, batchProduct)
+    await publishProductsInngest(job.shopId, batchProduct);
+    await prisma.job.update({
+      where: {
+        id: job.id,
+      },
+      data: {
+        lastRunTime: job.lastRunTime,
+        uploadedProducts: job.uploadedProducts + batchProduct.length,
+        status:
+          job.uploadedProducts + batchProduct.length >= job.productIds.length
+            ? "Succeeded"
+            : "Scheduled",
+      },
+    });
   }
-
   return Response.json({
     success: true,
   });
