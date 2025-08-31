@@ -23,6 +23,7 @@ enum ImageSyncStatus {
 enum ProductSyncStatus {
   Published
   Scheduled
+  Processing
   NotPublished
 }
 

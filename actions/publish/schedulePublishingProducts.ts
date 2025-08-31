@@ -42,11 +42,24 @@ export const schedulePublishingProducts = async (
     return { success: false, data: "Shop is not active" };
   }
 
+  
   const job = await prisma.job.create({
     data: {
       batchSize: batchSize,
       productIds: shop.products.map((p) => p.productId),
       shopId: shopId,
+    },
+  });
+
+  await prisma.productsOnShops.updateMany({
+    where: {
+      shopId: shopId,
+      productId: {
+        in: shop.products.map((p) => p.productId),
+      },
+    },
+    data: {
+      status: "Scheduled",
     },
   });
 
