@@ -1,5 +1,6 @@
 import prisma from "@/lib/prisma";
 import { publishProductsInngest } from "@/actions/publish/publishProducts";
+import { ShopStatus } from "@prisma/client";
 
 export const maxDuration = 60;
 export const revalidate = 0;
@@ -8,6 +9,9 @@ export async function GET() {
   const jobs = await prisma.job.findMany({
     where: {
       status: "Scheduled",
+      shop: {
+        status: ShopStatus.Active,
+      }
     },
   });
 
