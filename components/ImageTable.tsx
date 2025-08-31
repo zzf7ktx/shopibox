@@ -99,9 +99,8 @@ const columns: ColumnDef<ImageWithProduct>[] = [
               height={90}
               className='h-36'
               src={
-                row.original.cloudLink ??
-                row.original.backupLink ??
-                row.original.sourceLink
+                row.original.cloudLink ||
+                row.original.backupLink || '/logo.png'
               }
               alt={row.original.name}
             ></Image>
@@ -111,9 +110,8 @@ const columns: ColumnDef<ImageWithProduct>[] = [
               width={320}
               height={192}
               src={
-                row.original.cloudLink ??
-                row.original.backupLink ??
-                row.original.sourceLink
+                row.original.cloudLink ||
+                row.original.backupLink || '/logo.png'
               }
               alt={row.original.name}
             ></Image>

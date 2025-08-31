@@ -39,13 +39,13 @@ const columns: ColumnDef<ShopDto>[] = [
   {
     accessorKey: "name",
     header: ({ column }) => (
-      <DataTableColumnHeader column={column} title='Name' />
+      <DataTableColumnHeader column={column} title="Name" />
     ),
   },
   {
     accessorKey: "status",
     header: ({ column }) => (
-      <DataTableColumnHeader column={column} title='Status' />
+      <DataTableColumnHeader column={column} title="Status" />
     ),
     cell: ({ row }) => {
       const status = Object.keys(ShopStatus).find(
@@ -57,13 +57,13 @@ const columns: ColumnDef<ShopDto>[] = [
       }
 
       return (
-        <div className='flex w-[150px] items-center'>
+        <div className="flex w-[150px] items-center">
           {status === ShopStatus.Active ? (
-            <CheckCircledIcon className='mr-2 h-4 w-4 text-muted-foreground' />
+            <CheckCircledIcon className="mr-2 h-4 w-4 text-muted-foreground" />
           ) : status === ShopStatus.Closed ? (
-            <CrossCircledIcon className='mr-2 h-4 w-4 text-muted-foreground' />
+            <CrossCircledIcon className="mr-2 h-4 w-4 text-muted-foreground" />
           ) : (
-            <ReaderIcon className='mr-2 h-4 w-4 text-muted-foreground' />
+            <ReaderIcon className="mr-2 h-4 w-4 text-muted-foreground" />
           )}
           <span>{status}</span>
         </div>
@@ -76,7 +76,7 @@ const columns: ColumnDef<ShopDto>[] = [
   {
     accessorKey: "syncStatus",
     header: ({ column }) => (
-      <DataTableColumnHeader column={column} title='Publish status' />
+      <DataTableColumnHeader column={column} title="Publish status" />
     ),
     cell: ({ row }) => {
       const status = Object.keys(ShopSyncStatus).find(
@@ -88,13 +88,13 @@ const columns: ColumnDef<ShopDto>[] = [
       }
 
       return (
-        <div className='flex w-[150px] items-center'>
+        <div className="flex w-[150px] items-center">
           {status === ShopSyncStatus.PushedAll ? (
-            <CheckCircledIcon className='mr-2 h-4 w-4 text-muted-foreground' />
+            <CheckCircledIcon className="mr-2 h-4 w-4 text-muted-foreground" />
           ) : status === ShopSyncStatus.NotPublished ? (
-            <CrossCircledIcon className='mr-2 h-4 w-4 text-muted-foreground' />
+            <CrossCircledIcon className="mr-2 h-4 w-4 text-muted-foreground" />
           ) : (
-            <StopwatchIcon className='mr-2 h-4 w-4 text-muted-foreground' />
+            <StopwatchIcon className="mr-2 h-4 w-4 text-muted-foreground" />
           )}
           <span>{status}</span>
         </div>
@@ -111,12 +111,12 @@ const columns: ColumnDef<ShopDto>[] = [
       return (
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant='ghost' className='h-8 w-8 p-0'>
-              <span className='sr-only'>Open menu</span>
-              <DotsHorizontalIcon className='h-4 w-4' />
+            <Button variant="ghost" className="h-8 w-8 p-0">
+              <span className="sr-only">Open menu</span>
+              <DotsHorizontalIcon className="h-4 w-4" />
             </Button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent align='end'>
+          <DropdownMenuContent align="end">
             <DropdownMenuLabel>Actions</DropdownMenuLabel>
             <DropdownMenuItem
               onClick={() => navigator.clipboard.writeText(shop.id)}
@@ -124,7 +124,9 @@ const columns: ColumnDef<ShopDto>[] = [
               Copy ID
             </DropdownMenuItem>
             <DropdownMenuSeparator />
-            <DropdownMenuItem>View products</DropdownMenuItem>
+            <DropdownMenuItem>
+              <Link href={`/shops/${shop.id}/products`}>View products</Link>
+            </DropdownMenuItem>
             <DropdownMenuItem asChild>
               <Link href={`/shops/${shop.id}/overview`}>Go to page</Link>
             </DropdownMenuItem>

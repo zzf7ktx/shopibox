@@ -12,7 +12,8 @@ import { Claim } from "@/types/claim";
 
 export const importProducts = async (
   data: FormData,
-  autoSyncImages: boolean = false
+  autoSyncImages: boolean = false,
+  shopId?: string
 ) => {
   const session = await verifySession();
   const userClaims = (session.user as SessionUser)?.claims ?? [];
@@ -124,6 +125,21 @@ export const importProducts = async (
     }
 
     products.push(product);
+  }
+
+  if (shopId) {
+    const preparedData = [];
+    for (const product of products) {
+      preparedData.push({
+        shopId: shopId,
+        productId: product.id,
+      });
+    }
+
+    await prisma.productsOnShops.createMany({
+      data: preparedData,
+      skipDuplicates: true,
+    });
   }
 
   return { success: true, data: products };
