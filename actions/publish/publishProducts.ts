@@ -8,7 +8,7 @@ import { Claim } from "@/types/claim";
 import { SessionUser } from "@/lib/definitions";
 import { inngest } from "@/inngest/client";
 
-const maxBatch = process.env.PUBLISH_MAX_BATCH ?? 5
+const maxBatch = process.env.PUBLISH_MAX_BATCH ?? 5;
 
 export const publishProducts = async (shopId: string, productIds: string[]) => {
   const shop = await prisma.shop.findFirst({
@@ -20,7 +20,9 @@ export const publishProducts = async (shopId: string, productIds: string[]) => {
       credentials: true,
       products: {
         where: {
-          status: "NotPublished",
+          status: {
+            in: ["NotPublished", "Scheduled"],
+          },
           productId: {
             in: productIds,
           },
@@ -60,18 +62,6 @@ export const publishProducts = async (shopId: string, productIds: string[]) => {
     return { success: false, data: "Shop is not active" };
   }
 
-  await prisma.productsOnShops.updateMany({
-    where: {
-      shopId: shopId,
-      productId: {
-        in: productIds,
-      },
-    },
-    data: {
-      status: "Scheduled",
-    },
-  });
-
   await run(
     shop.products.map((p) => p.product),
     shop.workflowId!
@@ -91,6 +81,18 @@ export const publishProductsInngest = async (
     return { success: false, data: "Access denied" };
   }
 
+  await prisma.productsOnShops.updateMany({
+    where: {
+      shopId: shopId,
+      productId: {
+        in: productIds,
+      },
+    },
+    data: {
+      status: "Processing",
+    },
+  });
+
   const batches = [];
   for (let i = 0; i < productIds.length; i += Number(maxBatch)) {
     batches.push(productIds.slice(i, i + Number(maxBatch)));
@@ -106,5 +108,8 @@ export const publishProductsInngest = async (
     });
   }
 
-  return { success: true, data: `Enqueued ${productIds.length} products in ${batches.length} batches` };
+  return {
+    success: true,
+    data: `Enqueued ${productIds.length} products in ${batches.length} batches`,
+  };
 };
