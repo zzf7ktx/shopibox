@@ -26,8 +26,8 @@ import { useParams, useRouter } from "next/navigation";
 import { getRowRange } from "@/utils";
 import { useState } from "react";
 import { CgSpinnerTwoAlt } from "react-icons/cg";
-import { publishSingleProduct } from "@/actions/publish";
 import { ShopProductTableToolbar } from "./ShopProductTableToolbar";
+import { publishProductsInngest } from "@/actions/publish/publishProducts";
 
 type ProductOnShop = Prisma.ProductGetPayload<{
   include: {
@@ -152,10 +152,10 @@ function ActionCell({ row }: { row: ProductOnShop }) {
   const pushToShop = async () => {
     try {
       setLoading(true);
-      const result = await publishSingleProduct(shopId, row.id);
+      const result = await publishProductsInngest(shopId, [row.id]);
       toast({
         title: "Success",
-        description: `Pushed selected product to shop`,
+        description: `Enqueue selected product to push to shop`,
       });
       router.refresh();
     } catch (error) {
