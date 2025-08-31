@@ -40,7 +40,7 @@ type ProductOnShop = Prisma.ProductGetPayload<{
     };
     shops: true;
   };
-}> & { status?: ProductSyncStatus };
+}> & { status?: string };
 
 let lastSelectedId: number = -1;
 
@@ -122,16 +122,18 @@ const columns: ColumnDef<ProductOnShop>[] = [
       const productStatus = row.original.status;
       return (
         <div className="flex w-[150px] items-center">
-          {productStatus === ProductSyncStatus.Published ? (
+          {productStatus === "Synced" ? (
             <CheckCircledIcon className="mr-2 h-4 w-4 text-green-700" />
-          ) : productStatus === ProductSyncStatus.NotPublished ? (
+          ) : productStatus === "NotPublished" ? (
             <CrossCircledIcon className="mr-2 h-4 w-4 text-red-700" />
-          ) : productStatus === ProductSyncStatus.Processing ? (
+          ) : productStatus === "Processing" ? (
             <RocketIcon className="mr-2 h-4 w-4 text-blue-700" />
           ) : (
             <ClockIcon className="mr-2 h-4 w-4 text-yellow-700" />
           )}
-          <span>{productStatus}</span>
+          <span>
+            {productStatus === "Synced" ? "Published" : productStatus}
+          </span>
         </div>
       );
     },
@@ -216,7 +218,13 @@ export default function ShopProductTable({
   data = [],
   loading,
 }: ShopProductTableProps) {
-  const transformData = data.map((d) => ({ ...d, status: d.shops[0].status }));
+  const transformData = data.map((d) => ({
+    ...d,
+    status:
+      d.shops[0].status === ProductSyncStatus.Published
+        ? "Synced"
+        : d.shops[0].status.toString(),
+  }));
   return (
     <DataTable
       columns={columns}

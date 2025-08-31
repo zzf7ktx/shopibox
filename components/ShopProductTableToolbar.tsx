@@ -48,7 +48,7 @@ export function ShopProductTableToolbar<TData>({
 
   const statuses = Object.entries(ProductSyncStatus).map(([key, value]) => ({
     label: key,
-    value: value,
+    value: value === ProductSyncStatus.Published ? "Synced" : value,
     icon:
       value === ProductSyncStatus.Published
         ? CheckCircledIcon
