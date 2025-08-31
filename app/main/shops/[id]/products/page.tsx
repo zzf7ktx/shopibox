@@ -1,8 +1,12 @@
+import ImportProductModal from "@/components/ImportProductModal";
 import ShopProductTable from "@/components/ShopProductTable";
+import { Button } from "@/components/ui/Button";
+import { DialogTrigger } from "@/components/ui/Dialog";
 import { haveAccess, verifySession } from "@/lib/dal";
 import { SessionUser } from "@/lib/definitions";
 import prisma from "@/lib/prisma";
 import { Claim } from "@/types/claim";
+import { UploadIcon } from "@radix-ui/react-icons";
 import { redirect } from "next/navigation";
 
 export const revalidate = 0;
@@ -49,10 +53,20 @@ export default async function ShopProductsPage(props: {
       })
     : [];
   return (
-    <div className='flex-1 space-y-4 py-6'>
-      <div className='flex items-center justify-between space-y-2'>
-        <h2 className='text-3xl font-bold tracking-tight'>Products</h2>
-        <div className='flex items-center space-x-2'></div>
+    <div className="flex-1 space-y-4 py-6">
+      <div className="flex items-center justify-between space-y-2">
+        <h2 className="text-3xl font-bold tracking-tight">Products</h2>
+        <div className="flex items-center space-x-2"></div>
+        <ImportProductModal
+          shopKey={params?.id}
+          dialogTrigger={
+            <DialogTrigger asChild>
+              <Button variant="secondary">
+                <UploadIcon className="mr-2 h-4 w-4" /> Import
+              </Button>
+            </DialogTrigger>
+          }
+        />
       </div>
       <ShopProductTable data={data} />
     </div>

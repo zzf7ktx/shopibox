@@ -4,8 +4,19 @@ import { haveAccess, verifySession } from "@/lib/dal";
 import { SessionUser } from "@/lib/definitions";
 import prisma from "@/lib/prisma";
 import { Claim } from "@/types/claim";
+import { Prisma } from "@prisma/client";
 
-export const getShops = async () => {
+export type ShopDto = Prisma.ShopGetPayload<{select: {
+      id: true,
+      name: true,
+      syncStatus: true,
+      provider: true,
+      images: true,
+      createdAt: true,
+      updatedAt: true,
+    }}>
+  
+export const getShops = async ()  => {
   const session = await verifySession();
   const userClaims = (session.user as SessionUser)?.claims ?? [];
 
@@ -13,7 +24,7 @@ export const getShops = async () => {
     return { success: false, data: "Access denied" };
   }
 
-  const shops = await prisma.shop.findMany({
+  const shops: ShopDto[] = await prisma.shop.findMany({
     select: {
       id: true,
       name: true,
