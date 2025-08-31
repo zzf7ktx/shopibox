@@ -7,7 +7,9 @@ import { redirect } from "next/navigation";
 
 export const revalidate = 0;
 
-export default async function Jobs() {
+export default async function ShopJobs(props: {
+  params: Promise<{ id: string }>;
+}) {
   const session = await verifySession();
 
   if (!session.isAuth) {
@@ -20,7 +22,12 @@ export default async function Jobs() {
     redirect("/");
   }
 
+  const params = await props.params;
+
   let data = await prisma.job.findMany({
+    where: {
+      shopId: params?.id,
+    },
     include: {
       shop: true,
     },
@@ -30,5 +37,14 @@ export default async function Jobs() {
       },
     ],
   });
-  return <JobTable data={data} />;
+
+  return (
+    <div className="flex-1 space-y-4 py-6">
+      <div className="flex items-center justify-between space-y-2">
+        <h2 className="text-3xl font-bold tracking-tight">Jobs</h2>
+        <div className="flex items-center space-x-2"></div>
+      </div>
+      <JobTable data={data} />
+    </div>
+  );
 }
