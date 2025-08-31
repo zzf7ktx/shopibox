@@ -86,12 +86,12 @@ export const publishProductsInngest = async (
   shopId: string,
   productIds: string[]
 ) => {
-  const session = await verifySession();
-  const userClaims = (session.user as SessionUser)?.claims ?? [];
+  // const session = await verifySession();
+  // const userClaims = (session.user as SessionUser)?.claims ?? [];
 
-  if (!haveAccess([Claim.PushToShop], userClaims)) {
-    return { success: false, data: "Access denied" };
-  }
+  // if (!haveAccess([Claim.PushToShop], userClaims)) {
+  //   return { success: false, data: "Access denied" };
+  // }
 
   const batches = [];
   for (let i = 0; i < productIds.length; i += Number(maxBatch)) {
