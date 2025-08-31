@@ -1,6 +1,6 @@
 "use client";
 
-import { Prisma } from "@prisma/client";
+import { Prisma, ProductSyncStatus } from "@prisma/client";
 import { ColumnDef } from "@tanstack/react-table";
 import { DataTable } from "@/components/ui/DataTable";
 import {
@@ -21,6 +21,7 @@ import {
   ClockIcon,
   CrossCircledIcon,
   DotsHorizontalIcon,
+  RocketIcon,
 } from "@radix-ui/react-icons";
 import { useParams, useRouter } from "next/navigation";
 import { getRowRange } from "@/utils";
@@ -39,7 +40,7 @@ type ProductOnShop = Prisma.ProductGetPayload<{
     };
     shops: true;
   };
-}>;
+}> & { status?: ProductSyncStatus };
 
 let lastSelectedId: number = -1;
 
@@ -112,19 +113,21 @@ const columns: ColumnDef<ProductOnShop>[] = [
     },
   },
   {
-    accessorKey: "shops",
+    accessorKey: "status",
     size: 200,
     header: ({ column }) => (
       <DataTableColumnHeader column={column} title="Status" />
     ),
     cell: ({ row }) => {
-      const productStatus = row.original.shops[0].status;
+      const productStatus = row.original.status;
       return (
         <div className="flex w-[150px] items-center">
-          {productStatus === "Published" ? (
+          {productStatus === ProductSyncStatus.Published ? (
             <CheckCircledIcon className="mr-2 h-4 w-4 text-green-700" />
-          ) : productStatus === "NotPublished" ? (
+          ) : productStatus === ProductSyncStatus.NotPublished ? (
             <CrossCircledIcon className="mr-2 h-4 w-4 text-red-700" />
+          ) : productStatus === ProductSyncStatus.Processing ? (
+            <RocketIcon className="mr-2 h-4 w-4 text-blue-700" />
           ) : (
             <ClockIcon className="mr-2 h-4 w-4 text-yellow-700" />
           )}
@@ -213,10 +216,11 @@ export default function ShopProductTable({
   data = [],
   loading,
 }: ShopProductTableProps) {
+  const transformData = data.map((d) => ({ ...d, status: d.shops[0].status }));
   return (
     <DataTable
       columns={columns}
-      data={data}
+      data={transformData}
       toolbar={(table) => <ShopProductTableToolbar table={table} />}
     />
   );
