@@ -6,15 +6,9 @@ import { run } from "@/lib/workflow/workflow";
 import { haveAccess, verifySession } from "@/lib/dal";
 import { Claim } from "@/types/claim";
 import { SessionUser } from "@/lib/definitions";
+import { inngest } from "@/inngest/client";
 
 export const publishProducts = async (shopId: string, productIds: string[]) => {
-  const session = await verifySession();
-  const userClaims = (session.user as SessionUser)?.claims ?? [];
-
-  if (!haveAccess([Claim.PushToShop], userClaims)) {
-    return { success: false, data: "Access denied" };
-  }
-
   const shop = await prisma.shop.findFirst({
     where: {
       id: shopId,
@@ -70,4 +64,26 @@ export const publishProducts = async (shopId: string, productIds: string[]) => {
   );
 
   return { success: true, data: { no: shop.products.length } };
+};
+
+export const publishProductsInngest = async (
+  shopId: string,
+  productIds: string[]
+) => {
+  const session = await verifySession();
+  const userClaims = (session.user as SessionUser)?.claims ?? [];
+
+  if (!haveAccess([Claim.PushToShop], userClaims)) {
+    return { success: false, data: "Access denied" };
+  }
+
+  await inngest.send({
+    name: "shop/publish-products",
+    data: {
+      shopId: shopId,
+      productIds: productIds,
+    },
+  });
+
+  return { success: true, data: "Enqueued" };
 };

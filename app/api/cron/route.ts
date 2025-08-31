@@ -1,5 +1,5 @@
-import { publishProducts } from "@/actions/publish";
 import prisma from "@/lib/prisma";
+import { publishProductsInngest } from "@/actions/publish/publishProducts";
 
 export const maxDuration = 60;
 export const revalidate = 0;
@@ -20,25 +20,7 @@ export async function GET() {
       job.uploadedProducts + job.batchSize
     );
 
-    const result = await publishProducts(job.shopId, batchProduct);
-
-    if (result.success) {
-      job.uploadedProducts +=
-        (result?.data as unknown as { no: number }).no ?? 0;
-    }
-
-    if (job.uploadedProducts === job.productIds.length) {
-      job.status = "Succeeded";
-    }
-
-    results.push(result);
-
-    await prisma.job.update({
-      data: job,
-      where: {
-        id: job.id,
-      },
-    });
+    await publishProductsInngest(job.shopId, batchProduct)
   }
 
   return Response.json({
