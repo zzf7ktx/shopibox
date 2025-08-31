@@ -5,18 +5,24 @@ import { Table } from "@tanstack/react-table";
 import { Input } from "@/components/ui/Input";
 import { DataTableViewOptions } from "@/components/ui/DataTableViewOptions";
 import { Button } from "@/components/ui/Button";
-import { Cross2Icon } from "@radix-ui/react-icons";
+import {
+  CheckCircledIcon,
+  ClockIcon,
+  Cross2Icon,
+  CrossCircledIcon,
+  RocketIcon,
+} from "@radix-ui/react-icons";
 import { DataTableFacetedFilter } from "@/components/ui/DataTableFacetedFilter";
 import { useToast } from "@/components/ui/useToast";
 import { getCollections } from "@/actions/manage";
 import {
-  publishProducts,
   schedulePublishingProducts,
   setProductsToUnpublished,
 } from "@/actions/publish";
 import { useParams, useRouter } from "next/navigation";
 import { CgSpinnerTwoAlt } from "react-icons/cg";
 import { publishProductsInngest } from "@/actions/publish/publishProducts";
+import { ProductSyncStatus } from "@prisma/client";
 
 interface Option {
   value: string;
@@ -34,10 +40,24 @@ export function ShopProductTableToolbar<TData>({
   const [loadingCollections, setLoadingCollection] = useState<boolean>(false);
   const [collections, setCollections] = useState<Option[]>([]);
   const selectedRows = table.getFilteredSelectedRowModel();
+
   const [loading, setLoading] = useState<boolean>(false);
   const { id } = useParams();
   const { toast } = useToast();
   const router = useRouter();
+
+  const statuses = Object.entries(ProductSyncStatus).map(([key, value]) => ({
+    label: key,
+    value: value,
+    icon:
+      value === ProductSyncStatus.Published
+        ? CheckCircledIcon
+        : value === ProductSyncStatus.NotPublished
+        ? CrossCircledIcon
+        : value === ProductSyncStatus.Processing
+        ? RocketIcon
+        : ClockIcon,
+  }));
 
   useEffect(() => {
     const getCollectionOptions = async () => {
@@ -55,6 +75,21 @@ export function ShopProductTableToolbar<TData>({
     };
     getCollectionOptions();
   }, []);
+
+  const handleSelectAll = () => {
+    const allRowIds = table.options.data.map((row: any) => row.id);
+    if (table.getSelectedRowModel().rows.length > 0) {
+      table.resetRowSelection();
+      return;
+    }
+
+    table.setRowSelection(
+      allRowIds.reduce((acc, id, index) => {
+        acc[index] = true;
+        return acc;
+      }, {} as Record<string, boolean>)
+    );
+  };
 
   const pushProducts = async () => {
     try {
@@ -168,6 +203,20 @@ export function ShopProductTableToolbar<TData>({
               options={collections}
             />
           )}
+          {table.getColumn("status") && (
+            <DataTableFacetedFilter
+              column={table.getColumn("status")}
+              title="Status"
+              options={statuses}
+            />
+          )}
+          <Button
+            variant="outline"
+            className="h-8 px-2 lg:px-3"
+            onClick={handleSelectAll}
+          >
+            Select All Products
+          </Button>
           {isFiltered && (
             <Button
               variant="ghost"
