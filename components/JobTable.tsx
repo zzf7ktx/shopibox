@@ -24,7 +24,7 @@ type JobWithShop = Prisma.JobGetPayload<{
   include: {
     shop: true;
   };
-}>;
+}> & { totalProducts?: number };
 
 const columns: ColumnDef<JobWithShop>[] = [
   {
@@ -37,6 +37,18 @@ const columns: ColumnDef<JobWithShop>[] = [
     accessorKey: "uploadedProducts",
     header: ({ column }) => (
       <DataTableColumnHeader column={column} title="Uploaded" />
+    ),
+  },
+  {
+    accessorKey: "totalProducts",
+    header: ({ column }) => (
+      <DataTableColumnHeader column={column} title="Batch" />
+    ),
+  },
+  {
+    accessorKey: "batch",
+    header: ({ column }) => (
+      <DataTableColumnHeader column={column} title="Batch" />
     ),
   },
   {
@@ -113,10 +125,15 @@ export interface JobTableProps {
 }
 
 export default function JobTable({ data = [], loading }: JobTableProps) {
+  const transformed = data.map((job) => ({
+    ...job,
+    totalProducts: job.productIds?.length ?? 0,
+  }));
   return (
     <DataTable
+      loading={loading}
       columns={columns}
-      data={data}
+      data={transformed}
       toolbar={(table) => <JobTableToolbar table={table} />}
     />
   );
