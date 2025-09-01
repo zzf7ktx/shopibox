@@ -42,11 +42,11 @@ const columns: ColumnDef<JobWithShop>[] = [
   {
     accessorKey: "totalProducts",
     header: ({ column }) => (
-      <DataTableColumnHeader column={column} title="Batch" />
+      <DataTableColumnHeader column={column} title="Total" />
     ),
   },
   {
-    accessorKey: "batch",
+    accessorKey: "batchSize",
     header: ({ column }) => (
       <DataTableColumnHeader column={column} title="Batch" />
     ),
