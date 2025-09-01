@@ -81,7 +81,7 @@ export default async function ShopOverviewPage(props: {
   const noNotPushedProducts =
     noProducts - noPushedProducts - noScheduleProducts;
   const noCollections = new Set(
-    shop?.products.flatMap((p) => p.product.collections) ?? []
+    shop?.products.flatMap((p) => p.product.collections.map(c => c.collectionId)) ?? []
   ).size;
   const noImages = shop?.products.flatMap((p) => p.product.images).length ?? 0;
   const noTransformImages =
